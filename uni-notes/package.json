@@ -1,15 +1,16 @@
 {
-  "name": "uni-notes",
+  "name": "uni",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "A friendly, Google Docs-inspired note editor for planning university applications.",
+  "description": "Uni \u2014 notes, sheets, slides, an AI study helper and vocabulary practice for planning university applications.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "firebase": "^12.16.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

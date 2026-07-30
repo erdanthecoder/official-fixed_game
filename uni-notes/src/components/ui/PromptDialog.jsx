@@ -7,6 +7,7 @@ export default function PromptDialog({
   label,
   initialValue = '',
   confirmLabel = 'Save',
+  cancelLabel = 'Cancel',
   placeholder,
   onConfirm,
   onClose,
@@ -26,7 +27,7 @@ export default function PromptDialog({
       footer={
         <>
           <button type="button" className="button ghost" onClick={onClose}>
-            Cancel
+            {cancelLabel}
           </button>
           <button type="submit" form="prompt-dialog-form" className="button primary">
             {confirmLabel}

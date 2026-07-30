@@ -2,3 +2,11 @@ node_modules/
 dist/
 *.log
 .DS_Store
+
+# Firebase
+.env
+.env.local
+.firebaserc
+.firebase/
+firebase-debug.log
+functions/node_modules/

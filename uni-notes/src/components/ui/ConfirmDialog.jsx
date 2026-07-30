@@ -5,6 +5,7 @@ export default function ConfirmDialog({
   title,
   message,
   confirmLabel = 'Delete',
+  cancelLabel = 'Cancel',
   destructive = true,
   onConfirm,
   onClose,
@@ -16,7 +17,7 @@ export default function ConfirmDialog({
       footer={
         <>
           <button type="button" className="button ghost" onClick={onClose}>
-            Cancel
+            {cancelLabel}
           </button>
           <button
             type="button"

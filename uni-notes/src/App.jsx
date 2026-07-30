@@ -1,39 +1,48 @@
 import { useCallback, useState } from 'react';
-import Dashboard from './components/Dashboard.jsx';
-import EditorPage from './components/editor/EditorPage.jsx';
+import AiWorkspace from './components/ai/AiWorkspace.jsx';
+import LanguagesModule from './components/languages/LanguagesModule.jsx';
+import NotesModule from './components/notes/NotesModule.jsx';
+import SettingsPage from './components/SettingsPage.jsx';
+import SheetsModule from './components/sheets/SheetsModule.jsx';
 import Sidebar from './components/Sidebar.jsx';
-import { useApp } from './context/AppContext.jsx';
+import SignInScreen from './components/SignInScreen.jsx';
+import SlidesModule from './components/slides/SlidesModule.jsx';
+import { AUTH_STATUS, useAuth } from './context/AuthContext.jsx';
+import { useData } from './context/DataContext.jsx';
 import { useHashRoute } from './hooks/useHashRoute.js';
+import { useT } from './i18n/index.jsx';
 
 export default function App() {
-  const { createDocument } = useApp();
-  const { route, goToDashboard, goToDocument } = useHashRoute();
+  const { t } = useT();
+  const { status } = useAuth();
+  const { ready } = useData();
+  const { route, goToModule, goToItem, goToFolder } = useHashRoute();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Remember which category the dashboard was showing so "back" returns there.
-  const [lastFolderId, setLastFolderId] = useState(route.folderId ?? null);
-  const folderId = route.name === 'dashboard' ? (route.folderId ?? null) : lastFolderId;
+  const openItem = useCallback((module, id) => goToItem(module, id), [goToItem]);
 
-  const selectFolder = useCallback(
-    (id) => {
-      setLastFolderId(id);
-      goToDashboard(id);
-    },
-    [goToDashboard],
-  );
+  if (status === AUTH_STATUS.loading) {
+    return (
+      <div className="boot-screen">
+        <span className="boot-logo" aria-hidden="true">
+          🎓
+        </span>
+        <p>{t('common.loading')}</p>
+      </div>
+    );
+  }
 
-  const handleNewDocument = useCallback(() => {
-    const doc = createDocument({ folderId: folderId === 'none' ? null : folderId });
-    setDrawerOpen(false);
-    goToDocument(doc.id);
-  }, [createDocument, folderId, goToDocument]);
+  if (status === AUTH_STATUS.signedOut) return <SignInScreen />;
+
+  const { module, id, folderId } = route;
 
   return (
     <div className="app-shell">
       <Sidebar
+        activeModule={module}
         activeFolderId={folderId}
-        onSelectFolder={selectFolder}
-        onNewDocument={handleNewDocument}
+        onSelectModule={goToModule}
+        onSelectFolder={goToFolder}
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
       />
@@ -43,18 +52,41 @@ export default function App() {
           type="button"
           className="drawer-toggle"
           onClick={() => setDrawerOpen(true)}
-          aria-label="Open categories"
+          aria-label={t('common.appName')}
         >
           ☰
         </button>
 
-        {route.name === 'doc' ? (
-          <EditorPage docId={route.docId} onBack={() => goToDashboard(folderId)} />
+        {!ready ? (
+          <div className="module-loading">{t('common.loading')}</div>
+        ) : module === 'sheets' ? (
+          <SheetsModule
+            sheetId={id}
+            onOpen={(sheetId) => openItem('sheets', sheetId)}
+            onBack={() => goToModule('sheets')}
+          />
+        ) : module === 'slides' ? (
+          <SlidesModule
+            deckId={id}
+            onOpen={(deckId) => openItem('slides', deckId)}
+            onBack={() => goToModule('slides')}
+          />
+        ) : module === 'languages' ? (
+          <LanguagesModule
+            deckId={id}
+            onOpen={(deckId) => openItem('languages', deckId)}
+            onBack={() => goToModule('languages')}
+          />
+        ) : module === 'ai' ? (
+          <AiWorkspace chatId={id} onOpenChat={(chatId) => openItem('ai', chatId)} />
+        ) : module === 'settings' ? (
+          <SettingsPage />
         ) : (
-          <Dashboard
+          <NotesModule
+            noteId={id}
             folderId={folderId}
-            onOpenDocument={goToDocument}
-            onNewDocument={handleNewDocument}
+            onOpen={(noteId) => openItem('notes', noteId)}
+            onBack={() => goToFolder(folderId)}
           />
         )}
       </main>

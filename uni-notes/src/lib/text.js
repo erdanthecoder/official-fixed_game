@@ -31,24 +31,19 @@ const MINUTE = 60 * 1000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
-/** "just now" / "12 minutes ago" / "Mar 4" — Google Docs style. */
-export function formatRelativeDate(timestamp) {
-  if (!timestamp) return 'never';
-  const diff = Date.now() - timestamp;
+/**
+ * "just now" / "12 min ago" / "Mar 4" — Google Docs style.
+ * Pass the `t` function to get it in the user's language; without it, English.
+ */
+export function formatRelativeDate(timestamp, t) {
+  const label = (key, values) => (t ? t(`common.${key}`, values) : fallbackLabel(key, values));
+  if (!timestamp) return label('never');
 
-  if (diff < MINUTE) return 'just now';
-  if (diff < HOUR) {
-    const mins = Math.round(diff / MINUTE);
-    return `${mins} minute${mins === 1 ? '' : 's'} ago`;
-  }
-  if (diff < DAY) {
-    const hours = Math.round(diff / HOUR);
-    return `${hours} hour${hours === 1 ? '' : 's'} ago`;
-  }
-  if (diff < 7 * DAY) {
-    const days = Math.round(diff / DAY);
-    return `${days} day${days === 1 ? '' : 's'} ago`;
-  }
+  const diff = Date.now() - timestamp;
+  if (diff < MINUTE) return label('justNow');
+  if (diff < HOUR) return label('minutesAgo', { count: Math.round(diff / MINUTE) });
+  if (diff < DAY) return label('hoursAgo', { count: Math.round(diff / HOUR) });
+  if (diff < 7 * DAY) return label('daysAgo', { count: Math.round(diff / DAY) });
 
   const date = new Date(timestamp);
   const sameYear = date.getFullYear() === new Date().getFullYear();
@@ -57,6 +52,24 @@ export function formatRelativeDate(timestamp) {
     day: 'numeric',
     ...(sameYear ? {} : { year: 'numeric' }),
   });
+}
+
+/** Used when no translator is supplied (tests, non-React callers). */
+function fallbackLabel(key, values) {
+  switch (key) {
+    case 'never':
+      return 'never';
+    case 'justNow':
+      return 'just now';
+    case 'minutesAgo':
+      return `${values.count} min ago`;
+    case 'hoursAgo':
+      return `${values.count} h ago`;
+    case 'daysAgo':
+      return `${values.count} d ago`;
+    default:
+      return key;
+  }
 }
 
 export function formatExactDate(timestamp) {

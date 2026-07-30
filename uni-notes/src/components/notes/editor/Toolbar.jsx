@@ -1,6 +1,7 @@
 import ColorMenu from './ColorMenu.jsx';
 import TemplateMenu from './TemplateMenu.jsx';
 import { BulletListIcon, NumberListIcon } from './icons.jsx';
+import { useT } from '../../../i18n/index.jsx';
 
 const TEXT_COLORS = [
   { name: 'Black', value: '#202124' },
@@ -24,17 +25,15 @@ const HIGHLIGHTS = [
 ];
 
 const BLOCKS = [
-  { value: 'p', label: 'Normal text' },
-  { value: 'h1', label: 'Heading 1' },
-  { value: 'h2', label: 'Heading 2' },
-  { value: 'h3', label: 'Heading 3' },
+  { value: 'p', labelKey: 'notes.normalText' },
+  { value: 'h1', labelKey: 'notes.heading1' },
+  { value: 'h2', labelKey: 'notes.heading2' },
+  { value: 'h3', labelKey: 'notes.heading3' },
 ];
 
-/**
- * The minimal Google-Docs-style toolbar. It's a dumb component — every button
- * calls back into the editor's imperative handle.
- */
-export default function Toolbar({ editorRef, formatState, activeProfile, onInsertTemplate }) {
+/** Minimal Google-Docs-style toolbar. Every button calls into the editor handle. */
+export default function Toolbar({ editorRef, formatState, onInsertTemplate }) {
+  const { t } = useT();
   const exec = (command, value) => editorRef.current?.exec(command, value);
 
   const toolButton = (key, label, glyph, command, { isActive = false, className = '' } = {}) => (
@@ -55,22 +54,22 @@ export default function Toolbar({ editorRef, formatState, activeProfile, onInser
   );
 
   return (
-    <div className="toolbar" role="toolbar" aria-label="Formatting">
+    <div className="toolbar" role="toolbar" aria-label={t('notes.textStyle')}>
       <div className="tool-group">
-        {toolButton('undo', 'Undo (Ctrl+Z)', '↶', 'undo')}
-        {toolButton('redo', 'Redo (Ctrl+Shift+Z)', '↷', 'redo')}
+        {toolButton('undo', `${t('notes.undo')} (Ctrl+Z)`, '↶', 'undo')}
+        {toolButton('redo', `${t('notes.redo')} (Ctrl+Shift+Z)`, '↷', 'redo')}
       </div>
 
       <div className="tool-group">
         <label className="block-select">
-          <span className="sr-only">Text style</span>
+          <span className="sr-only">{t('notes.textStyle')}</span>
           <select
             value={formatState.block}
             onChange={(event) => exec('formatBlock', `<${event.target.value}>`)}
           >
             {BLOCKS.map((block) => (
               <option key={block.value} value={block.value}>
-                {block.label}
+                {t(block.labelKey)}
               </option>
             ))}
           </select>
@@ -78,15 +77,15 @@ export default function Toolbar({ editorRef, formatState, activeProfile, onInser
       </div>
 
       <div className="tool-group">
-        {toolButton('bold', 'Bold (Ctrl+B)', 'B', 'bold', {
+        {toolButton('bold', `${t('notes.bold')} (Ctrl+B)`, 'B', 'bold', {
           isActive: formatState.bold,
           className: 'glyph-bold',
         })}
-        {toolButton('italic', 'Italic (Ctrl+I)', 'I', 'italic', {
+        {toolButton('italic', `${t('notes.italic')} (Ctrl+I)`, 'I', 'italic', {
           isActive: formatState.italic,
           className: 'glyph-italic',
         })}
-        {toolButton('underline', 'Underline (Ctrl+U)', 'U', 'underline', {
+        {toolButton('underline', `${t('notes.underline')} (Ctrl+U)`, 'U', 'underline', {
           isActive: formatState.underline,
           className: 'glyph-underline',
         })}
@@ -94,46 +93,32 @@ export default function Toolbar({ editorRef, formatState, activeProfile, onInser
 
       <div className="tool-group">
         <ColorMenu
-          label="Text colour"
+          label={t('notes.textColour')}
           icon="🅰"
           colors={TEXT_COLORS}
           onPick={(color) => exec('foreColor', color)}
         />
         <ColorMenu
-          label="Highlight"
+          label={t('notes.highlight')}
           icon="🖍"
           colors={HIGHLIGHTS}
           onPick={(color) => exec('hiliteColor', color)}
           onClear={() => exec('hiliteColor', 'transparent')}
-          clearLabel="No highlight"
+          clearLabel={t('notes.noHighlight')}
         />
-        <button
-          type="button"
-          className="tool-button mine"
-          style={{ '--profile-color': activeProfile.color }}
-          title={`Mark this bit as ${activeProfile.name}'s`}
-          aria-label={`Highlight in ${activeProfile.name}'s colour`}
-          onMouseDown={(event) => {
-            event.preventDefault();
-            exec('hiliteColor', activeProfile.highlight);
-          }}
-        >
-          <span aria-hidden="true">✍️</span>
-          <span className="tool-text">Mine</span>
-        </button>
       </div>
 
       <div className="tool-group">
-        {toolButton('ul', 'Bulleted list', <BulletListIcon />, 'insertUnorderedList', {
+        {toolButton('ul', t('notes.bulletList'), <BulletListIcon />, 'insertUnorderedList', {
           isActive: formatState.unorderedList,
         })}
-        {toolButton('ol', 'Numbered list', <NumberListIcon />, 'insertOrderedList', {
+        {toolButton('ol', t('notes.numberList'), <NumberListIcon />, 'insertOrderedList', {
           isActive: formatState.orderedList,
         })}
       </div>
 
       <div className="tool-group">
-        {toolButton('clear', 'Clear formatting', '⌫', 'removeFormat')}
+        {toolButton('clear', t('notes.clearFormatting'), '⌫', 'removeFormat')}
       </div>
 
       <div className="tool-group push-right">

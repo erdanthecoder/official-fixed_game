@@ -126,41 +126,44 @@ function scholarshipTracker() {
   `;
 }
 
-export const TEMPLATES = [
+export const NOTE_TEMPLATES = [
   {
     id: 'comparison-table',
-    label: 'University Comparison Table',
-    description: 'School, location, tuition, acceptance rate, major, notes, deadline.',
+    labelKey: 'templates.comparisonTable',
+    hintKey: 'templates.comparisonTableHint',
     icon: '🏫',
     html: universityComparisonTable,
   },
   {
     id: 'application-checklist',
-    label: 'Application Checklist',
-    description: 'Essays, recommendation letters, test scores and deadlines.',
+    labelKey: 'templates.applicationChecklist',
+    hintKey: 'templates.applicationChecklistHint',
     icon: '✅',
     html: applicationChecklist,
   },
   {
     id: 'essay-outline',
-    label: 'Essay Outline',
-    description: 'Hook, main points, what you learned, ending.',
+    labelKey: 'templates.essayOutline',
+    hintKey: 'templates.essayOutlineHint',
     icon: '✏️',
     html: essayOutline,
   },
   {
     id: 'scholarship-tracker',
-    label: 'Scholarship Tracker',
-    description: 'Track amounts, requirements and deadlines.',
+    labelKey: 'templates.scholarshipTracker',
+    hintKey: 'templates.scholarshipTrackerHint',
     icon: '💸',
     html: scholarshipTracker,
   },
 ];
 
 /**
- * A template used as a whole new document rather than inserted into one: its
- * own opening <h2> becomes the document's <h1>, so there's exactly one title.
+ * A template used as a whole new document rather than inserted into one. The
+ * template's own opening <h2> is replaced by an <h1> carrying the translated
+ * title, so the document has exactly one heading and it matches its name.
  */
-export function templateAsDocument(template) {
-  return template.html().replace(/<h2>/i, '<h1>').replace(/<\/h2>/i, '</h1>');
+export function templateAsDocument(template, title) {
+  return template
+    .html()
+    .replace(/<h2>[\s\S]*?<\/h2>/i, `<h1>${title}</h1>`);
 }

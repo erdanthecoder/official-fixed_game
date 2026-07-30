@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { TEMPLATES } from '../../lib/templates.js';
+import { NOTE_TEMPLATES } from '../../../lib/templates/notes.js';
+import { useT } from '../../../i18n/index.jsx';
 
 /** "Insert template" dropdown — drops a table or checklist at the caret. */
 export default function TemplateMenu({ onInsert }) {
+  const { t } = useT();
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
 
@@ -27,15 +29,15 @@ export default function TemplateMenu({ onInsert }) {
         }}
       >
         <span aria-hidden="true">➕</span>
-        <span className="tool-text">Insert</span>
+        <span className="tool-text">{t('notes.insert')}</span>
         <span className="tool-caret" aria-hidden="true">
           ▾
         </span>
       </button>
 
       {open ? (
-        <div className="template-popover" role="menu" aria-label="Insert a template">
-          {TEMPLATES.map((template) => (
+        <div className="template-popover" role="menu" aria-label={t('notes.insert')}>
+          {NOTE_TEMPLATES.map((template) => (
             <button
               key={template.id}
               type="button"
@@ -51,8 +53,8 @@ export default function TemplateMenu({ onInsert }) {
                 {template.icon}
               </span>
               <span>
-                <strong>{template.label}</strong>
-                <small>{template.description}</small>
+                <strong>{t(template.labelKey)}</strong>
+                <small>{t(template.hintKey)}</small>
               </span>
             </button>
           ))}

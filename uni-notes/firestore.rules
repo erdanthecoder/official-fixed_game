@@ -1,0 +1,48 @@
+rules_version = '2';
+
+// Uni — Firestore security rules.
+//
+// The whole model is one line of intent: a signed-in user can read and write
+// everything under their own users/{uid} document, and nothing else. There are
+// no shared collections, so there is no path by which one account can reach
+// another account's documents.
+//
+// Deploy with:  firebase deploy --only firestore:rules
+// Check a change in the Console's Rules Playground before trusting it.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // Cheap guards against a runaway client filling the database. Firestore
+    // caps documents at 1 MiB regardless; these keep common fields sensible.
+    function isSaneDocument() {
+      return request.resource.data.keys().size() < 60
+        && (!('title' in request.resource.data)
+            || (request.resource.data.title is string
+                && request.resource.data.title.size() <= 300))
+        && (!('name' in request.resource.data)
+            || (request.resource.data.name is string
+                && request.resource.data.name.size() <= 300));
+    }
+
+    // Everything the app writes lives under the owner's uid:
+    //   users/{uid}/notes|sheets|presentations|decks|chats|folders/{id}
+    //   users/{uid}/meta/prefs
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+
+      match /{collection}/{docId} {
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid) && isSaneDocument();
+        allow delete: if isOwner(uid);
+      }
+    }
+
+    // Anything not matched above is denied by default.
+    // Do not add a catch-all rule below this line.
+  }
+}

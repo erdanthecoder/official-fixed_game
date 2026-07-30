@@ -1,23 +1,36 @@
 /**
- * Tiny hash router — enough for a two-screen SPA without pulling in a library.
+ * Hash router for the whole suite.
  *
- * `#/`            → dashboard (all documents)
- * `#/folder/:id`  → dashboard filtered to one category
- * `#/doc/:id`     → the editor
+ *   #/notes                  dashboard
+ *   #/notes/folder/:id       dashboard filtered to a category
+ *   #/notes/:docId           note editor
+ *   #/sheets  #/sheets/:id
+ *   #/slides  #/slides/:id
+ *   #/languages  #/languages/:deckId
+ *   #/ai  #/ai/:chatId
+ *   #/settings
  *
- * Using the hash means refreshing the tab keeps you where you were, and the
- * tablet back button behaves the way you'd expect.
+ * The hash keeps refresh and the browser back button working without pulling in
+ * a router library.
  */
 
 import { useCallback, useEffect, useState } from 'react';
 
-function parse(hash) {
-  const path = hash.replace(/^#\/?/, '');
-  const [section, id] = path.split('/');
+export const MODULES = ['notes', 'sheets', 'slides', 'ai', 'languages', 'settings'];
 
-  if (section === 'doc' && id) return { name: 'doc', docId: id };
-  if (section === 'folder' && id) return { name: 'dashboard', folderId: id };
-  return { name: 'dashboard', folderId: null };
+const DEFAULT_ROUTE = { module: 'notes', id: null, folderId: null };
+
+function parse(hash) {
+  const parts = hash.replace(/^#\/?/, '').split('/').filter(Boolean);
+  if (parts.length === 0) return DEFAULT_ROUTE;
+
+  const [module, second, third] = parts;
+  if (!MODULES.includes(module)) return DEFAULT_ROUTE;
+
+  if (module === 'notes' && second === 'folder') {
+    return { module, id: null, folderId: third ?? null };
+  }
+  return { module, id: second ?? null, folderId: null };
 }
 
 export function useHashRoute() {
@@ -37,11 +50,15 @@ export function useHashRoute() {
     window.location.hash = hash;
   }, []);
 
-  const goToDashboard = useCallback(
-    (folderId = null) => navigate(folderId ? `#/folder/${folderId}` : '#/'),
+  const goToModule = useCallback((module) => navigate(`#/${module}`), [navigate]);
+  const goToItem = useCallback(
+    (module, id) => navigate(`#/${module}/${id}`),
     [navigate],
   );
-  const goToDocument = useCallback((docId) => navigate(`#/doc/${docId}`), [navigate]);
+  const goToFolder = useCallback(
+    (folderId) => navigate(folderId ? `#/notes/folder/${folderId}` : '#/notes'),
+    [navigate],
+  );
 
-  return { route, navigate, goToDashboard, goToDocument };
+  return { route, navigate, goToModule, goToItem, goToFolder };
 }

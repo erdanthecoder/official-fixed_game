@@ -1,29 +1,27 @@
-import { SAVE_STATUS, useApp } from '../context/AppContext.jsx';
-import { formatExactDate } from '../lib/text.js';
+import { SAVE_STATUS, useData } from '../context/DataContext.jsx';
+import { useT } from '../i18n/index.jsx';
 
-const LABELS = {
-  [SAVE_STATUS.saved]: { text: 'Saved', icon: '☁️' },
-  [SAVE_STATUS.pending]: { text: 'Saving…', icon: '⋯' },
-  [SAVE_STATUS.saving]: { text: 'Saving…', icon: '⋯' },
-  [SAVE_STATUS.error]: { text: "Couldn't save", icon: '⚠️' },
-};
-
+/** "Saving… / Saved" — reflects the debounced write queue, not just local state. */
 export default function SaveIndicator() {
-  const { saveStatus, lastSavedAt } = useApp();
-  const { text, icon } = LABELS[saveStatus] ?? LABELS[SAVE_STATUS.saved];
+  const { t } = useT();
+  const { saveStatus, storageMode } = useData();
+
+  const label =
+    saveStatus === SAVE_STATUS.error
+      ? t('common.saveError')
+      : saveStatus === SAVE_STATUS.saved
+        ? t('common.saved')
+        : storageMode === 'cloud'
+          ? t('common.syncing')
+          : t('common.saving');
+
+  const icon =
+    saveStatus === SAVE_STATUS.error ? '⚠️' : saveStatus === SAVE_STATUS.saved ? '☁️' : '⋯';
 
   return (
-    <span
-      className={`save-indicator save-${saveStatus}`}
-      title={
-        saveStatus === SAVE_STATUS.error
-          ? 'Your browser blocked local storage — try turning off private browsing.'
-          : `Last saved to this device: ${formatExactDate(lastSavedAt)}`
-      }
-      aria-live="polite"
-    >
+    <span className={`save-indicator save-${saveStatus}`} aria-live="polite">
       <span aria-hidden="true">{icon}</span>
-      {text}
+      {label}
     </span>
   );
 }

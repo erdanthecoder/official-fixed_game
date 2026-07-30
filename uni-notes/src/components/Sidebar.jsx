@@ -1,165 +1,254 @@
 import { useMemo, useState } from 'react';
-import { useApp } from '../context/AppContext.jsx';
 import ConfirmDialog from './ui/ConfirmDialog.jsx';
-import ProfileSwitcher from './ProfileSwitcher.jsx';
 import PromptDialog from './ui/PromptDialog.jsx';
+import SaveIndicator from './SaveIndicator.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
+import { useData } from '../context/DataContext.jsx';
+import { useT } from '../i18n/index.jsx';
+
+const MODULE_ITEMS = [
+  { id: 'notes', icon: '📝', labelKey: 'nav.notes', hintKey: 'nav.notesHint' },
+  { id: 'sheets', icon: '📊', labelKey: 'nav.sheets', hintKey: 'nav.sheetsHint' },
+  { id: 'slides', icon: '🖼️', labelKey: 'nav.slides', hintKey: 'nav.slidesHint' },
+  { id: 'ai', icon: '✨', labelKey: 'nav.ai', hintKey: 'nav.aiHint' },
+  { id: 'languages', icon: '🗣️', labelKey: 'nav.languages', hintKey: 'nav.languagesHint' },
+];
 
 /**
- * Category list. Doubles as the mobile/tablet drawer — the parent controls
- * whether it's on screen via `isOpen`.
+ * Suite navigation. The category list only appears inside Notes, since that's
+ * the only module that uses folders.
  */
-export default function Sidebar({ activeFolderId, onSelectFolder, onNewDocument, isOpen, onClose }) {
-  const { documents, folders, createFolder, renameFolder, deleteFolder } = useApp();
-  const [isAdding, setIsAdding] = useState(false);
-  const [renaming, setRenaming] = useState(null);
-  const [deleting, setDeleting] = useState(null);
+export default function Sidebar({
+  activeModule,
+  activeFolderId,
+  onSelectModule,
+  onSelectFolder,
+  isOpen,
+  onClose,
+}) {
+  const { t } = useT();
+  const { notes, folders, create, update, deleteFolder, storageMode } = useData();
+  const { user, signOut, isFirebaseConfigured } = useAuth();
+
+  const [addingFolder, setAddingFolder] = useState(false);
+  const [renamingFolder, setRenamingFolder] = useState(null);
+  const [deletingFolder, setDeletingFolder] = useState(null);
 
   const counts = useMemo(() => {
-    const map = { all: documents.length, uncategorised: 0 };
-    documents.forEach((doc) => {
-      if (!doc.folderId) map.uncategorised += 1;
-      else map[doc.folderId] = (map[doc.folderId] ?? 0) + 1;
+    const map = { all: notes.length, uncategorised: 0 };
+    notes.forEach((note) => {
+      if (!note.folderId) map.uncategorised += 1;
+      else map[note.folderId] = (map[note.folderId] ?? 0) + 1;
     });
     return map;
-  }, [documents]);
+  }, [notes]);
 
-  const select = (folderId) => {
+  const pickModule = (module) => {
+    onSelectModule(module);
+    onClose?.();
+  };
+
+  const pickFolder = (folderId) => {
     onSelectFolder(folderId);
     onClose?.();
   };
 
   return (
     <>
-      <aside className={`sidebar ${isOpen ? 'is-open' : ''}`} aria-label="Categories">
+      <aside className={`sidebar ${isOpen ? 'is-open' : ''}`} aria-label={t('common.appName')}>
         <div className="sidebar-brand">
           <span className="sidebar-logo" aria-hidden="true">
             🎓
           </span>
           <div>
-            <strong>Uni Notes</strong>
-            <small>Plan it together</small>
+            <strong>{t('common.appName')}</strong>
+            <small>{t('common.tagline')}</small>
           </div>
         </div>
 
-        <button type="button" className="button primary new-doc" onClick={onNewDocument}>
-          <span aria-hidden="true">＋</span> New document
-        </button>
-
-        <nav className="folder-list">
-          <button
-            type="button"
-            className={`folder-item ${activeFolderId === null ? 'is-active' : ''}`}
-            onClick={() => select(null)}
-          >
-            <span className="folder-emoji" aria-hidden="true">
-              📚
-            </span>
-            <span className="folder-name">All documents</span>
-            <span className="folder-count">{counts.all}</span>
-          </button>
-
-          <p className="sidebar-heading">Categories</p>
-
-          {folders.map((folder) => (
-            <div key={folder.id} className="folder-row">
-              <button
-                type="button"
-                className={`folder-item ${activeFolderId === folder.id ? 'is-active' : ''}`}
-                onClick={() => select(folder.id)}
-              >
-                <span className="folder-emoji" aria-hidden="true">
-                  {folder.emoji ?? '📁'}
-                </span>
-                <span className="folder-name">{folder.name}</span>
-                <span className="folder-count">{counts[folder.id] ?? 0}</span>
-              </button>
-              <div className="folder-actions">
-                <button
-                  type="button"
-                  className="icon-button small"
-                  title={`Rename ${folder.name}`}
-                  aria-label={`Rename ${folder.name}`}
-                  onClick={() => setRenaming(folder)}
-                >
-                  ✏️
-                </button>
-                {folder.locked ? null : (
-                  <button
-                    type="button"
-                    className="icon-button small"
-                    title={`Delete ${folder.name}`}
-                    aria-label={`Delete ${folder.name}`}
-                    onClick={() => setDeleting(folder)}
-                  >
-                    🗑️
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-
-          {counts.uncategorised > 0 ? (
+        <nav className="module-nav" aria-label={t('common.appName')}>
+          {MODULE_ITEMS.map((module) => (
             <button
+              key={module.id}
               type="button"
-              className={`folder-item ${activeFolderId === 'none' ? 'is-active' : ''}`}
-              onClick={() => select('none')}
+              className={`module-item ${activeModule === module.id ? 'is-active' : ''}`}
+              onClick={() => pickModule(module.id)}
+              aria-current={activeModule === module.id ? 'page' : undefined}
             >
-              <span className="folder-emoji" aria-hidden="true">
-                🗂️
+              <span className="module-icon" aria-hidden="true">
+                {module.icon}
               </span>
-              <span className="folder-name">No category</span>
-              <span className="folder-count">{counts.uncategorised}</span>
+              <span className="module-text">
+                <strong>{t(module.labelKey)}</strong>
+                <small>{t(module.hintKey)}</small>
+              </span>
             </button>
-          ) : null}
-
-          <button type="button" className="add-folder" onClick={() => setIsAdding(true)}>
-            ＋ New category
-          </button>
+          ))}
         </nav>
 
+        {activeModule === 'notes' ? (
+          <nav className="folder-list" aria-label={t('notes.categories')}>
+            <p className="sidebar-heading">{t('notes.categories')}</p>
+
+            <button
+              type="button"
+              className={`folder-item ${activeFolderId === null ? 'is-active' : ''}`}
+              onClick={() => pickFolder(null)}
+            >
+              <span className="folder-emoji" aria-hidden="true">
+                📚
+              </span>
+              <span className="folder-name">{t('notes.allDocs')}</span>
+              <span className="folder-count">{counts.all}</span>
+            </button>
+
+            {folders
+              .slice()
+              .sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0))
+              .map((folder) => (
+                <div key={folder.id} className="folder-row">
+                  <button
+                    type="button"
+                    className={`folder-item ${activeFolderId === folder.id ? 'is-active' : ''}`}
+                    onClick={() => pickFolder(folder.id)}
+                  >
+                    <span className="folder-emoji" aria-hidden="true">
+                      {folder.emoji ?? '📁'}
+                    </span>
+                    <span className="folder-name">{folder.name}</span>
+                    <span className="folder-count">{counts[folder.id] ?? 0}</span>
+                  </button>
+                  <div className="folder-actions">
+                    <button
+                      type="button"
+                      className="icon-button small"
+                      title={t('common.rename')}
+                      aria-label={`${t('common.rename')} ${folder.name}`}
+                      onClick={() => setRenamingFolder(folder)}
+                    >
+                      ✏️
+                    </button>
+                    {folder.locked ? null : (
+                      <button
+                        type="button"
+                        className="icon-button small"
+                        title={t('common.delete')}
+                        aria-label={`${t('common.delete')} ${folder.name}`}
+                        onClick={() => setDeletingFolder(folder)}
+                      >
+                        🗑️
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+            {counts.uncategorised > 0 ? (
+              <button
+                type="button"
+                className={`folder-item ${activeFolderId === 'none' ? 'is-active' : ''}`}
+                onClick={() => pickFolder('none')}
+              >
+                <span className="folder-emoji" aria-hidden="true">
+                  🗂️
+                </span>
+                <span className="folder-name">{t('common.noCategory')}</span>
+                <span className="folder-count">{counts.uncategorised}</span>
+              </button>
+            ) : null}
+
+            <button type="button" className="add-folder" onClick={() => setAddingFolder(true)}>
+              ＋ {t('notes.newCategory')}
+            </button>
+          </nav>
+        ) : (
+          <div className="sidebar-spacer" />
+        )}
+
         <div className="sidebar-footer">
-          <ProfileSwitcher />
-          <p className="sidebar-note">
-            Everything is saved on this device only — nothing leaves your browser.
-          </p>
+          <button
+            type="button"
+            className={`module-item compact ${activeModule === 'settings' ? 'is-active' : ''}`}
+            onClick={() => pickModule('settings')}
+          >
+            <span className="module-icon" aria-hidden="true">
+              ⚙️
+            </span>
+            <span className="module-text">
+              <strong>{t('nav.settings')}</strong>
+            </span>
+          </button>
+
+          <div className="account-row">
+            {user?.photoURL ? (
+              <img className="account-avatar" src={user.photoURL} alt="" referrerPolicy="no-referrer" />
+            ) : (
+              <span className="account-avatar placeholder" aria-hidden="true">
+                {(user?.name ?? '·').charAt(0).toUpperCase()}
+              </span>
+            )}
+            <div className="account-text">
+              <strong>{user?.name ?? t('settings.localOnly')}</strong>
+              <small>
+                {storageMode === 'cloud' ? user?.email : t('settings.localOnlyHint')}
+              </small>
+            </div>
+            {isFirebaseConfigured && user ? (
+              <button
+                type="button"
+                className="icon-button small"
+                title={t('common.signOut')}
+                aria-label={t('common.signOut')}
+                onClick={signOut}
+              >
+                ⏏
+              </button>
+            ) : null}
+          </div>
+
+          <div className="sidebar-save">
+            <SaveIndicator />
+          </div>
         </div>
       </aside>
 
       {isOpen ? <div className="sidebar-scrim" onClick={onClose} /> : null}
 
-      {isAdding ? (
+      {addingFolder ? (
         <PromptDialog
-          title="New category"
-          label="Category name"
-          placeholder="e.g. Dorm Research"
-          confirmLabel="Create"
+          title={t('notes.newCategory')}
+          label={t('notes.categoryName')}
+          confirmLabel={t('common.create')}
           onConfirm={(name) => {
-            if (name.trim()) createFolder(name);
+            if (name.trim()) create('folders', { name: name.trim(), emoji: '📁' }, { idPrefix: 'folder' });
           }}
-          onClose={() => setIsAdding(false)}
+          onClose={() => setAddingFolder(false)}
         />
       ) : null}
 
-      {renaming ? (
+      {renamingFolder ? (
         <PromptDialog
-          title="Rename category"
-          label="Category name"
-          initialValue={renaming.name}
-          onConfirm={(name) => renameFolder(renaming.id, name)}
-          onClose={() => setRenaming(null)}
+          title={t('notes.renameCategory')}
+          label={t('notes.categoryName')}
+          initialValue={renamingFolder.name}
+          onConfirm={(name) => {
+            if (name.trim()) update('folders', renamingFolder.id, { name: name.trim() }, { immediate: true });
+          }}
+          onClose={() => setRenamingFolder(null)}
         />
       ) : null}
 
-      {deleting ? (
+      {deletingFolder ? (
         <ConfirmDialog
-          title={`Delete "${deleting.name}"?`}
-          message="The category disappears but the documents inside it stay — they move to “No category”."
-          confirmLabel="Delete category"
+          title={t('notes.deleteCategoryTitle', { name: deletingFolder.name })}
+          message={t('notes.deleteCategoryBody')}
+          confirmLabel={t('common.delete')}
+          cancelLabel={t('common.cancel')}
           onConfirm={() => {
-            deleteFolder(deleting.id);
-            if (activeFolderId === deleting.id) onSelectFolder(null);
+            deleteFolder(deletingFolder.id);
+            if (activeFolderId === deletingFolder.id) onSelectFolder(null);
           }}
-          onClose={() => setDeleting(null)}
+          onClose={() => setDeletingFolder(null)}
         />
       ) : null}
     </>
