@@ -110,7 +110,7 @@ Cloud Functions need the **Blaze** (pay-as-you-go) plan. Firebase's free
 allowances are generous — a couple of teenagers using this will almost certainly
 stay inside them — but a card must be on file.
 
-Console → ⚙ → **Usage and billing → Details & settings → Modify plan → Blaze**.
+Console → the settings gear → **Usage and billing → Details & settings → Modify plan → Blaze**.
 
 **Set a budget alert while you're there** (Google Cloud Console → Billing →
 Budgets & alerts). €5/month with an email alert at 50% is plenty for peace of

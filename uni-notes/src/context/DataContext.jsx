@@ -378,6 +378,8 @@ export function DataProvider({ children }) {
       sheets: merged.sheets ?? [],
       presentations: merged.presentations ?? [],
       vocabDecks: merged.decks ?? [],
+      boards: merged.boards ?? [],
+      plans: merged.plans ?? [],
       chats: merged.chats ?? [],
       prefs,
       ready,

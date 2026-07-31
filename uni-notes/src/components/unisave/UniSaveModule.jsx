@@ -8,6 +8,7 @@ import PromptDialog from '../ui/PromptDialog.jsx';
 import ShareDialog from './ShareDialog.jsx';
 import { ROLE, isSharedWithOthers, roleOf, titleOf } from '../../lib/model.js';
 import { formatRelativeDate, previewSnippet, wordCount } from '../../lib/text.js';
+import { planStats } from '../../lib/templates/tasks.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useData } from '../../context/DataContext.jsx';
 import { useT } from '../../i18n/index.jsx';
@@ -17,6 +18,8 @@ const KINDS = [
   { collection: 'notes', product: 'notes', module: 'notes', titleKey: 'title' },
   { collection: 'sheets', product: 'sheets', module: 'sheets', titleKey: 'title' },
   { collection: 'presentations', product: 'slides', module: 'slides', titleKey: 'title' },
+  { collection: 'boards', product: 'canvas', module: 'canvas', titleKey: 'title' },
+  { collection: 'plans', product: 'tasks', module: 'tasks', titleKey: 'title' },
   { collection: 'decks', product: 'languages', module: 'languages', titleKey: 'name' },
 ];
 
@@ -55,6 +58,8 @@ export default function UniSaveModule({ onOpen }) {
       notes: data.notes,
       sheets: data.sheets,
       presentations: data.presentations,
+      boards: data.boards,
+      plans: data.plans,
       decks: data.vocabDecks,
     };
 
@@ -67,7 +72,7 @@ export default function UniSaveModule({ onOpen }) {
         isMine: !document.ownerUid || document.ownerUid === uid,
       })),
     );
-  }, [data.notes, data.sheets, data.presentations, data.vocabDecks, t, uid]);
+  }, [data.notes, data.sheets, data.presentations, data.boards, data.plans, data.vocabDecks, t, uid]);
 
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -112,6 +117,13 @@ export default function UniSaveModule({ onOpen }) {
     }
     if (collection === 'presentations') {
       return `${document.slides?.length ?? 0} · ${t('slides.slide')}`;
+    }
+    if (collection === 'boards') {
+      return t('canvas.shapeCount', { count: document.shapes?.length ?? 0 });
+    }
+    if (collection === 'plans') {
+      const stats = planStats(document);
+      return t('tasks.doneOf', { done: stats.done, total: stats.total });
     }
     return t('languages.cards', { count: document.cards?.length ?? 0 });
   };

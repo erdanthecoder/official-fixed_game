@@ -15,6 +15,8 @@ export const PRODUCTS = {
   notes: { colour: '#1A73E8', soft: '#E8F0FE', labelKey: 'nav.notes', hintKey: 'nav.notesHint' },
   sheets: { colour: '#0F9D58', soft: '#E4F5EC', labelKey: 'nav.sheets', hintKey: 'nav.sheetsHint' },
   slides: { colour: '#E8A020', soft: '#FDF2DC', labelKey: 'nav.slides', hintKey: 'nav.slidesHint' },
+  canvas: { colour: '#0F7B6C', soft: '#DFF1EE', labelKey: 'nav.canvas', hintKey: 'nav.canvasHint' },
+  tasks: { colour: '#C5372C', soft: '#FBE9E7', labelKey: 'nav.tasks', hintKey: 'nav.tasksHint' },
   unisave: { colour: '#0F7B6C', soft: '#DFF1EE', labelKey: 'nav.unisave', hintKey: 'nav.unisaveHint' },
   ai: { colour: '#8430CE', soft: '#F3E8FD', labelKey: 'nav.ai', hintKey: 'nav.aiHint' },
   languages: { colour: '#C5372C', soft: '#FBE9E7', labelKey: 'nav.languages', hintKey: 'nav.languagesHint' },
@@ -45,6 +47,26 @@ function Glyph({ product, colour }) {
           <rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke={colour} strokeWidth="1.8" />
           <rect x="6" y="8" width="9" height="2.2" rx="1.1" fill={colour} />
           <path d="M6 13h12M6 16h8" stroke={colour} strokeWidth="1.4" strokeLinecap="round" opacity="0.8" />
+        </>
+      );
+
+    case 'canvas':
+      // A nib on a sheet: the board is something you draw on, not type into.
+      return (
+        <>
+          <rect x="3.4" y="4" width="17.2" height="16" rx="2.4" fill="none" stroke={colour} strokeWidth="1.8" />
+          <path d="M7.4 15.6 8 12.9l5.2-5.2a1.3 1.3 0 0 1 1.9 0l.6.6a1.3 1.3 0 0 1 0 1.9L10.5 15Z" fill="none" stroke={colour} strokeWidth="1.6" strokeLinejoin="round" />
+        </>
+      );
+
+    case 'tasks':
+      // Ticked boxes over a date: a checklist that knows what day it is.
+      return (
+        <>
+          <rect x="3.6" y="4.6" width="16.8" height="15.4" rx="2.4" fill="none" stroke={colour} strokeWidth="1.8" />
+          <path d="M3.6 8.6h16.8M8 3.2v2.8M16 3.2v2.8" stroke={colour} strokeWidth="1.8" strokeLinecap="round" />
+          <path d="M7.6 13.4 9.4 15.2 12.6 12" fill="none" stroke={colour} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M15 16.6h2.4" stroke={colour} strokeWidth="1.5" strokeLinecap="round" opacity="0.75" />
         </>
       );
 

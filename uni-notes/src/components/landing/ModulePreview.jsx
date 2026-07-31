@@ -177,10 +177,72 @@ function LanguagesPreview({ copy }) {
   );
 }
 
+function CanvasPreview({ copy }) {
+  // A real BoardView would need a board document; this is the same shapes,
+  // drawn straight, so the landing page stays free of app state.
+  return (
+    <Chrome title={copy.canvasFile} accent="#0F7B6C">
+      <div className="preview-board">
+        <svg viewBox="0 0 320 170" aria-hidden="true">
+          <defs>
+            <pattern id="preview-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M20 0H0v20" fill="none" stroke="#e3eaf1" strokeWidth="1" />
+            </pattern>
+          </defs>
+          <rect width="320" height="170" fill="#fff" />
+          <rect width="320" height="170" fill="url(#preview-grid)" />
+          <rect x="24" y="34" width="86" height="46" rx="6" fill="none" stroke="#1A73E8" strokeWidth="3" />
+          <rect x="210" y="34" width="86" height="46" rx="6" fill="none" stroke="#0F9D58" strokeWidth="3" />
+          <ellipse cx="160" cy="126" rx="52" ry="26" fill="none" stroke="#E8A020" strokeWidth="3" />
+          <path d="M110 57h84" stroke="#12263a" strokeWidth="3" strokeLinecap="round" />
+          <path d="M186 51l8 6-8 6" fill="none" stroke="#12263a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M67 80v20h86v18" fill="none" stroke="#12263a" strokeWidth="3" strokeLinecap="round" />
+        </svg>
+      </div>
+      <div className="preview-inks" aria-hidden="true">
+        {['#12263a', '#1A73E8', '#0F9D58', '#E8A020', '#C5372C'].map((colour) => (
+          <span key={colour} style={{ background: colour }} />
+        ))}
+      </div>
+    </Chrome>
+  );
+}
+
+function TasksPreview({ copy }) {
+  const rows = [
+    { text: copy.tasksItem1, state: 'overdue', when: copy.tasksWhen1 },
+    { text: copy.tasksItem2, state: 'soon', when: copy.tasksWhen2 },
+    { text: copy.tasksItem3, state: 'later', when: copy.tasksWhen3 },
+  ];
+
+  return (
+    <Chrome title={copy.tasksFile} accent="#C5372C">
+      <div className="preview-progress">
+        <span style={{ width: '38%' }} />
+      </div>
+      <ul className="preview-tasks">
+        {rows.map((row) => (
+          <li key={row.text} className={`is-${row.state}`}>
+            <Icon name="circleEmpty" size={15} />
+            <span>{row.text}</span>
+            <em>{row.when}</em>
+          </li>
+        ))}
+        <li className="is-done">
+          <Icon name="circleCheck" size={15} className="ticked" />
+          <span>{copy.tasksItem4}</span>
+        </li>
+      </ul>
+    </Chrome>
+  );
+}
+
 const PREVIEWS = {
   notes: NotesPreview,
   sheets: SheetsPreview,
   slides: SlidesPreview,
+  canvas: CanvasPreview,
+  tasks: TasksPreview,
   unisave: UniSavePreview,
   ai: AiPreview,
   languages: LanguagesPreview,

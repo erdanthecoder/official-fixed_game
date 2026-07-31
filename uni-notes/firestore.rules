@@ -4,7 +4,8 @@ rules_version = '2';
 //
 // Two shapes of data:
 //
-//   docs/{docId}          Shareable documents (notes, sheets, decks, vocab).
+//   docs/{docId}          Shareable documents (notes, sheets, slide decks,
+//                         canvas boards, task plans, vocab decks).
 //                         Readable and writable by the accounts listed in
 //                         memberUids. Editors may change content; viewers may
 //                         only read. Membership itself is writable only by the

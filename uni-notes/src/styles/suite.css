@@ -1752,6 +1752,493 @@
 
 /* ---------------------------- responsive extras --------------------------- */
 
+/* ================================= canvas ================================== */
+
+.board-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.board-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px clamp(12px, 3vw, 24px);
+  border-bottom: 1px solid var(--border-soft);
+  background: var(--surface);
+}
+
+.board-ink {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(6, 43, 68, 0.16);
+  cursor: pointer;
+}
+
+.board-ink.is-active {
+  border-color: var(--accent);
+  transform: scale(1.08);
+}
+
+.board-width {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+}
+
+.board-width span {
+  width: 18px;
+  border-radius: 999px;
+}
+
+.board-width.is-active {
+  border-color: var(--border-strong, #c9d3dd);
+  background: var(--surface-alt);
+}
+
+.board-readonly {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px clamp(12px, 3vw, 24px);
+  border-bottom: 1px solid var(--border-soft);
+  background: var(--surface-alt);
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+/* The surface fills whatever is left and the board is centred in it, letterboxed
+   rather than stretched — a board drawn on a tablet has to open unchanged on a
+   laptop, and the pointer maths in BoardEditor assumes exactly this. */
+.board-surface {
+  flex: 1;
+  min-height: 0;
+  padding: clamp(8px, 2vw, 20px);
+  background: var(--page, #f7f8fa);
+}
+
+.board-view {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-sm);
+  background: #fff;
+}
+
+.board-view.is-live {
+  box-shadow: 0 1px 3px rgba(6, 43, 68, 0.12), 0 8px 24px rgba(6, 43, 68, 0.06);
+  touch-action: none; /* the pen owns the gesture, not the scroller */
+  cursor: crosshair;
+}
+
+.board-view.is-text {
+  cursor: text;
+}
+
+.board-view.is-eraser {
+  cursor: cell;
+}
+
+.board-view.is-locked {
+  cursor: default;
+}
+
+.board-card-thumb {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: #fff;
+}
+
+.board-card-thumb .board-view {
+  border-radius: 0;
+}
+
+/* ================================== tasks ================================== */
+
+.plan-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.plan-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: clamp(14px, 3vw, 28px);
+}
+
+.plan-summary {
+  margin-bottom: 16px;
+}
+
+.plan-progress {
+  display: block;
+  overflow: hidden;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--surface-alt);
+}
+
+.plan-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: #0f9d58;
+  transition: width 0.25s ease;
+}
+
+.plan-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 8px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.plan-counts span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.count-overdue {
+  color: #c5372c;
+  font-weight: 600;
+}
+
+.count-soon {
+  color: #b26a00;
+}
+
+.plan-controls {
+  margin-bottom: 12px;
+}
+
+.segmented {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: var(--surface);
+}
+
+.segmented button {
+  padding: 6px 14px;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.segmented button.is-active {
+  background: var(--accent-soft);
+  color: #174ea6;
+  font-weight: 600;
+}
+
+.plan-add {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-muted);
+}
+
+.plan-add input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  font-size: 0.92rem;
+}
+
+.plan-add input:focus {
+  outline: none;
+}
+
+.plan-group {
+  margin-bottom: 22px;
+}
+
+.plan-group h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.plan-group-count {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--surface-alt);
+  font-size: 0.72rem;
+  letter-spacing: 0;
+}
+
+.task-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The left edge carries the state. Colour alone would fail for anyone who
+   cannot separate red from grey, so the due label repeats it in words. */
+.task-row {
+  border: 1px solid var(--border-soft);
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.task-row.is-overdue {
+  border-left-color: #c5372c;
+}
+
+.task-row.is-today {
+  border-left-color: #e8a020;
+}
+
+.task-row.is-soon {
+  border-left-color: #1a73e8;
+}
+
+.task-row.is-done {
+  opacity: 0.62;
+}
+
+.task-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+}
+
+.task-tick {
+  display: inline-flex;
+  padding: 2px;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.task-row.is-done .task-tick {
+  color: #0f9d58;
+}
+
+.task-text {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  font-size: 0.92rem;
+}
+
+.task-text:focus {
+  outline: none;
+}
+
+.task-row.is-done .task-text {
+  text-decoration: line-through;
+}
+
+.task-due {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  white-space: nowrap;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.task-due.is-overdue {
+  color: #c5372c;
+  font-weight: 600;
+}
+
+.task-due.is-today {
+  color: #b26a00;
+  font-weight: 600;
+}
+
+.task-due.is-none {
+  opacity: 0.6;
+}
+
+.task-flag {
+  flex: none;
+  line-height: 0;
+}
+
+.task-details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 0 10px 12px 40px;
+}
+
+.field.compact {
+  min-width: 150px;
+}
+
+.field.compact.wide {
+  flex: 1;
+  min-width: 220px;
+}
+
+.field.compact span {
+  font-size: 0.74rem;
+}
+
+.plan-empty {
+  padding: 28px 0;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.plan-card-thumb {
+  display: block;
+  padding: 14px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+}
+
+.plan-card-next {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plan-card-next li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plan-card-next li.is-overdue {
+  color: #c5372c;
+}
+
+.plan-card-clear {
+  margin: 14px 0 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+/* Landing-page previews for both modules. */
+.preview-board {
+  overflow: hidden;
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+}
+
+.preview-board svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.preview-inks {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.preview-inks span {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.preview-progress {
+  overflow: hidden;
+  height: 6px;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  background: #eef1f4;
+}
+
+.preview-progress span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: #0f9d58;
+}
+
+.preview-tasks {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.preview-tasks li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+
+.preview-tasks li em {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-style: normal;
+}
+
+.preview-tasks li.is-overdue em {
+  color: #c5372c;
+  font-weight: 600;
+}
+
+.preview-tasks li.is-done {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+
 @media (max-width: 900px) {
   .ai-banner,
   .module-banner {
@@ -1821,5 +2308,31 @@
   .ai-banner .scenery-content {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+/* Canvas and Tasks, narrow. The board keeps its aspect ratio and simply gets
+   less room; the task rows drop their inline date onto a second line. */
+@media (max-width: 720px) {
+  .board-toolbar {
+    gap: 6px;
+  }
+
+  .board-toolbar .push-right {
+    margin-left: 0;
+  }
+
+  .task-main {
+    flex-wrap: wrap;
+  }
+
+  .task-text {
+    flex: 1 0 100%;
+    order: -1;
+    padding-left: 30px;
+  }
+
+  .task-details {
+    padding-left: 10px;
   }
 }

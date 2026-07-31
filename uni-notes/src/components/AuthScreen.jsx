@@ -8,7 +8,7 @@ import TipLine from './TipLine.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useT } from '../i18n/index.jsx';
 
-const MODULES = ['notes', 'sheets', 'slides', 'unisave', 'ai', 'languages'];
+const MODULES = ['notes', 'sheets', 'slides', 'canvas', 'tasks', 'unisave', 'ai', 'languages'];
 
 function GoogleMark() {
   return (

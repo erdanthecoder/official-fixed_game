@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Icon from './components/ui/Icon.jsx';
 import AiWorkspace from './components/ai/AiWorkspace.jsx';
 import AuthScreen from './components/AuthScreen.jsx';
+import CanvasModule from './components/canvas/CanvasModule.jsx';
 import LandingPage from './components/landing/LandingPage.jsx';
 import LanguagesModule from './components/languages/LanguagesModule.jsx';
 import NotesModule from './components/notes/NotesModule.jsx';
@@ -9,6 +10,7 @@ import SettingsPage from './components/SettingsPage.jsx';
 import SheetsModule from './components/sheets/SheetsModule.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import SlidesModule from './components/slides/SlidesModule.jsx';
+import TasksModule from './components/tasks/TasksModule.jsx';
 import TipLine from './components/TipLine.jsx';
 import UniSaveModule from './components/unisave/UniSaveModule.jsx';
 import { AUTH_STATUS, useAuth } from './context/AuthContext.jsx';
@@ -126,6 +128,18 @@ export default function App() {
             deckId={id}
             onOpen={(deckId) => goToItem('slides', deckId)}
             onBack={() => goToModule('slides')}
+          />
+        ) : module === 'canvas' ? (
+          <CanvasModule
+            boardId={id}
+            onOpen={(boardId) => goToItem('canvas', boardId)}
+            onBack={() => goToModule('canvas')}
+          />
+        ) : module === 'tasks' ? (
+          <TasksModule
+            planId={id}
+            onOpen={(planId) => goToItem('tasks', planId)}
+            onBack={() => goToModule('tasks')}
           />
         ) : module === 'unisave' ? (
           <UniSaveModule onOpen={(target, itemId) => goToItem(target, itemId)} />

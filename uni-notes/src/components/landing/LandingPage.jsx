@@ -9,7 +9,7 @@ import TipLine from '../TipLine.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useT } from '../../i18n/index.jsx';
 
-const TOUR = ['notes', 'sheets', 'slides', 'unisave', 'ai', 'languages'];
+const TOUR = ['notes', 'sheets', 'slides', 'canvas', 'tasks', 'unisave', 'ai', 'languages'];
 
 /**
  * The front door.
@@ -39,6 +39,15 @@ export default function LandingPage({ onStart }) {
     sheetsSchool2: t('landing.previewSheetsSchool2'),
     sheetsSchool3: t('landing.previewSheetsSchool3'),
     sheetsCheapest: t('landing.previewSheetsCheapest'),
+    canvasFile: t('landing.previewCanvasFile'),
+    tasksFile: t('landing.previewTasksFile'),
+    tasksItem1: t('landing.previewTasksItem1'),
+    tasksItem2: t('landing.previewTasksItem2'),
+    tasksItem3: t('landing.previewTasksItem3'),
+    tasksItem4: t('landing.previewTasksItem4'),
+    tasksWhen1: t('landing.previewTasksWhen1'),
+    tasksWhen2: t('landing.previewTasksWhen2'),
+    tasksWhen3: t('landing.previewTasksWhen3'),
     slidesFile: t('landing.previewSlidesFile'),
     slidesTitle: t('landing.previewSlidesTitle'),
     slidesSub: t('landing.previewSlidesSub'),

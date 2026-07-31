@@ -49,6 +49,24 @@ export const SLOTS = {
     sun: '#cfe4ff',
     stars: true,
   },
+  canvas: {
+    file: 'bay.jpg',
+    // Flat light off the water — a quiet backdrop for a page full of drawing.
+    sky: ['#bfe0ea', '#e2f1f5'],
+    peaks: ['#5f8b8c', '#7fa6a4'],
+    snow: '#f2fafa',
+    water: ['#2a9d8f', '#17786f'],
+    sun: '#ffffff',
+  },
+  tasks: {
+    file: 'autumn.jpg',
+    // Late in the season, which is what a deadline feels like.
+    sky: ['#e8b98a', '#f6dcc0'],
+    peaks: ['#9a6a55', '#b58a6f'],
+    snow: '#fff1e2',
+    water: ['#3f8fa8', '#286f88'],
+    sun: '#ffe3bd',
+  },
   languages: {
     file: 'meadow.jpg',
     sky: ['#f3c48a', '#f8e0c0'],

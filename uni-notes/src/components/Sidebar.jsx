@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useData } from '../context/DataContext.jsx';
 import { useT } from '../i18n/index.jsx';
 
-const MODULES = ['notes', 'sheets', 'slides', 'unisave', 'ai', 'languages'];
+const MODULES = ['notes', 'sheets', 'slides', 'canvas', 'tasks', 'unisave', 'ai', 'languages'];
 
 /** The grid of products, the way a suite offers its apps. */
 function AppSwitcher({ active, onPick, onClose }) {

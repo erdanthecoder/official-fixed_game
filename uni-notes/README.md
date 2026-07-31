@@ -1,8 +1,8 @@
 # Uni
 
-Six tools for getting into university, in one place: **Notes**, **Sheets**,
-**Slides**, **UniSave**, an **AI** study helper, and **Languages** vocabulary
-practice. Sign in with Google or an email address; everything syncs privately to
+Eight tools for getting into university, in one place: **Notes**, **Sheets**,
+**Slides**, **Canvas**, **Tasks**, **UniSave**, an **AI** study helper, and
+**Languages** vocabulary practice. Sign in with Google or an email address; everything syncs privately to
 your account, and you choose who else can open it.
 
 The interface speaks **English, Русский and Кыргызча**.
@@ -27,9 +27,9 @@ npm run build        # production build → dist/
 npm run preview      # serve the built files
 ```
 
-## The six modules
+## The eight modules
 
-### 📝 Notes
+### Notes
 A Google-Docs-style rich text editor. Bold, italic, underline, H1–H3, bulleted
 and numbered lists, text colour and highlight, clear formatting, undo/redo
 (toolbar and the usual keyboard shortcuts). Auto-saves with a live
@@ -41,7 +41,7 @@ Comparison Table (School, Location, Tuition, Acceptance Rate, Major, Notes,
 Deadline), Application Checklist with clickable ☐→☑ boxes, Essay Outline,
 Scholarship Tracker — insertable into an open doc or usable as a whole new one.
 
-### 📊 Sheets
+### Sheets
 A real spreadsheet, not a static table. Editable grid with A/B/C columns, a
 formula bar, keyboard navigation (arrows, Tab, Enter, F2), bold and alignment,
 add/delete rows and columns.
@@ -55,14 +55,34 @@ NOT CONCAT LEN TODAY DAYS`. `IF` short-circuits like a real spreadsheet, so
 Templates: Tuition Comparison (with totals worked out), Budget Planner, Deadline
 Tracker (days remaining via `DAYS`), Grade Tracker.
 
-### 🖼️ Slides
+### Slides
 A deck editor with a thumbnail rail, five layouts (title, title + bullets,
 section break, quote, two columns) and four themes — including an **Issyk-Kul**
 theme that renders the lake behind your slide. Speaker notes, reorder, duplicate,
 and a fullscreen **Present** mode driven by arrow keys / space, `Esc` to exit.
 Templates: Why This University, About Me, Research Presentation.
 
-### 🗂️ UniSave
+### Canvas
+A board you draw on. Pen, straight lines, arrows, rectangles, ellipses and text,
+in six inks and three weights, on a plain, grid, dotted or ruled background.
+Eraser, undo/redo (toolbar and `Ctrl/Cmd+Z`), and clear.
+
+Everything you draw is stored as **shapes, not pixels**. That is what lets a
+board sync like any other document, survive a reload without a resize losing
+anything, and stay sharp at any zoom. Templates: Compare Three Schools,
+Application Timeline, Essay Map.
+
+### Tasks
+A deadline planner for the parts of an application that have dates on them. Each
+task carries a due date, a priority, a school and notes; the list groups by
+university and calls out what is **overdue** and what is **due this week**, with
+a progress bar over the whole plan.
+
+Dates are stored as plain calendar dates rather than timestamps, so a deadline
+means the same day wherever you open it. Templates: One Application, Scholarship
+Round, Test Preparation.
+
+### UniSave
 Everything from every tool in one list, and the place sharing happens. Filter by
 type, by what you own, or by what has been shared with you.
 
@@ -74,7 +94,7 @@ else can leave a shared document without deleting it for the rest.
 A document lives in one place and every member edits the same copy — there are
 no per-person duplicates to reconcile.
 
-### ✨ AI
+### AI
 A study helper for essays, school research and revision. Quick starts for
 brainstorming essay topics, improving a paragraph, explaining an application
 term, comparing two universities, and vocabulary quizzing. Conversations are
@@ -85,7 +105,7 @@ browser**. The function verifies the caller's ID token, rate-limits per user
 (8/minute, 200/day), caps input size, and won't write essays for you to submit as
 your own — it helps you write your own. Requires the setup in FIREBASE_SETUP.md.
 
-### 🗣️ Languages
+### Languages
 Vocabulary decks with a flashcard trainer on a Leitner-style spaced-repetition
 schedule (**Again / Hard / Good / Easy** → progressively longer intervals), a
 multiple-choice quiz mode, and per-deck progress (new / learning / known).
@@ -177,7 +197,7 @@ uni-notes/
       ui/                  Modal, PromptDialog, ConfirmDialog, MoveDialog
     styles/
       global.css           tokens, buttons, cards, dialogs, Notes editor
-      suite.css            scenery, nav, Sheets/Slides/Languages/AI
+      suite.css            scenery, nav, Sheets/Slides/Canvas/Tasks/Languages/AI
       brand.css            type, product identity, landing, auth, UniSave
 ```
 

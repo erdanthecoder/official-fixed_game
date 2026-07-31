@@ -8,6 +8,8 @@
  *   #/notes/:docId           note editor
  *   #/sheets  #/sheets/:id
  *   #/slides  #/slides/:id
+ *   #/canvas  #/canvas/:boardId
+ *   #/tasks   #/tasks/:planId
  *   #/languages  #/languages/:deckId
  *   #/unisave                everything, with sharing
  *   #/ai  #/ai/:chatId
@@ -23,6 +25,8 @@ export const MODULES = [
   'notes',
   'sheets',
   'slides',
+  'canvas',
+  'tasks',
   'unisave',
   'ai',
   'languages',
