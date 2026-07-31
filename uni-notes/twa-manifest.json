@@ -1,0 +1,56 @@
+{
+  "packageId": "app.web.unisave_e8483.twa",
+  "host": "unisave-e8483.web.app",
+  "name": "Uni — university planning workspace",
+  "launcherName": "Uni",
+  "display": "standalone",
+  "orientation": "default",
+  "themeColor": "#0B4265",
+  "themeColorDark": "#04203A",
+  "navigationColor": "#0B4265",
+  "navigationColorDark": "#04203A",
+  "navigationDividerColor": "#0B4265",
+  "navigationDividerColorDark": "#04203A",
+  "backgroundColor": "#071E2F",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://unisave-e8483.web.app/icon-512.png",
+  "maskableIconUrl": "https://unisave-e8483.web.app/icon-maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "uni"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "New note",
+      "shortName": "Notes",
+      "url": "/#/notes",
+      "chosenIconUrl": "https://unisave-e8483.web.app/shortcut-notes.png"
+    },
+    {
+      "name": "Deadlines",
+      "shortName": "Tasks",
+      "url": "/#/tasks",
+      "chosenIconUrl": "https://unisave-e8483.web.app/shortcut-tasks.png"
+    },
+    {
+      "name": "Draw a board",
+      "shortName": "Canvas",
+      "url": "/#/canvas",
+      "chosenIconUrl": "https://unisave-e8483.web.app/shortcut-canvas.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://unisave-e8483.web.app/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://unisave-e8483.web.app/",
+  "minSdkVersion": 23,
+  "appVersion": "1.0.0"
+}

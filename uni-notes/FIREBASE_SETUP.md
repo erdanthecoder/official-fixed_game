@@ -148,8 +148,8 @@ by email address are in Part Two.
 ## 6. Put it on the internet (still free)
 
 ```bash
-npm run build
-firebase deploy --only hosting
+cd uni-notes
+npm run deploy       # build + rules + hosting, in one
 ```
 
 Firebase gives you `https://<your-project>.web.app` and adds it to the

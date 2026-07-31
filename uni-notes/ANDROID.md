@@ -61,23 +61,37 @@ appear there; the Share menu is the route.
 ## 2. Build a real APK (optional, still free)
 
 This wraps the same web app in a **Trusted Web Activity** — a genuine Android
-package you can sideload, send to someone, or later put on Play. It is the same
-code; only the container differs.
+package you can sideload or send to someone. Same code; only the container
+differs.
 
-You need [Node 22+](https://nodejs.org) and a JDK. Bubblewrap fetches the
-Android SDK itself.
+**You do not need any Android tooling.** GitHub builds it:
+
+1. Deploy the site first (`npm run deploy`) — the build reads the live manifest.
+2. Repo → **Actions** → **Build Android APK** → **Run workflow**.
+3. Download the **uni-android** artifact. `app-release-signed.apk` is inside.
+4. Copy it to the phone and open it. Android asks once whether to allow
+   installing from that source.
+
+**Save the keystore after the first run.** The workflow generates one and puts
+it in the artifact; put it in repo secrets as `ANDROID_KEYSTORE_BASE64` (run
+`base64 -w0 android.keystore` to get the value). Android refuses to install an
+update signed with a different key than the version already on the phone, so
+without this every build has to be uninstalled and reinstalled by hand.
+
+The settings live in `uni-notes/twa-manifest.json`, which is checked in — that
+is what makes the build non-interactive.
+
+<details>
+<summary>Doing it locally instead</summary>
+
+Needs Node 22+ and a JDK; Bubblewrap fetches the Android SDK itself.
 
 ```bash
 npm install -g @bubblewrap/cli
-
-# Point it at your deployed manifest
-bubblewrap init --manifest https://<your-project>.web.app/manifest.webmanifest
-
-bubblewrap build
+cd uni-notes
+bubblewrap build          # uses the checked-in twa-manifest.json
 ```
-
-That produces `app-release-signed.apk`. Copy it to a phone and open it —
-Android will ask you to allow installing from that source once.
+</details>
 
 ### Removing the address bar
 
@@ -85,10 +99,10 @@ A TWA shows a URL bar until Android can verify that you own both the app and the
 website. That check is **Digital Asset Links**: a file on your site naming the
 app's signing key.
 
-1. `bubblewrap init` prints your SHA-256 fingerprint, and writes
-   `assetlinks.json`. If you need it again: `bubblewrap fingerprint list`.
-2. Put that file at `public/.well-known/assetlinks.json` in this project.
-3. `npm run build && firebase deploy --only hosting`.
+1. The workflow uploads it as the **uni-assetlinks** artifact. (Locally:
+   `bubblewrap fingerprint generateAssetLinks --output assetlinks.json`.)
+2. Put that file at `uni-notes/public/.well-known/assetlinks.json`.
+3. `npm run deploy`.
 4. Confirm it is live at
    `https://<your-project>.web.app/.well-known/assetlinks.json`, then reinstall
    the APK.

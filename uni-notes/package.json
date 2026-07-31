@@ -8,7 +8,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test:rules": "firebase emulators:exec --only firestore --project uni-rules-test \"node test/rules.test.mjs && node test/join.test.mjs\""
+    "test:rules": "firebase emulators:exec --only firestore --project uni-rules-test \"node test/rules.test.mjs && node test/join.test.mjs\"",
+    "deploy": "npm run build && firebase deploy --only firestore:rules,hosting",
+    "deploy:rules": "firebase deploy --only firestore:rules"
   },
   "dependencies": {
     "firebase": "^12.16.0",
