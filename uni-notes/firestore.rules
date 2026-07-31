@@ -2,19 +2,72 @@ rules_version = '2';
 
 // Uni — Firestore security rules.
 //
-// The whole model is one line of intent: a signed-in user can read and write
-// everything under their own users/{uid} document, and nothing else. There are
-// no shared collections, so there is no path by which one account can reach
-// another account's documents.
+// Two shapes of data:
+//
+//   docs/{docId}          Shareable documents (notes, sheets, decks, vocab).
+//                         Readable and writable by the accounts listed in
+//                         memberUids. Editors may change content; viewers may
+//                         only read. Membership itself is writable only by the
+//                         owner — and in practice only through the sharing
+//                         Cloud Functions, which is the only way to turn an
+//                         email address into a uid.
+//
+//   users/{uid}/…         Personal: folders, AI chats, preferences. Only that
+//                         account, ever.
+//
+//   invites/{inviteId}    Written by the sharing functions. Deliberately
+//                         unreadable and unwritable by clients: the invitee
+//                         claims theirs through claimInvites(), which runs with
+//                         admin privileges. Nothing here needs client access,
+//                         so nothing gets it.
 //
 // Deploy with:  firebase deploy --only firestore:rules
-// Check a change in the Console's Rules Playground before trusting it.
+// Check changes in the Console's Rules Playground before trusting them.
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function signedIn() {
+      return request.auth != null;
+    }
+
     function isOwner(uid) {
-      return request.auth != null && request.auth.uid == uid;
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // --- shareable documents -------------------------------------------------
+
+    function isMember() {
+      return signedIn()
+        && resource.data.memberUids is list
+        && request.auth.uid in resource.data.memberUids;
+    }
+
+    function myRole() {
+      return resource.data.roles is map
+        ? resource.data.roles.get(request.auth.uid, '')
+        : '';
+    }
+
+    function isDocOwner() {
+      return signedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+
+    // Membership fields are the access-control list, so only the owner may
+    // change them. Anyone else editing must leave them exactly as they were.
+    function membershipUnchanged() {
+      return request.resource.data.memberUids == resource.data.memberUids
+        && request.resource.data.roles == resource.data.roles
+        && request.resource.data.ownerUid == resource.data.ownerUid;
+    }
+
+    // A member removing only themselves — "leave a shared document".
+    function isLeaving() {
+      return signedIn()
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && !(request.auth.uid in request.resource.data.memberUids)
+        && request.resource.data.memberUids.size() == resource.data.memberUids.size() - 1
+        && resource.data.memberUids.hasAll(request.resource.data.memberUids);
     }
 
     // Cheap guards against a runaway client filling the database. Firestore
@@ -29,9 +82,29 @@ service cloud.firestore {
                 && request.resource.data.name.size() <= 300));
     }
 
-    // Everything the app writes lives under the owner's uid:
-    //   users/{uid}/notes|sheets|presentations|decks|chats|folders/{id}
-    //   users/{uid}/meta/prefs
+    match /docs/{docId} {
+      allow read: if isMember();
+
+      // A new document must be created owned by, and containing only, its author.
+      allow create: if signedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.memberUids == [request.auth.uid]
+        && isSaneDocument();
+
+      // Owners may change anything. Editors may change content but not who has
+      // access. Any member may remove themselves. Viewers may not write.
+      allow update: if isSaneDocument() && (
+        isDocOwner()
+        || (isMember() && myRole() == 'editor' && membershipUnchanged())
+        || (isMember() && isLeaving())
+      );
+
+      allow delete: if isDocOwner();
+    }
+
+    // --- personal data -------------------------------------------------------
+
+    // users/{uid}/folders|chats/{id} and users/{uid}/meta/prefs
     match /users/{uid} {
       allow read, write: if isOwner(uid);
 
@@ -40,6 +113,13 @@ service cloud.firestore {
         allow create, update: if isOwner(uid) && isSaneDocument();
         allow delete: if isOwner(uid);
       }
+    }
+
+    // --- invitations ---------------------------------------------------------
+
+    // Server-only. Clients go through the sharing Cloud Functions.
+    match /invites/{inviteId} {
+      allow read, write: if false;
     }
 
     // Anything not matched above is denied by default.

@@ -1,18 +1,53 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import AppIcon from './brand/AppIcon.jsx';
 import ConfirmDialog from './ui/ConfirmDialog.jsx';
+import ProductIcon, { PRODUCTS } from './brand/ProductIcon.jsx';
 import PromptDialog from './ui/PromptDialog.jsx';
 import SaveIndicator from './SaveIndicator.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useData } from '../context/DataContext.jsx';
 import { useT } from '../i18n/index.jsx';
 
-const MODULE_ITEMS = [
-  { id: 'notes', icon: '📝', labelKey: 'nav.notes', hintKey: 'nav.notesHint' },
-  { id: 'sheets', icon: '📊', labelKey: 'nav.sheets', hintKey: 'nav.sheetsHint' },
-  { id: 'slides', icon: '🖼️', labelKey: 'nav.slides', hintKey: 'nav.slidesHint' },
-  { id: 'ai', icon: '✨', labelKey: 'nav.ai', hintKey: 'nav.aiHint' },
-  { id: 'languages', icon: '🗣️', labelKey: 'nav.languages', hintKey: 'nav.languagesHint' },
-];
+const MODULES = ['notes', 'sheets', 'slides', 'unisave', 'ai', 'languages'];
+
+/** The grid of products, the way a suite offers its apps. */
+function AppSwitcher({ active, onPick, onClose }) {
+  const { t } = useT();
+  const panel = useRef(null);
+
+  useEffect(() => {
+    const onOutside = (event) => {
+      if (!panel.current?.contains(event.target)) onClose();
+    };
+    const onEscape = (event) => event.key === 'Escape' && onClose();
+    document.addEventListener('mousedown', onOutside);
+    document.addEventListener('keydown', onEscape);
+    return () => {
+      document.removeEventListener('mousedown', onOutside);
+      document.removeEventListener('keydown', onEscape);
+    };
+  }, [onClose]);
+
+  return (
+    <div className="switcher-panel" ref={panel} role="menu" aria-label={t('nav.switcher')}>
+      {[...MODULES, 'settings'].map((product) => (
+        <button
+          key={product}
+          type="button"
+          role="menuitem"
+          className={`switcher-item ${active === product ? 'is-active' : ''}`}
+          onClick={() => {
+            onPick(product);
+            onClose();
+          }}
+        >
+          <ProductIcon product={product} size={38} variant="solid" />
+          <span>{t(PRODUCTS[product].labelKey)}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
 
 /**
  * Suite navigation. The category list only appears inside Notes, since that's
@@ -23,6 +58,7 @@ export default function Sidebar({
   activeFolderId,
   onSelectModule,
   onSelectFolder,
+  onGoHome,
   isOpen,
   onClose,
 }) {
@@ -30,6 +66,7 @@ export default function Sidebar({
   const { notes, folders, create, update, deleteFolder, storageMode } = useData();
   const { user, signOut, isFirebaseConfigured } = useAuth();
 
+  const [switcherOpen, setSwitcherOpen] = useState(false);
   const [addingFolder, setAddingFolder] = useState(false);
   const [renamingFolder, setRenamingFolder] = useState(null);
   const [deletingFolder, setDeletingFolder] = useState(null);
@@ -57,30 +94,54 @@ export default function Sidebar({
     <>
       <aside className={`sidebar ${isOpen ? 'is-open' : ''}`} aria-label={t('common.appName')}>
         <div className="sidebar-brand">
-          <span className="sidebar-logo" aria-hidden="true">
-            🎓
-          </span>
-          <div>
-            <strong>{t('common.appName')}</strong>
-            <small>{t('common.tagline')}</small>
+          <button type="button" className="brand-home" onClick={onGoHome} title={t('nav.home')}>
+            <AppIcon size={32} />
+            <span>
+              <strong>{t('common.appName')}</strong>
+              <small>{t(PRODUCTS[activeModule]?.labelKey ?? 'common.tagline')}</small>
+            </span>
+          </button>
+
+          <div className="switcher-wrap">
+            <button
+              type="button"
+              className={`icon-button switcher-button ${switcherOpen ? 'is-open' : ''}`}
+              aria-label={t('nav.switcher')}
+              aria-expanded={switcherOpen}
+              onClick={() => setSwitcherOpen((open) => !open)}
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+                {[2, 7.5, 13].map((y) =>
+                  [2, 7.5, 13].map((x) => (
+                    <rect key={`${x}-${y}`} x={x} y={y} width="3" height="3" rx="0.8" fill="currentColor" />
+                  )),
+                )}
+              </svg>
+            </button>
+            {switcherOpen ? (
+              <AppSwitcher
+                active={activeModule}
+                onPick={pickModule}
+                onClose={() => setSwitcherOpen(false)}
+              />
+            ) : null}
           </div>
         </div>
 
         <nav className="module-nav" aria-label={t('common.appName')}>
-          {MODULE_ITEMS.map((module) => (
+          {MODULES.map((module) => (
             <button
-              key={module.id}
+              key={module}
               type="button"
-              className={`module-item ${activeModule === module.id ? 'is-active' : ''}`}
-              onClick={() => pickModule(module.id)}
-              aria-current={activeModule === module.id ? 'page' : undefined}
+              className={`module-item ${activeModule === module ? 'is-active' : ''}`}
+              style={{ '--module-accent': PRODUCTS[module].colour }}
+              onClick={() => pickModule(module)}
+              aria-current={activeModule === module ? 'page' : undefined}
             >
-              <span className="module-icon" aria-hidden="true">
-                {module.icon}
-              </span>
+              <ProductIcon product={module} size={26} />
               <span className="module-text">
-                <strong>{t(module.labelKey)}</strong>
-                <small>{t(module.hintKey)}</small>
+                <strong>{t(PRODUCTS[module].labelKey)}</strong>
+                <small>{t(PRODUCTS[module].hintKey)}</small>
               </span>
             </button>
           ))}
@@ -169,11 +230,10 @@ export default function Sidebar({
           <button
             type="button"
             className={`module-item compact ${activeModule === 'settings' ? 'is-active' : ''}`}
+            style={{ '--module-accent': PRODUCTS.settings.colour }}
             onClick={() => pickModule('settings')}
           >
-            <span className="module-icon" aria-hidden="true">
-              ⚙️
-            </span>
+            <ProductIcon product="settings" size={26} />
             <span className="module-text">
               <strong>{t('nav.settings')}</strong>
             </span>
@@ -189,9 +249,7 @@ export default function Sidebar({
             )}
             <div className="account-text">
               <strong>{user?.name ?? t('settings.localOnly')}</strong>
-              <small>
-                {storageMode === 'cloud' ? user?.email : t('settings.localOnlyHint')}
-              </small>
+              <small>{storageMode === 'cloud' ? user?.email : t('settings.localOnlyHint')}</small>
             </div>
             {isFirebaseConfigured && user ? (
               <button
@@ -219,6 +277,7 @@ export default function Sidebar({
           title={t('notes.newCategory')}
           label={t('notes.categoryName')}
           confirmLabel={t('common.create')}
+          cancelLabel={t('common.cancel')}
           onConfirm={(name) => {
             if (name.trim()) create('folders', { name: name.trim(), emoji: '📁' }, { idPrefix: 'folder' });
           }}
@@ -231,6 +290,8 @@ export default function Sidebar({
           title={t('notes.renameCategory')}
           label={t('notes.categoryName')}
           initialValue={renamingFolder.name}
+          confirmLabel={t('common.save')}
+          cancelLabel={t('common.cancel')}
           onConfirm={(name) => {
             if (name.trim()) update('folders', renamingFolder.id, { name: name.trim() }, { immediate: true });
           }}

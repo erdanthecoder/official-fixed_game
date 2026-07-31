@@ -37,16 +37,27 @@ key (step 6) costs money per use — see **Cost** at the bottom before you start
 with a **Continue with Google** button instead of the "Running without an
 account" notice.
 
-## 3. Turn on Google sign-in
+## 3. Turn on sign-in (Google and email)
 
 1. Console → **Build → Authentication → Get started**.
-2. **Sign-in method** tab → **Google** → enable → pick a support email → Save.
+2. **Sign-in method** tab:
+   - **Google** → enable → pick a support email → Save.
+   - **Email/Password** → enable → Save. (Leave "Email link" off; the app uses
+     a password, and the forgot-password flow works without it.)
+   Enable both — the sign-in card offers Google first and email underneath, and
+   an account created one way can't sign in the other way.
 3. **Settings → Authorized domains**: `localhost` is there by default. Add your
    production domain when you deploy (step 7 adds it automatically if you use
    Firebase Hosting).
 
-**Check it worked:** click **Continue with Google** in the app. You should land
-in Notes, with your name and photo at the bottom of the sidebar.
+**Check it worked:** open the app, click **Let's go**, and try both paths. Google
+should open a popup; email should let you create an account with a name,
+address and password. Either way you land in Notes with your name at the bottom
+of the sidebar.
+
+> If Google sign-in opens and immediately closes, the domain isn't authorised
+> (step 3.3). If email sign-up says the method is switched off, you enabled
+> Google but not Email/Password.
 
 ## 4. Create Firestore and deploy the security rules
 
@@ -64,20 +75,30 @@ This is the step that keeps each account's work private. Do not skip it.
    cp .firebaserc.example .firebaserc     # then put your real project ID in it
    ```
 
-5. Deploy the rules:
+5. Deploy the rules and the index:
 
    ```bash
-   firebase deploy --only firestore:rules
+   firebase deploy --only firestore:rules,firestore:indexes
    ```
 
-`firestore.rules` says: a signed-in user can read and write everything under
-`users/{their own uid}`, and nothing else. There are no shared collections, so
-one account cannot reach another's documents.
+### What the rules actually say
+
+Data sits in two shapes, because collaboration needs one and privacy needs the
+other:
+
+| Where | What | Who can touch it |
+|---|---|---|
+| `docs/{docId}` | Notes, sheets, slide decks, vocab sets | Only the accounts listed in that document's `memberUids`. Owners can do anything; editors can change content but not who has access; viewers can only read. Any member can remove themselves. |
+| `users/{uid}/…` | Folders, AI chats, preferences | Only that account. Never shared. |
+| `invites/{id}` | Pending invitations | **Nobody**, from the browser. Only the sharing Cloud Functions, which run with admin rights. |
+
+The index is for the invitation lookup when you withdraw an invite — a query
+with two equality filters, which Firestore cannot serve without one.
 
 **Check it worked:** Console → Firestore → **Rules** tab shows the deployed
-rules. Then open the **Rules Playground** and try a read of
-`users/some-other-uid/notes/x` while authenticated as yourself — it must be
-**denied**.
+rules. Then open the **Rules Playground** and confirm two things are **denied**:
+a read of `users/some-other-uid/folders/x` as yourself, and a read of any
+`docs/{id}` whose `memberUids` does not contain your uid.
 
 **Check sync works:** create a note in the app, then reload. Open the app in
 another browser (or another device) and sign in with the same account — the note
@@ -110,17 +131,35 @@ Anthropic API key. The browser calls the function; the function calls Claude.
 
    Paste the key when prompted. It will not be echoed.
 
-3. Deploy:
+3. Deploy. This ships the AI proxy **and** the four sharing functions, which
+   UniSave needs:
 
    ```bash
    cd functions && npm install && cd ..
    firebase deploy --only functions
    ```
 
+   | Function | What it does |
+   |---|---|
+   | `askUniAi` | Talks to the Claude API with the secret key |
+   | `shareDocument` | Turns an email address into an account and grants access |
+   | `revokeAccess` | Removes a member, or withdraws a pending invitation |
+   | `claimInvites` | Runs on sign-in; picks up invitations sent before the account existed |
+   | `listInvites` | Shows pending invitations in the share dialog |
+
 **Check it worked:** open **AI** in the app and ask something. If you see "AI is
 not connected yet", check `firebase functions:log` — the usual causes are a
 missing secret (`failed-precondition`) or a function that didn't deploy
 (`not-found`).
+
+Then open **UniSave**, click **Share** on any document, and invite a second
+email address. With a real account behind it, that person sees the document
+immediately; without one, the invitation waits and is claimed the first time
+they sign in.
+
+> Sharing needs the functions deployed, but **not** the Anthropic key. If you
+> only want collaboration and not AI, skip the key: `shareDocument` and friends
+> don't use it, and `askUniAi` simply reports that it isn't configured.
 
 ### What the function does for you
 

@@ -14,13 +14,10 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { defineSecret } from 'firebase-functions/params';
-import { initializeApp } from 'firebase-admin/app';
-import { FieldValue, getFirestore } from 'firebase-admin/firestore';
+import { FieldValue } from 'firebase-admin/firestore';
+import { db } from './admin.js';
 
 const ANTHROPIC_API_KEY = defineSecret('ANTHROPIC_API_KEY');
-
-initializeApp();
-const db = getFirestore();
 
 /** Model + generation settings. See the note on cost in FIREBASE_SETUP.md. */
 const MODEL = 'claude-opus-5';
@@ -217,3 +214,7 @@ export const askUniAi = onCall(
     };
   },
 );
+
+// Collaboration functions live in their own file; they share this app instance,
+// which is why the re-export sits after initializeApp() above.
+export { claimInvites, listInvites, revokeAccess, shareDocument } from './sharing.js';

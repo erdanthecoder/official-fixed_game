@@ -1,12 +1,16 @@
-# 🎓 Uni
+# Uni
 
-Five tools for getting into university, in one place: **Notes**, **Sheets**,
-**Slides**, an **AI** study helper, and **Languages** vocabulary practice.
-Sign in with Google and everything syncs privately to your own account.
+Six tools for getting into university, in one place: **Notes**, **Sheets**,
+**Slides**, **UniSave**, an **AI** study helper, and **Languages** vocabulary
+practice. Sign in with Google or an email address; everything syncs privately to
+your account, and you choose who else can open it.
 
-The interface speaks **English, Russian and Kyrgyz**.
+The interface speaks **English, Русский and Кыргызча**.
 
-## ▶ Run it
+Visiting the bare URL gets a landing page that shows each tool working before
+asking anyone to sign in — click **Let's go** to start.
+
+## Run it
 
 ```bash
 cd uni-notes
@@ -23,7 +27,7 @@ npm run build        # production build → dist/
 npm run preview      # serve the built files
 ```
 
-## ✨ The five modules
+## The six modules
 
 ### 📝 Notes
 A Google-Docs-style rich text editor. Bold, italic, underline, H1–H3, bulleted
@@ -58,6 +62,18 @@ theme that renders the lake behind your slide. Speaker notes, reorder, duplicate
 and a fullscreen **Present** mode driven by arrow keys / space, `Esc` to exit.
 Templates: Why This University, About Me, Research Presentation.
 
+### 🗂️ UniSave
+Everything from every tool in one list, and the place sharing happens. Filter by
+type, by what you own, or by what has been shared with you.
+
+Invite anyone by email as an **editor** (can change things) or a **viewer** (can
+only read). If they don't have an account yet the invitation waits and is picked
+up the first time they sign in. Owners can change roles or remove people; anyone
+else can leave a shared document without deleting it for the rest.
+
+A document lives in one place and every member edits the same copy — there are
+no per-person duplicates to reconcile.
+
 ### ✨ AI
 A study helper for essays, school research and revision. Quick starts for
 brainstorming essay topics, improving a paragraph, explaining an application
@@ -75,7 +91,7 @@ schedule (**Again / Hard / Good / Easy** → progressively longer intervals), a
 multiple-choice quiz mode, and per-deck progress (new / learning / known).
 Starter decks: Academic English, Application Vocabulary.
 
-## 🌍 Languages of the interface
+## Languages of the interface
 
 English, Русский, Кыргызча — switchable in **Settings**, stored with your
 account so it follows you between devices.
@@ -84,7 +100,7 @@ account so it follows you between devices.
 > grammatical and consistent, but a Kyrgyz speaker should read through the `ky`
 > block in `src/i18n/translations.js` before this goes in front of real users.
 
-## 🖼️ Photos
+## Photos
 
 The app is built for real Issyk-Kul photography. Drop your own JPEGs into
 `public/images/issyk-kul/` using the names in
@@ -92,53 +108,77 @@ The app is built for real Issyk-Kul photography. Drop your own JPEGs into
 — no code change. Until then, hand-drawn SVG artwork of the lake and the Tian
 Shan stands in, so nothing ever looks unfinished.
 
-## 🔐 Privacy and sync
+## Privacy, sync, and not losing work
 
-- Signed in: everything lives under `users/{your uid}` in Firestore. The
-  security rules in `firestore.rules` allow each account to touch only its own
-  documents — there are no shared collections.
-- Not configured: everything stays in that browser. Nothing leaves the device.
-- Firestore's offline cache is enabled, so the app keeps working on patchy wifi
-  and syncs when the connection returns.
-- Work created before you sign in is copied into your account on first sign-in —
-  but only if the account is empty, so signing in never overwrites what's there.
+**Who can see what.** Documents live in `docs/{id}` carrying their own member
+list; folders, AI chats and settings live under `users/{uid}` and are never
+shared. The rules in `firestore.rules` let an account touch a document only if
+it is named in that document's `memberUids`, and only owners can change that
+list — membership changes go through Cloud Functions, because turning an email
+address into an account needs admin rights the browser must never have.
 
-## 🧱 How the code is laid out
+**Reloading is safe.** Writes are debounced, which normally leaves a window
+where an edit exists only in memory. Uni closes that window: every edit is
+appended to a local-storage journal *synchronously* before anything else, and
+flushed on `pagehide`. Anything still in the journal at startup is replayed and
+you get a note saying so. Closing the tab mid-sentence loses nothing.
+
+**Offline.** Firestore's persistent cache is on, so the app works on patchy wifi
+and syncs when the connection returns.
+
+**Before you sign in.** With no Firebase config the app runs entirely in the
+browser. Work made that way is lifted into your account on first sign-in — but
+only into an empty account, so signing in never overwrites what is already
+there.
+
+## How the code is laid out
 
 ```
 uni-notes/
   firebase.json            hosting + functions + firestore + emulators
-  firestore.rules          per-user isolation
+  firestore.rules          document membership + per-user isolation
+  firestore.indexes.json
   .env.example             Firebase web config template
   FIREBASE_SETUP.md        step-by-step backend setup
   functions/
+    admin.js               one Admin app, imported by both function files
     index.js               askUniAi — the Claude API proxy
-  public/images/           drop Issyk-Kul photos here
+    sharing.js             shareDocument / revokeAccess / claimInvites
+  public/
+    icon.svg               the app mark; PNGs beside it are generated from it
+    manifest.webmanifest
+    images/                drop Issyk-Kul photos here
   src/
     main.jsx               entry: Auth → Data → i18n → App
-    App.jsx                shell + module routing
+    App.jsx                landing / sign-in / app-shell routing
     context/
-      AuthContext.jsx      Google sign-in state
-      DataContext.jsx      all data, debounced writes, optimistic overlay
+      AuthContext.jsx      Google + email sign-in state
+      DataContext.jsx      all data, debounced writes, overlay, journal replay
     lib/
       firebase.js          SDK init from env (absent env = local mode)
+      model.js             what a document is; roles and permissions
       repository.js        Firestore or localStorage behind one interface
+      journal.js           the write-ahead log that survives a reload
+      sharing.js           calls the collaboration functions
       formula.js           the spreadsheet engine
-      aiClient.js          calls the Cloud Function
+      aiClient.js          calls the AI function
       seed.js              first-run content
       text.js  ids.js
       templates/           notes / sheets / slides / vocab starters
-    hooks/useHashRoute.js  #/notes, #/sheets/:id, #/slides/:id, …
-    i18n/                  provider + en / ru / ky strings
+    hooks/useHashRoute.js  #/, #/signin, #/notes, #/unisave, …
+    i18n/                  provider + en / ru / ky strings + loading tips
     components/
-      Sidebar.jsx  SignInScreen.jsx  Scenery.jsx  SettingsPage.jsx
-      LanguagePicker.jsx  SaveIndicator.jsx
+      brand/               AppIcon, ProductIcon (per-module colour + glyph)
+      landing/             LandingPage, ModulePreview
+      AuthScreen.jsx  Sidebar.jsx  Scenery.jsx  SettingsPage.jsx
+      TipLine.jsx  LanguagePicker.jsx  SaveIndicator.jsx
       shared/              ModuleHeader, TemplateStrip, ItemCard, EmptyState
-      notes/  sheets/  slides/  languages/  ai/
+      notes/  sheets/  slides/  unisave/  languages/  ai/
       ui/                  Modal, PromptDialog, ConfirmDialog, MoveDialog
     styles/
       global.css           tokens, buttons, cards, dialogs, Notes editor
-      suite.css            scenery, sign-in, nav, Sheets/Slides/Languages/AI
+      suite.css            scenery, nav, Sheets/Slides/Languages/AI
+      brand.css            type, product identity, landing, auth, UniSave
 ```
 
 ### Extending it
@@ -150,9 +190,14 @@ uni-notes/
 - **A new UI language** — add a block to `src/i18n/translations.js` and an entry
   to `LANGUAGES`. Missing keys fall back to English per key, so a partial
   translation is safe to ship.
-- **A new module** — add a route to `useHashRoute.js`, an item to `MODULE_ITEMS`
-  in `Sidebar.jsx`, and a branch in `App.jsx`. Data comes from `useData()`; you
-  don't touch storage.
+- **A new module** — add it to `MODULES` in `useHashRoute.js`, give it a colour
+  and glyph in `brand/ProductIcon.jsx`, add it to `MODULES` in `Sidebar.jsx`, and
+  branch on it in `App.jsx`. Data comes from `useData()`; you don't touch
+  storage. If its documents should be shareable, add the kind to `SHARED_KINDS`
+  in `lib/model.js` and it appears in UniSave automatically.
+- **A new loading tip** — add a line to each language array in `i18n/tips.js`.
+- **The app icon** — edit `public/icon.svg`; the PNGs are generated from it (see
+  the note in that file's header).
 - **A different AI model** — change `MODEL` / `EFFORT` in `functions/index.js`
   and redeploy.
 
@@ -164,14 +209,19 @@ way to get formatting *plus* a working native undo stack. It's all behind one
 imperative handle in `notes/editor/RichTextEditor.jsx`, so swapping in a real
 editor engine is a single-file change.
 
-**Writes are debounced and optimistic.** `DataContext` merges patches per item
-and holds an overlay of pending changes so the UI never lags behind the caret,
-dropping each overlay entry once the backend confirms a version at least as new.
-Both storage backends shallow-merge patches, matching Firestore's
-`{ merge: true }` — a patch like `{ theme: 'night' }` must never wipe a
-document's other fields.
+**Writes are debounced, optimistic, and journalled.** `DataContext` merges
+patches per item and holds an overlay of pending changes so the UI never lags
+behind the caret, dropping each overlay entry once the backend confirms a
+version at least as new. The same patch goes to `journal.js` synchronously
+first, so a crash inside the debounce window is recoverable. Both storage
+backends shallow-merge patches, matching Firestore's `{ merge: true }` — a patch
+like `{ theme: 'night' }` must never wipe a document's other fields.
 
-## 📌 Good to know
+**Sharing is server-side on purpose.** `lib/sharing.js` only calls functions.
+Resolving an email to a uid needs admin privileges, and the rules deliberately
+stop a client writing anyone's membership — including its own.
+
+## Good to know
 
 - Uni AI can be wrong. Check anything that costs money or has a deadline against
   the university's own website — the app says this next to the chat box too.

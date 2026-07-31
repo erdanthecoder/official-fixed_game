@@ -6,6 +6,7 @@ import { DataProvider, useData } from './context/DataContext.jsx';
 import { I18nProvider } from './i18n/index.jsx';
 import './styles/global.css';
 import './styles/suite.css';
+import './styles/brand.css';
 
 /**
  * The chosen language lives in the user's prefs, which live in DataProvider —

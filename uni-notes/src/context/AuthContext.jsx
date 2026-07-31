@@ -1,20 +1,28 @@
 /**
- * Google sign-in state.
+ * Sign-in state: Google, or email and password.
  *
- * Three states the UI cares about:
- *   status 'loading'  — still asking Firebase who's signed in
- *   status 'signedIn' — `user` is set, data syncs to that account
- *   status 'signedOut'— show the sign-in screen
- *
- * When Firebase isn't configured we jump straight to 'local': the app works,
- * saving to this browser only. That keeps the suite usable (and testable)
- * before the project exists.
+ * Four states the UI cares about:
+ *   'loading'  — still asking Firebase who's signed in
+ *   'signedIn' — `user` is set, data syncs to that account
+ *   'signedOut'— show the landing page and the sign-in card
+ *   'local'    — Firebase isn't configured; the app works, saving to this
+ *                browser only. That keeps the suite usable (and testable)
+ *                before a project exists.
  */
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  updateProfile,
+} from 'firebase/auth';
 import { auth, googleProvider, isFirebaseConfigured } from '../lib/firebase.js';
-import { migrateLocalDataToCloud } from '../lib/repository.js';
+import { migrateIntoAccount } from '../lib/repository.js';
+import { claimInvites } from '../lib/sharing.js';
 
 const AuthContext = createContext(null);
 
@@ -25,12 +33,39 @@ export const AUTH_STATUS = {
   local: 'local',
 };
 
+/**
+ * Firebase error codes are not for humans. Map the ones a real person can
+ * actually hit; everything else falls back to a generic message.
+ */
+const MESSAGES = {
+  'auth/invalid-email': 'auth.errorInvalidEmail',
+  'auth/missing-password': 'auth.errorNoPassword',
+  'auth/weak-password': 'auth.errorWeakPassword',
+  'auth/email-already-in-use': 'auth.errorEmailInUse',
+  'auth/invalid-credential': 'auth.errorWrongDetails',
+  'auth/wrong-password': 'auth.errorWrongDetails',
+  'auth/user-not-found': 'auth.errorWrongDetails',
+  'auth/too-many-requests': 'auth.errorTooMany',
+  'auth/network-request-failed': 'auth.errorNetwork',
+  'auth/popup-blocked': 'auth.errorPopupBlocked',
+  'auth/operation-not-allowed': 'auth.errorMethodOff',
+  'auth/unauthorized-domain': 'auth.errorDomain',
+};
+
+/** Popup dismissals are not errors worth showing anyone. */
+const SILENT = new Set([
+  'auth/popup-closed-by-user',
+  'auth/cancelled-popup-request',
+  'auth/user-cancelled',
+]);
+
 export function AuthProvider({ children }) {
   const [status, setStatus] = useState(
     isFirebaseConfigured ? AUTH_STATUS.loading : AUTH_STATUS.local,
   );
   const [user, setUser] = useState(null);
-  const [error, setError] = useState(null);
+  const [errorKey, setErrorKey] = useState(null);
+  const [noticeKey, setNoticeKey] = useState(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -45,44 +80,96 @@ export function AuthProvider({ children }) {
 
       setUser({
         uid: nextUser.uid,
-        name: nextUser.displayName || nextUser.email || 'You',
+        name: nextUser.displayName || nextUser.email?.split('@')[0] || 'You',
         email: nextUser.email ?? '',
         photoURL: nextUser.photoURL ?? '',
       });
       setStatus(AUTH_STATUS.signedIn);
 
-      // Lift work created before signing in — no-op if the account already has data.
+      // Both of these are safe to re-run on every sign-in and no-op when
+      // there's nothing to do, so neither needs its own guard.
       try {
-        await migrateLocalDataToCloud(nextUser.uid);
-      } catch (migrationError) {
-        console.warn('[Uni] Could not copy local work into the account.', migrationError);
+        await migrateIntoAccount({
+          uid: nextUser.uid,
+          email: nextUser.email ?? '',
+          name: nextUser.displayName ?? '',
+        });
+      } catch (error) {
+        console.warn('[Uni] Could not move earlier work into the account.', error);
+      }
+
+      try {
+        await claimInvites();
+      } catch (error) {
+        // Sharing needs the Cloud Function deployed; not having it must not
+        // block sign-in.
+        console.info('[Uni] Skipped checking for shared documents.', error?.message ?? error);
       }
     });
   }, []);
 
-  const signIn = useCallback(async () => {
-    if (!isFirebaseConfigured) return;
+  const run = useCallback(async (action) => {
+    if (!isFirebaseConfigured) return false;
     setBusy(true);
-    setError(null);
+    setErrorKey(null);
+    setNoticeKey(null);
     try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (signInError) {
-      // Closing the popup isn't an error worth shouting about.
-      if (
-        signInError?.code !== 'auth/popup-closed-by-user' &&
-        signInError?.code !== 'auth/cancelled-popup-request'
-      ) {
-        console.warn('[Uni] Sign-in failed.', signInError);
-        setError(signInError?.code ?? 'unknown');
+      await action();
+      return true;
+    } catch (error) {
+      const code = error?.code ?? '';
+      if (!SILENT.has(code)) {
+        console.warn('[Uni] Sign-in problem.', code || error);
+        setErrorKey(MESSAGES[code] ?? 'auth.errorGeneric');
       }
+      return false;
     } finally {
       setBusy(false);
     }
   }, []);
 
+  const signInWithGoogle = useCallback(
+    () => run(() => signInWithPopup(auth, googleProvider)),
+    [run],
+  );
+
+  const signInWithEmail = useCallback(
+    (email, password) => run(() => signInWithEmailAndPassword(auth, email.trim(), password)),
+    [run],
+  );
+
+  const signUpWithEmail = useCallback(
+    (email, password, name) =>
+      run(async () => {
+        const credential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+        const displayName = name.trim();
+        if (displayName) {
+          await updateProfile(credential.user, { displayName });
+          // onAuthStateChanged has already fired with the pre-update profile,
+          // so reflect the name locally rather than waiting for a reload.
+          setUser((current) => (current ? { ...current, name: displayName } : current));
+        }
+      }),
+    [run],
+  );
+
+  const resetPassword = useCallback(
+    async (email) => {
+      const ok = await run(() => sendPasswordResetEmail(auth, email.trim()));
+      if (ok) setNoticeKey('auth.resetSent');
+      return ok;
+    },
+    [run],
+  );
+
   const leave = useCallback(async () => {
     if (!isFirebaseConfigured) return;
     await signOut(auth);
+  }, []);
+
+  const clearMessages = useCallback(() => {
+    setErrorKey(null);
+    setNoticeKey(null);
   }, []);
 
   const value = useMemo(
@@ -90,14 +177,31 @@ export function AuthProvider({ children }) {
       status,
       user,
       uid: user?.uid ?? null,
-      error,
+      errorKey,
+      noticeKey,
       busy,
       isCloud: status === AUTH_STATUS.signedIn,
       isFirebaseConfigured,
-      signIn,
+      signInWithGoogle,
+      signInWithEmail,
+      signUpWithEmail,
+      resetPassword,
+      clearMessages,
       signOut: leave,
     }),
-    [status, user, error, busy, signIn, leave],
+    [
+      status,
+      user,
+      errorKey,
+      noticeKey,
+      busy,
+      signInWithGoogle,
+      signInWithEmail,
+      signUpWithEmail,
+      resetPassword,
+      clearMessages,
+      leave,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

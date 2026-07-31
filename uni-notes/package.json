@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Uni \u2014 notes, sheets, slides, an AI study helper and vocabulary practice for planning university applications.",
+  "description": "Uni — notes, sheets, slides, UniSave, an AI study helper and vocabulary practice for planning university applications.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

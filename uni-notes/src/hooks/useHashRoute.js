@@ -1,12 +1,15 @@
 /**
  * Hash router for the whole suite.
  *
+ *   #/                       the landing page (the front door)
+ *   #/signin                 sign in / sign up
  *   #/notes                  dashboard
  *   #/notes/folder/:id       dashboard filtered to a category
  *   #/notes/:docId           note editor
  *   #/sheets  #/sheets/:id
  *   #/slides  #/slides/:id
  *   #/languages  #/languages/:deckId
+ *   #/unisave                everything, with sharing
  *   #/ai  #/ai/:chatId
  *   #/settings
  *
@@ -16,16 +19,30 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-export const MODULES = ['notes', 'sheets', 'slides', 'ai', 'languages', 'settings'];
+export const MODULES = [
+  'notes',
+  'sheets',
+  'slides',
+  'unisave',
+  'ai',
+  'languages',
+  'settings',
+];
 
-const DEFAULT_ROUTE = { module: 'notes', id: null, folderId: null };
+/** Screens that sit outside the app shell. */
+export const LANDING = 'landing';
+export const SIGN_IN = 'signin';
+
+const LANDING_ROUTE = { module: LANDING, id: null, folderId: null };
 
 function parse(hash) {
   const parts = hash.replace(/^#\/?/, '').split('/').filter(Boolean);
-  if (parts.length === 0) return DEFAULT_ROUTE;
+  // A bare URL is the front door, not the app.
+  if (parts.length === 0) return LANDING_ROUTE;
 
   const [module, second, third] = parts;
-  if (!MODULES.includes(module)) return DEFAULT_ROUTE;
+  if (module === SIGN_IN) return { module: SIGN_IN, id: null, folderId: null };
+  if (!MODULES.includes(module)) return LANDING_ROUTE;
 
   if (module === 'notes' && second === 'folder') {
     return { module, id: null, folderId: third ?? null };
@@ -51,6 +68,8 @@ export function useHashRoute() {
   }, []);
 
   const goToModule = useCallback((module) => navigate(`#/${module}`), [navigate]);
+  const goToLanding = useCallback(() => navigate('#/'), [navigate]);
+  const goToSignIn = useCallback(() => navigate(`#/${SIGN_IN}`), [navigate]);
   const goToItem = useCallback(
     (module, id) => navigate(`#/${module}/${id}`),
     [navigate],
@@ -60,5 +79,5 @@ export function useHashRoute() {
     [navigate],
   );
 
-  return { route, navigate, goToModule, goToItem, goToFolder };
+  return { route, navigate, goToModule, goToItem, goToFolder, goToLanding, goToSignIn };
 }

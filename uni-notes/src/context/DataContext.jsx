@@ -5,9 +5,13 @@
  * events). Writes are debounced and merged per item, so holding a key down in
  * an editor costs one write, not one per keystroke.
  *
- * Between a keystroke and the write landing, an "overlay" holds the optimistic
- * value so the UI never lags behind the caret. An overlay entry is dropped once
- * a subscription delivers a version at least as new as the pending patch.
+ * Three things keep the UI honest between a keystroke and the write landing:
+ *
+ *   overlay  the optimistic value, so the view never lags the caret. An entry
+ *            is dropped once a subscription delivers a version at least as new.
+ *   journal  the same edit written synchronously to local storage, so a reload
+ *            or crash inside the debounce window cannot lose it (see journal.js).
+ *   flush    a best-effort write on pagehide, so most edits never need replay.
  */
 
 import {
@@ -26,7 +30,9 @@ import {
 } from '../lib/repository.js';
 import { SEED_VERSION, seedWorkspace } from '../lib/seed.js';
 import { VOCAB_TEMPLATES } from '../lib/templates/vocab.js';
+import { canEdit, isShared, ownershipFor } from '../lib/model.js';
 import { createId } from '../lib/ids.js';
+import { pendingFor, record, settle } from '../lib/journal.js';
 import { useAuth } from './AuthContext.jsx';
 
 const DataContext = createContext(null);
@@ -44,7 +50,7 @@ export const SAVE_STATUS = {
 const emptyCollections = () => Object.fromEntries(COLLECTIONS.map((name) => [name, []]));
 
 export function DataProvider({ children }) {
-  const { uid, isCloud } = useAuth();
+  const { uid, user, isCloud } = useAuth();
 
   const repository = useMemo(
     () => (isCloud && uid ? createCloudRepository(uid) : createLocalRepository()),
@@ -55,12 +61,17 @@ export function DataProvider({ children }) {
   const [prefs, setPrefsState] = useState({});
   const [ready, setReady] = useState(false);
   const [saveStatus, setSaveStatus] = useState(SAVE_STATUS.saved);
+  const [recovered, setRecovered] = useState(0);
 
   // key `${collection}:${id}` → { data, deleted, at, isNew }
   const [overlay, setOverlay] = useState({});
   const pendingWrites = useRef(new Map());
   const flushTimer = useRef(null);
   const savedTimer = useRef(null);
+
+  // Identity for ownership stamping, read at write time rather than captured.
+  const identity = useRef(user);
+  identity.current = user;
 
   /* ---------------------------- subscriptions ---------------------------- */
 
@@ -118,19 +129,28 @@ export function DataProvider({ children }) {
           deleted ? repository.remove(name, id) : repository.set(name, id, data),
         ),
       );
+      // Written for real — the journal no longer needs to guard these.
+      settle(batch.flatMap((item) => item.tickets ?? []));
       clearTimeout(savedTimer.current);
       savedTimer.current = setTimeout(() => setSaveStatus(SAVE_STATUS.saved), SAVED_FLASH);
     } catch (error) {
       console.warn('[Uni] Save failed.', error);
+      // Leave the journal entries in place: they are now the only copy.
       setSaveStatus(SAVE_STATUS.error);
     }
   }, [repository]);
 
   const queueWrite = useCallback(
-    (name, id, data, { immediate = false, deleted = false, isNew = false } = {}) => {
+    (name, id, data, { immediate = false, deleted = false, isNew = false, replay = false } = {}) => {
       const at = Date.now();
       const key = `${name}:${id}`;
       const payload = deleted ? { id } : { ...data, id, updatedAt: at };
+
+      // Journal first. If everything after this line fails, the edit survives.
+      // Replayed edits are already journalled — re-recording them would loop.
+      const ticket = replay
+        ? null
+        : record({ scope: repository.scope, collection: name, id, data: payload, deleted });
 
       // Merge into any pending overlay entry rather than replacing it. Two quick
       // edits to different fields of the same item (add a slide, then change the
@@ -155,6 +175,7 @@ export function DataProvider({ children }) {
         id,
         deleted,
         data: deleted ? null : { ...(existing?.data ?? {}), ...payload },
+        tickets: [...(existing?.tickets ?? []), ...(ticket ? [ticket] : [])],
       });
 
       setSaveStatus(SAVE_STATUS.pending);
@@ -162,23 +183,55 @@ export function DataProvider({ children }) {
       if (immediate) flush();
       else flushTimer.current = setTimeout(flush, WRITE_DEBOUNCE);
     },
-    [flush],
+    [flush, repository.scope],
   );
 
-  // Never lose the last edit to a closing tab.
+  // Best-effort write when the page goes away. The journal covers what this
+  // misses; this just means most sessions never need a replay at all.
   useEffect(() => {
     const onHide = () => {
       if (pendingWrites.current.size > 0) flush();
     };
+    window.addEventListener('pagehide', onHide);
     window.addEventListener('beforeunload', onHide);
     document.addEventListener('visibilitychange', onHide);
     return () => {
+      window.removeEventListener('pagehide', onHide);
       window.removeEventListener('beforeunload', onHide);
       document.removeEventListener('visibilitychange', onHide);
       clearTimeout(flushTimer.current);
       clearTimeout(savedTimer.current);
     };
   }, [flush]);
+
+  /* --------------------------- journal recovery -------------------------- */
+
+  const replayed = useRef(null);
+  useEffect(() => {
+    if (!ready) return;
+    // Once per storage location per session.
+    if (replayed.current === repository.scope) return;
+    replayed.current = repository.scope;
+
+    const outstanding = pendingFor(repository.scope);
+    if (outstanding.length === 0) return;
+
+    console.info(`[Uni] Replaying ${outstanding.length} unsaved edit(s) from the last session.`);
+    outstanding.forEach((entry) => {
+      queueWrite(entry.collection, entry.id, entry.data, {
+        deleted: entry.deleted,
+        replay: true,
+      });
+    });
+    // Hand the original tickets to the flush that will write them.
+    outstanding.forEach((entry) => {
+      const key = `${entry.collection}:${entry.id}`;
+      const queued = pendingWrites.current.get(key);
+      if (queued) queued.tickets = [...(queued.tickets ?? []), ...(entry.tickets ?? [])];
+    });
+    setRecovered(outstanding.length);
+    flush();
+  }, [ready, repository.scope, queueWrite, flush]);
 
   /* ------------------------------ derived data --------------------------- */
 
@@ -208,7 +261,14 @@ export function DataProvider({ children }) {
   const create = useCallback(
     (name, data, { idPrefix = 'item' } = {}) => {
       const now = Date.now();
-      const item = { id: createId(idPrefix), createdAt: now, updatedAt: now, ...data };
+      const item = {
+        id: createId(idPrefix),
+        createdAt: now,
+        updatedAt: now,
+        // Shareable documents carry their own membership; personal ones don't.
+        ...(isShared(name) ? ownershipFor(identity.current) : {}),
+        ...data,
+      };
       queueWrite(name, item.id, item, { immediate: true, isNew: true });
       return item;
     },
@@ -236,6 +296,8 @@ export function DataProvider({ children }) {
         [titleKey]: `${source[titleKey] ?? 'Untitled'} (copy)`,
         createdAt: now,
         updatedAt: now,
+        // A copy belongs to whoever made it, not to the original's members.
+        ...(isShared(name) ? ownershipFor(identity.current) : {}),
       };
       queueWrite(name, copy.id, copy, { immediate: true, isNew: true });
       return copy;
@@ -269,6 +331,33 @@ export function DataProvider({ children }) {
     [merged.notes, queueWrite, remove],
   );
 
+  /** Leave a document someone shared with you, without deleting it for them. */
+  const leaveDocument = useCallback(
+    (name, id) => {
+      const document = merged[name]?.find((item) => item.id === id);
+      if (!document || !uid || document.ownerUid === uid) return;
+      const memberUids = (document.memberUids ?? []).filter((member) => member !== uid);
+      const roles = { ...(document.roles ?? {}) };
+      const members = { ...(document.members ?? {}) };
+      delete roles[uid];
+      delete members[uid];
+      queueWrite(name, id, { memberUids, roles, members }, { immediate: true });
+    },
+    [merged, queueWrite, uid],
+  );
+
+  const exportAll = useCallback(
+    () => ({
+      exportedAt: new Date().toISOString(),
+      mode: repository.mode,
+      prefs,
+      collections: Object.fromEntries(COLLECTIONS.map((name) => [name, merged[name] ?? []])),
+    }),
+    [merged, prefs, repository.mode],
+  );
+
+  const mayEdit = useCallback((document) => canEdit(document, uid), [uid]);
+
   // First run for this account (or this browser in local mode): lay down the
   // starter folders, notes and vocab deck exactly once.
   const seeded = useRef(false);
@@ -282,16 +371,6 @@ export function DataProvider({ children }) {
     seedWorkspace({ create, setPrefs }, { vocabTemplates: VOCAB_TEMPLATES });
   }, [ready, prefs.seedVersion, create, setPrefs]);
 
-  const exportAll = useCallback(
-    () => ({
-      exportedAt: new Date().toISOString(),
-      mode: repository.mode,
-      prefs,
-      collections: Object.fromEntries(COLLECTIONS.map((name) => [name, merged[name] ?? []])),
-    }),
-    [merged, prefs, repository.mode],
-  );
-
   const value = useMemo(
     () => ({
       notes: merged.notes ?? [],
@@ -303,17 +382,37 @@ export function DataProvider({ children }) {
       prefs,
       ready,
       saveStatus,
+      recovered,
       storageMode: repository.mode,
+      mayEdit,
       create,
       update,
       remove,
       duplicate,
       deleteFolder,
+      leaveDocument,
       setPrefs,
       flush,
       exportAll,
     }),
-    [merged, prefs, ready, saveStatus, repository.mode, create, update, remove, duplicate, deleteFolder, setPrefs, flush, exportAll],
+    [
+      merged,
+      prefs,
+      ready,
+      saveStatus,
+      recovered,
+      repository.mode,
+      mayEdit,
+      create,
+      update,
+      remove,
+      duplicate,
+      deleteFolder,
+      leaveDocument,
+      setPrefs,
+      flush,
+      exportAll,
+    ],
   );
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
