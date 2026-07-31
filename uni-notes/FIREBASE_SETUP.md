@@ -88,12 +88,16 @@ other:
 
 | Where | What | Who can touch it |
 |---|---|---|
-| `docs/{docId}` | Notes, sheets, slide decks, vocab sets | Only the accounts listed in that document's `memberUids`. Owners can do anything; editors can change content but not who has access; viewers can only read. Any member can remove themselves. |
+| `docs/{docId}` | Notes, sheets, slide decks, canvas boards, task plans, vocab sets | Only the accounts listed in that document's `memberUids`. Owners can do anything; editors can change content but not who has access; viewers can only read. Any member can remove themselves. |
 | `users/{uid}/…` | Folders, AI chats, preferences | Only that account. Never shared. |
 | `invites/{id}` | Pending invitations | **Nobody**, from the browser. Only the sharing Cloud Functions, which run with admin rights. |
 
 The index is for the invitation lookup when you withdraw an invite — a query
 with two equality filters, which Firestore cannot serve without one.
+
+The rules do not care what *kind* of document each one is, so adding a module
+(Canvas and Tasks were added after this file was written) needs no rules change
+and no redeploy.
 
 **Check it worked:** Console → Firestore → **Rules** tab shows the deployed
 rules. Then open the **Rules Playground** and confirm two things are **denied**:
