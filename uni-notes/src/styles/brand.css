@@ -1934,3 +1934,11 @@
     justify-content: center;
   }
 }
+
+/* A hint below a hint: the same voice, quieter, for a caveat that matters only
+   if the first hint did not already answer the question. */
+.share-hint.is-quiet {
+  margin-top: 4px;
+  opacity: 0.72;
+  font-size: 0.74rem;
+}

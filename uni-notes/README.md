@@ -97,9 +97,10 @@ into an account id.
 
 **By link** — mint a link, send it however you like, and whoever opens it joins
 at the role you chose. Needs no server at all: the code is the credential and
-the security rules check it, so this works on Firebase's free plan. One live
-link per document; replacing or revoking it kills the old one at once. The
-trade-off is inherent to link sharing — whoever holds it can use it.
+the security rules check it, so **this works on Firebase's free plan**, which is
+why it is listed first in the share dialog. One live link per document;
+replacing or revoking it kills the old one at once. The trade-off is inherent to
+link sharing — whoever holds it can use it.
 
 Owners can change roles or remove people; anyone else can leave a shared
 document without deleting it for the rest.
@@ -112,6 +113,9 @@ A study helper for essays, school research and revision. Quick starts for
 brainstorming essay topics, improving a paragraph, explaining an application
 term, comparing two universities, and vocabulary quizzing. Conversations are
 saved per account.
+
+Needs Cloud Functions, so it is the one part of the app that requires a paid
+Firebase plan — see FIREBASE_SETUP.md, Part Two. Everything else works free.
 
 It runs through a Firebase Cloud Function so **the API key never reaches the
 browser**. The function verifies the caller's ID token, rate-limits per user

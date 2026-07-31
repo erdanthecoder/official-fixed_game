@@ -197,34 +197,6 @@ export default function ShareDialog({ document: doc, onClose }) {
         <p className="share-unavailable">{t('share.localOnly')}</p>
       ) : (
         <>
-          {isOwner ? (
-            <form className="share-invite" onSubmit={invite}>
-              <label className="field">
-                <span>{t('share.inviteLabel')}</span>
-                <div className="share-invite-row">
-                  <input
-                    type="email"
-                    value={email}
-                    placeholder="classmate@example.com"
-                    inputMode="email"
-                    autoComplete="off"
-                    onChange={(event) => setEmail(event.target.value)}
-                  />
-                  <select value={role} onChange={(event) => setRole(event.target.value)}>
-                    <option value={ROLE.editor}>{t('share.roleEditor')}</option>
-                    <option value={ROLE.viewer}>{t('share.roleViewer')}</option>
-                  </select>
-                  <button type="submit" className="button primary" disabled={busy}>
-                    {busy ? t('share.sending') : t('share.send')}
-                  </button>
-                </div>
-              </label>
-              <p className="share-hint">{t('share.inviteHint')}</p>
-            </form>
-          ) : (
-            <p className="share-hint">{t('share.notOwnerHint')}</p>
-          )}
-
           {isOwner && areLinksAvailable ? (
             <section className="share-link">
               <h3 className="share-section">{t('share.linkTitle')}</h3>
@@ -286,6 +258,35 @@ export default function ShareDialog({ document: doc, onClose }) {
               )}
             </section>
           ) : null}
+
+          {isOwner ? (
+            <form className="share-invite" onSubmit={invite}>
+              <label className="field">
+                <span>{t('share.inviteLabel')}</span>
+                <div className="share-invite-row">
+                  <input
+                    type="email"
+                    value={email}
+                    placeholder="classmate@example.com"
+                    inputMode="email"
+                    autoComplete="off"
+                    onChange={(event) => setEmail(event.target.value)}
+                  />
+                  <select value={role} onChange={(event) => setRole(event.target.value)}>
+                    <option value={ROLE.editor}>{t('share.roleEditor')}</option>
+                    <option value={ROLE.viewer}>{t('share.roleViewer')}</option>
+                  </select>
+                  <button type="submit" className="button primary" disabled={busy}>
+                    {busy ? t('share.sending') : t('share.send')}
+                  </button>
+                </div>
+              </label>
+              <p className="share-hint">{t('share.inviteHint')}</p>
+              <p className="share-hint is-quiet">{t('share.inviteNeedsServer')}</p>
+            </form>
+          ) : (
+            <p className="share-hint">{t('share.notOwnerHint')}</p>
+          )}
 
           {errorKey ? (
             <p className="share-error" role="alert">
