@@ -9,6 +9,7 @@ import {
   shareDocument,
   updateMemberRole,
 } from '../../lib/sharing.js';
+import { areLinksAvailable, createInviteLink, linkOn, revokeInviteLink } from '../../lib/inviteLinks.js';
 import { ROLE, titleOf } from '../../lib/model.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useT } from '../../i18n/index.jsx';
@@ -30,8 +31,17 @@ function initialOf(text) {
 /**
  * Who can open this document, and what they can do with it.
  *
- * Every change here goes through a Cloud Function — the client can't resolve an
- * email to an account, and shouldn't be able to write someone else's access.
+ * Two ways in, and they are not interchangeable.
+ *
+ * By email is precise — it names an account, so access can be granted before
+ * that person has even signed up. It needs a Cloud Function, because turning an
+ * address into an account id needs privileges the browser must never hold, and
+ * Cloud Functions need a billing plan.
+ *
+ * By link is immediate and needs no server at all: the code is the credential,
+ * and the security rules check it. It is also weaker by construction — whoever
+ * holds the link can use it — so the dialog says that plainly rather than
+ * letting someone assume otherwise.
  */
 export default function ShareDialog({ document: doc, onClose }) {
   const { t } = useT();
@@ -44,6 +54,10 @@ export default function ShareDialog({ document: doc, onClose }) {
   const [noticeKey, setNoticeKey] = useState(null);
   const [noticeValue, setNoticeValue] = useState('');
   const [invites, setInvites] = useState([]);
+  const [link, setLink] = useState(() => linkOn(doc));
+  const [linkRole, setLinkRole] = useState(doc.joinRole || ROLE.editor);
+  const [linkBusy, setLinkBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const isOwner = doc.ownerUid === uid || !doc.ownerUid;
   const members = Object.entries(doc.members ?? {});
@@ -66,6 +80,51 @@ export default function ShareDialog({ document: doc, onClose }) {
   }, [doc.id, isOwner]);
 
   const report = (error) => setErrorKey(ERROR_KEYS[error?.code] ?? 'share.errorFailed');
+
+  const makeLink = async () => {
+    setErrorKey(null);
+    setLinkBusy(true);
+    try {
+      const created = await createInviteLink({
+        docId: doc.id,
+        ownerUid: uid,
+        role: linkRole,
+        previousCode: link?.code ?? null,
+      });
+      setLink({ ...created, expired: false });
+    } catch {
+      setErrorKey('share.errorLink');
+    } finally {
+      setLinkBusy(false);
+    }
+  };
+
+  const dropLink = async () => {
+    setErrorKey(null);
+    setLinkBusy(true);
+    try {
+      await revokeInviteLink({ docId: doc.id, code: link?.code });
+      setLink(null);
+    } catch {
+      setErrorKey('share.errorLink');
+    } finally {
+      setLinkBusy(false);
+    }
+  };
+
+  const copy = async () => {
+    if (!link) return;
+    try {
+      await navigator.clipboard.writeText(link.url);
+    } catch {
+      // Clipboard access can be refused (insecure origin, or a browser that
+      // wants a user gesture it didn't see). The input is selectable, so
+      // there's still a way through — just don't claim success.
+      return;
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  };
 
   const invite = async (event) => {
     event.preventDefault();
@@ -165,6 +224,68 @@ export default function ShareDialog({ document: doc, onClose }) {
           ) : (
             <p className="share-hint">{t('share.notOwnerHint')}</p>
           )}
+
+          {isOwner && areLinksAvailable ? (
+            <section className="share-link">
+              <h3 className="share-section">{t('share.linkTitle')}</h3>
+
+              {link && !link.expired ? (
+                <>
+                  <div className="share-link-row">
+                    <input
+                      readOnly
+                      value={link.url}
+                      aria-label={t('share.linkTitle')}
+                      onFocus={(event) => event.target.select()}
+                    />
+                    <button type="button" className="button ghost" onClick={copy}>
+                      <Icon name={copied ? 'check' : 'copy'} size={15} />
+                      {copied ? t('share.copied') : t('common.copy')}
+                    </button>
+                  </div>
+                  <p className="share-hint">
+                    {t(
+                      link.role === ROLE.viewer ? 'share.linkHintViewer' : 'share.linkHintEditor',
+                    )}
+                  </p>
+                  <div className="share-link-actions">
+                    <button
+                      type="button"
+                      className="link-button"
+                      onClick={makeLink}
+                      disabled={linkBusy}
+                    >
+                      {t('share.linkNew')}
+                    </button>
+                    <button
+                      type="button"
+                      className="link-button is-danger"
+                      onClick={dropLink}
+                      disabled={linkBusy}
+                    >
+                      {t('share.linkRevoke')}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="share-link-row">
+                  <select value={linkRole} onChange={(event) => setLinkRole(event.target.value)}>
+                    <option value={ROLE.editor}>{t('share.roleEditor')}</option>
+                    <option value={ROLE.viewer}>{t('share.roleViewer')}</option>
+                  </select>
+                  <button
+                    type="button"
+                    className="button ghost"
+                    onClick={makeLink}
+                    disabled={linkBusy}
+                  >
+                    <Icon name="link" size={15} />
+                    {link?.expired ? t('share.linkRenew') : t('share.linkCreate')}
+                  </button>
+                </div>
+              )}
+            </section>
+          ) : null}
 
           {errorKey ? (
             <p className="share-error" role="alert">

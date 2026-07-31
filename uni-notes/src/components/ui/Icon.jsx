@@ -103,6 +103,14 @@ const P = {
     </>
   ),
   move: <path d="M4 7.6a1.6 1.6 0 0 1 1.6-1.6h3.1l1.7 2h7A1.6 1.6 0 0 1 20 9.6v7.2a1.6 1.6 0 0 1-1.6 1.6H5.6A1.6 1.6 0 0 1 4 16.8Z" />,
+  // Two links of a chain, each an open bracket meeting in the middle.
+  link: (
+    <>
+      <path d="M10.4 13.6a3.4 3.4 0 0 0 5 .4l3-3a3.4 3.4 0 0 0-4.8-4.8l-1.7 1.7" />
+      <path d="M13.6 10.4a3.4 3.4 0 0 0-5-.4l-3 3a3.4 3.4 0 0 0 4.8 4.8l1.7-1.7" />
+    </>
+  ),
+
   share: (
     <>
       <circle cx="17.6" cy="6" r="2.6" />

@@ -87,10 +87,22 @@ Round, Test Preparation.
 Everything from every tool in one list, and the place sharing happens. Filter by
 type, by what you own, or by what has been shared with you.
 
-Invite anyone by email as an **editor** (can change things) or a **viewer** (can
-only read). If they don't have an account yet the invitation waits and is picked
-up the first time they sign in. Owners can change roles or remove people; anyone
-else can leave a shared document without deleting it for the rest.
+Two ways to let someone in, because they are good at different things.
+
+**By email** — invite an address as an **editor** (can change things) or a
+**viewer** (can only read). Precise, and it works even if they have no account
+yet: the invitation waits and is picked up the first time they sign in. Needs
+the Cloud Functions deployed, because only a server may turn an email address
+into an account id.
+
+**By link** — mint a link, send it however you like, and whoever opens it joins
+at the role you chose. Needs no server at all: the code is the credential and
+the security rules check it, so this works on Firebase's free plan. One live
+link per document; replacing or revoking it kills the old one at once. The
+trade-off is inherent to link sharing — whoever holds it can use it.
+
+Owners can change roles or remove people; anyone else can leave a shared
+document without deleting it for the rest.
 
 A document lives in one place and every member edits the same copy — there are
 no per-person duplicates to reconcile.
@@ -220,6 +232,10 @@ uni-notes/
   storage. If its documents should be shareable, add the kind to `SHARED_KINDS`
   in `lib/model.js` and it appears in UniSave automatically.
 - **A new loading tip** — add a line to each language array in `i18n/tips.js`.
+- **Anything touching the security rules** — change `firestore.rules`, then run
+  `npm run test:rules`. It boots the Firestore emulator and asserts both what
+  must work and what must not, which is the only way to be sure about a rule
+  that lets a non-member write.
 - **The app icon** — edit `public/icon.svg`; the PNGs are generated from it (see
   the note in that file's header).
 - **A different AI model** — change `MODEL` / `EFFORT` in `functions/index.js`

@@ -88,7 +88,8 @@ other:
 
 | Where | What | Who can touch it |
 |---|---|---|
-| `docs/{docId}` | Notes, sheets, slide decks, canvas boards, task plans, vocab sets | Only the accounts listed in that document's `memberUids`. Owners can do anything; editors can change content but not who has access; viewers can only read. Any member can remove themselves. |
+| `docs/{docId}` | Notes, sheets, slide decks, canvas boards, task plans, vocab sets | Only the accounts listed in that document's `memberUids`. Owners can do anything; editors can change content but not who has access; viewers can only read. Any member can remove themselves. Someone holding a valid invite link can add themselves, and nothing else. |
+| `joinCodes/{code}` | Invite links | Fetchable by any signed-in account **that already has the code** — the code is the credential. Listable by nobody. Only the document's owner can mint or revoke one. |
 | `users/{uid}/…` | Folders, AI chats, preferences | Only that account. Never shared. |
 | `invites/{id}` | Pending invitations | **Nobody**, from the browser. Only the sharing Cloud Functions, which run with admin rights. |
 
@@ -99,8 +100,9 @@ The rules do not care what *kind* of document each one is, so adding a module
 (Canvas and Tasks were added after this file was written) needs no rules change
 and no redeploy.
 
-**Check it worked:** Console → Firestore → **Rules** tab shows the deployed
-rules. Then open the **Rules Playground** and confirm two things are **denied**:
+**Check it worked:** `npm run test:rules` runs 38 assertions against the local
+Firestore emulator, including every way an invite link must *fail*. Then
+Console → Firestore → **Rules** tab shows the deployed rules. Then open the **Rules Playground** and confirm two things are **denied**:
 a read of `users/some-other-uid/folders/x` as yourself, and a read of any
 `docs/{id}` whose `memberUids` does not contain your uid.
 
@@ -108,11 +110,35 @@ a read of `users/some-other-uid/folders/x` as yourself, and a read of any
 another browser (or another device) and sign in with the same account — the note
 should be there.
 
+## 4b. What you already have, for free
+
+Stop here and everything below is already working: Google and email sign-in,
+and every document syncing to your account across devices. Firestore's free
+tier is 50K reads and 20K writes a day, which two people will not approach.
+
+**Sharing by link works on the free plan too.** Open any document, click
+**Share**, and *Create link*. Anyone who opens that link signs in and joins, as
+an editor or a viewer — whichever you chose. No Cloud Function is involved:
+the code in the link is the credential, and the Firestore rules check it
+(`isJoiningWithCode`). One live link per document; replacing or revoking it
+kills the old one immediately.
+
+The trade-off is the one every link-share has: whoever holds the link can use
+it. There is no email check. For precise, per-person access — and for Uni AI —
+carry on to step 5.
+
 ## 5. Enable billing (required for Cloud Functions)
 
-Cloud Functions need the **Blaze** (pay-as-you-go) plan. Firebase's free
-allowances are generous — a couple of teenagers using this will almost certainly
-stay inside them — but a card must be on file.
+Cloud Functions need the **Blaze** (pay-as-you-go) plan.
+
+**Blaze does not mean Google charges you.** The free allowances stay exactly as
+they are — you pay only for what goes past them, and Cloud Functions gives you
+2 million invocations a month. Two people will use a few hundred. The card is a
+ceiling, not a subscription, and the realistic Google bill is €0.00.
+
+The one genuine cost is the Anthropic API in step 6, billed per token. Note
+also that Google requires the billing account holder to be **18 or over**, so
+this step needs an adult's card and their Google account.
 
 Console → the settings gear → **Usage and billing → Details & settings → Modify plan → Blaze**.
 

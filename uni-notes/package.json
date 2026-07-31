@@ -3,11 +3,12 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Uni — notes, sheets, slides, UniSave, an AI study helper and vocabulary practice for planning university applications.",
+  "description": "Uni \u2014 notes, sheets, slides, UniSave, an AI study helper and vocabulary practice for planning university applications.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:rules": "firebase emulators:exec --only firestore --project uni-rules-test \"node test/rules.test.mjs && node test/join.test.mjs\""
   },
   "dependencies": {
     "firebase": "^12.16.0",
@@ -15,7 +16,9 @@
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.1",
     "@vitejs/plugin-react": "^5.1.0",
+    "firebase-tools": "^15.25.1",
     "vite": "^7.1.0"
   }
 }

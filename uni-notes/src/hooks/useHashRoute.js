@@ -3,6 +3,7 @@
  *
  *   #/                       the landing page (the front door)
  *   #/signin                 sign in / sign up
+ *   #/join/:code             open an invite link
  *   #/notes                  dashboard
  *   #/notes/folder/:id       dashboard filtered to a category
  *   #/notes/:docId           note editor
@@ -36,6 +37,7 @@ export const MODULES = [
 /** Screens that sit outside the app shell. */
 export const LANDING = 'landing';
 export const SIGN_IN = 'signin';
+export const JOIN = 'join';
 
 const LANDING_ROUTE = { module: LANDING, id: null, folderId: null };
 
@@ -46,6 +48,9 @@ function parse(hash) {
 
   const [module, second, third] = parts;
   if (module === SIGN_IN) return { module: SIGN_IN, id: null, folderId: null };
+  // An invite link is a URL someone was sent, so it has to survive being
+  // opened by a signed-out stranger — it is handled outside the app shell.
+  if (module === JOIN) return { module: JOIN, id: second ?? null, folderId: null };
   if (!MODULES.includes(module)) return LANDING_ROUTE;
 
   if (module === 'notes' && second === 'folder') {
@@ -74,6 +79,7 @@ export function useHashRoute() {
   const goToModule = useCallback((module) => navigate(`#/${module}`), [navigate]);
   const goToLanding = useCallback(() => navigate('#/'), [navigate]);
   const goToSignIn = useCallback(() => navigate(`#/${SIGN_IN}`), [navigate]);
+  const goToJoin = useCallback((code) => navigate(`#/${JOIN}/${code}`), [navigate]);
   const goToItem = useCallback(
     (module, id) => navigate(`#/${module}/${id}`),
     [navigate],
@@ -83,5 +89,5 @@ export function useHashRoute() {
     [navigate],
   );
 
-  return { route, navigate, goToModule, goToItem, goToFolder, goToLanding, goToSignIn };
+  return { route, navigate, goToModule, goToItem, goToFolder, goToLanding, goToSignIn, goToJoin };
 }

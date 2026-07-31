@@ -3,6 +3,7 @@ import Icon from './components/ui/Icon.jsx';
 import AiWorkspace from './components/ai/AiWorkspace.jsx';
 import AuthScreen from './components/AuthScreen.jsx';
 import CanvasModule from './components/canvas/CanvasModule.jsx';
+import JoinPage from './components/JoinPage.jsx';
 import LandingPage from './components/landing/LandingPage.jsx';
 import LanguagesModule from './components/languages/LanguagesModule.jsx';
 import NotesModule from './components/notes/NotesModule.jsx';
@@ -14,9 +15,19 @@ import TasksModule from './components/tasks/TasksModule.jsx';
 import TipLine from './components/TipLine.jsx';
 import UniSaveModule from './components/unisave/UniSaveModule.jsx';
 import { AUTH_STATUS, useAuth } from './context/AuthContext.jsx';
-import { LANDING, SIGN_IN, useHashRoute } from './hooks/useHashRoute.js';
+import { JOIN, LANDING, SIGN_IN, useHashRoute } from './hooks/useHashRoute.js';
 import { useData } from './context/DataContext.jsx';
 import { useT } from './i18n/index.jsx';
+
+/** Which module opens a shared document, by the collection it lives in. */
+const SHARED_MODULES = [
+  ['notes', 'notes'],
+  ['sheets', 'sheets'],
+  ['presentations', 'slides'],
+  ['boards', 'canvas'],
+  ['plans', 'tasks'],
+  ['vocabDecks', 'languages'],
+];
 
 /** Take down the pre-React splash once there's something real to look at. */
 function useHideBootSplash(ready) {
@@ -33,7 +44,8 @@ function useHideBootSplash(ready) {
 export default function App() {
   const { t } = useT();
   const { status } = useAuth();
-  const { ready, recovered } = useData();
+  const data = useData();
+  const { ready, recovered } = data;
   const { route, goToModule, goToItem, goToFolder, goToLanding, goToSignIn } = useHashRoute();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [recoveryDismissed, setRecoveryDismissed] = useState(false);
@@ -41,6 +53,7 @@ export default function App() {
   const { module, id, folderId } = route;
   const onLanding = module === LANDING;
   const onSignIn = module === SIGN_IN;
+  const onJoin = module === JOIN;
 
   useHideBootSplash(status !== AUTH_STATUS.loading);
 
@@ -56,10 +69,31 @@ export default function App() {
     if (onSignIn && status === AUTH_STATUS.signedIn) goToModule('notes');
   }, [onSignIn, status, goToModule]);
 
-  // An app URL while signed out goes to sign-in, then on into the app.
+  // An app URL while signed out goes to sign-in, then on into the app. An
+  // invite link is exempt: it is a URL a stranger was sent, and it explains
+  // itself before asking anyone to sign in.
   useEffect(() => {
-    if (!onLanding && !onSignIn && status === AUTH_STATUS.signedOut) goToSignIn();
-  }, [onLanding, onSignIn, status, goToSignIn]);
+    if (!onLanding && !onSignIn && !onJoin && status === AUTH_STATUS.signedOut) goToSignIn();
+  }, [onLanding, onSignIn, onJoin, status, goToSignIn]);
+
+  /**
+   * Open whatever a freshly-joined document turns out to be.
+   *
+   * The join writes membership, and the document arrives through the normal
+   * subscription a moment later — so it may not be in `data` yet. UniSave lists
+   * every kind, which makes it the right place to land when we cannot yet say
+   * which module owns it.
+   */
+  const openJoined = useCallback(
+    (docId) => {
+      const found = SHARED_MODULES.map(([collection, target]) =>
+        (data[collection] ?? []).some((item) => item.id === docId) ? target : null,
+      ).find(Boolean);
+      if (found) goToItem(found, docId);
+      else goToModule('unisave');
+    },
+    [data, goToItem, goToModule],
+  );
 
   if (status === AUTH_STATUS.loading) {
     return (
@@ -67,6 +101,17 @@ export default function App() {
         <p>{t('common.loading')}</p>
         <TipLine className="on-dark" />
       </div>
+    );
+  }
+
+  if (onJoin) {
+    return (
+      <JoinPage
+        code={id}
+        onOpenDocument={openJoined}
+        onGoHome={goToLanding}
+        onSignIn={goToSignIn}
+      />
     );
   }
 

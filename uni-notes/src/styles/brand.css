@@ -1414,6 +1414,143 @@
   color: color-mix(in srgb, var(--module-accent) 78%, #000);
 }
 
+/* --------------------------------- joining -------------------------------- */
+
+/*
+ * The one screen a stranger reaches. It gets the full-bleed scenery and a
+ * single centred card, because there is nothing else to show someone who has
+ * no documents yet — and because a link that lands on a bare form looks like
+ * a phishing page.
+ */
+
+.join-page {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.join-scene {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+.join-card {
+  width: min(460px, 100%);
+  padding: clamp(26px, 5vw, 40px);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 24px 64px rgba(6, 27, 43, 0.3);
+  text-align: center;
+}
+
+.join-card .logo.is-stacked {
+  margin-bottom: 22px;
+}
+
+.join-card h1 {
+  font-family: var(--display);
+  font-size: clamp(1.4rem, 3.4vw, 1.8rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.join-lede {
+  margin: 12px 0 22px;
+  color: var(--ink-soft);
+  font-size: 0.94rem;
+  line-height: 1.6;
+}
+
+.join-note {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-bottom: 18px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.join-note.is-good {
+  color: #0f9d58;
+  font-weight: 600;
+}
+
+.join-note.is-bad {
+  color: var(--danger, #d93025);
+  text-align: left;
+}
+
+.join-card .button {
+  width: 100%;
+  justify-content: center;
+}
+
+.join-card .tip-line {
+  justify-content: center;
+  margin-top: 26px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(6, 43, 68, 0.1);
+  text-align: left;
+}
+
+/* ------------------------------- share links ------------------------------ */
+
+.share-link {
+  margin: 4px 0 18px;
+  padding: 14px 16px;
+  border: 1px solid rgba(6, 43, 68, 0.1);
+  border-radius: 14px;
+  background: var(--surface-alt, #f8f9fa);
+}
+
+.share-link .share-section {
+  margin-top: 0;
+}
+
+.share-link-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.share-link-row input {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--border, #dadce0);
+  border-radius: 9px;
+  background: #fff;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-size: 0.78rem;
+  /* The URL is long and the interesting half is the end. Let it scroll rather
+     than wrap the card. */
+  text-overflow: ellipsis;
+}
+
+.share-link-row .button {
+  flex: none;
+  min-height: 38px;
+}
+
+.share-link-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 10px;
+  font-size: 0.8rem;
+}
+
+.link-button.is-danger {
+  color: var(--danger, #d93025);
+}
+
 /* ------------------------------ recovery note ----------------------------- */
 
 .recovery-banner {

@@ -22,6 +22,12 @@ rules_version = '2';
 //                         admin privileges. Nothing here needs client access,
 //                         so nothing gets it.
 //
+//   joinCodes/{code}      Invite links. The document id *is* the secret, so it
+//                         is fetchable by anyone signed in who already has it
+//                         and listable by nobody. See "invite links" below —
+//                         this is the half of sharing that needs no server, and
+//                         so no billing.
+//
 // Deploy with:  firebase deploy --only firestore:rules
 // Check changes in the Console's Rules Playground before trusting them.
 
@@ -56,10 +62,54 @@ service cloud.firestore {
 
     // Membership fields are the access-control list, so only the owner may
     // change them. Anyone else editing must leave them exactly as they were.
+    // The invite-link fields belong to that list: an editor who could rewrite
+    // joinRole could quietly promote every future joiner to editor.
     function membershipUnchanged() {
       return request.resource.data.memberUids == resource.data.memberUids
         && request.resource.data.roles == resource.data.roles
-        && request.resource.data.ownerUid == resource.data.ownerUid;
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.get('joinCode', '') == resource.data.get('joinCode', '')
+        && request.resource.data.get('joinRole', '') == resource.data.get('joinRole', '')
+        && request.resource.data.get('joinExpiresAt', 0) == resource.data.get('joinExpiresAt', 0);
+    }
+
+    // --- invite links --------------------------------------------------------
+    //
+    // Someone opening an invite link is, by definition, not yet a member: they
+    // cannot read the document, so they cannot be asked to prove anything about
+    // its contents. What they *can* do is present the code.
+    //
+    // The proof is the comparison below. The joiner writes the code they were
+    // given into their own member entry, and the rule checks it against the
+    // code stored on the document. Client-supplied data is measured against
+    // server-held data, which is the only shape of check that means anything
+    // here. Guessing is the alternative, and the codes are 26 random characters
+    // from a 32-symbol alphabet — about 130 bits.
+    //
+    // Everything else is a containment check: they may add themselves and
+    // nobody else, at the role the owner chose and no other, and they may not
+    // touch a single other field on the way past.
+
+    function linkIsLive() {
+      return resource.data.get('joinExpiresAt', 0) == 0
+        || request.time.toMillis() < resource.data.joinExpiresAt;
+    }
+
+    function isJoiningWithCode() {
+      return signedIn()
+        && resource.data.get('joinCode', '').size() >= 20
+        && linkIsLive()
+        // The code, as presented by the joiner, against the code we hold.
+        && request.resource.data.members[request.auth.uid].via == resource.data.get('joinCode', '')
+        && !(request.auth.uid in resource.data.memberUids)
+        && request.resource.data.memberUids == resource.data.memberUids.concat([request.auth.uid])
+        && request.resource.data.roles[request.auth.uid] == resource.data.get('joinRole', '')
+        && request.resource.data.roles.diff(resource.data.roles).affectedKeys()
+             == [request.auth.uid].toSet()
+        && request.resource.data.members.diff(resource.data.members).affectedKeys()
+             == [request.auth.uid].toSet()
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['memberUids', 'roles', 'members', 'updatedAt']);
     }
 
     // A member removing only themselves — "leave a shared document".
@@ -98,6 +148,7 @@ service cloud.firestore {
         isDocOwner()
         || (isMember() && myRole() == 'editor' && membershipUnchanged())
         || (isMember() && isLeaving())
+        || isJoiningWithCode()
       );
 
       allow delete: if isDocOwner();
@@ -121,6 +172,30 @@ service cloud.firestore {
     // Server-only. Clients go through the sharing Cloud Functions.
     match /invites/{inviteId} {
       allow read, write: if false;
+    }
+
+    // --- invite links --------------------------------------------------------
+    //
+    // A pointer from a code to the document it opens. The document id is the
+    // secret, which is why `get` is open to any signed-in account and `list` is
+    // open to none: knowing the code is the whole credential, and a listable
+    // collection would hand out every code in the project.
+    //
+    // Deleting the pointer is how a link is revoked, so only its owner may.
+
+    match /joinCodes/{code} {
+      allow get: if signedIn();
+      allow list: if false;
+
+      allow create: if signedIn()
+        && code.size() >= 20
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.docId is string
+        && get(/databases/$(database)/documents/docs/$(request.resource.data.docId))
+             .data.ownerUid == request.auth.uid;
+
+      allow update: if false;
+      allow delete: if signedIn() && resource.data.ownerUid == request.auth.uid;
     }
 
     // Anything not matched above is denied by default.
