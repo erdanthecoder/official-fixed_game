@@ -4,6 +4,7 @@ import AiWorkspace from './components/ai/AiWorkspace.jsx';
 import AuthScreen from './components/AuthScreen.jsx';
 import CanvasModule from './components/canvas/CanvasModule.jsx';
 import JoinPage from './components/JoinPage.jsx';
+import Skeleton from './components/shared/Skeleton.jsx';
 import LandingPage from './components/landing/LandingPage.jsx';
 import LanguagesModule from './components/languages/LanguagesModule.jsx';
 import NotesModule from './components/notes/NotesModule.jsx';
@@ -157,11 +158,9 @@ export default function App() {
           </div>
         ) : null}
 
+        <div className="view-enter" key={`${module}:${id ?? ''}:${folderId ?? ''}`}>
         {!ready ? (
-          <div className="module-loading">
-            <p>{t('common.loading')}</p>
-            <TipLine />
-          </div>
+          <Skeleton />
         ) : module === 'sheets' ? (
           <SheetsModule
             sheetId={id}
@@ -206,6 +205,7 @@ export default function App() {
             onBack={() => goToFolder(folderId)}
           />
         )}
+        </div>
       </main>
     </div>
   );

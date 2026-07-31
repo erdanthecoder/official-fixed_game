@@ -1,0 +1,369 @@
+/* ==========================================================================
+   Motion.
+
+   Loaded last, so it can settle arguments the other three sheets started.
+
+   Before this, motion in the app was ad hoc: nineteen transitions, five
+   different durations and one easing curve between them, each chosen wherever
+   it happened to be written. That is what makes an interface feel *assembled*
+   rather than designed — nothing is wrong exactly, but nothing agrees either,
+   and the eye reads the disagreement as cheapness long before the mind can say
+   why.
+
+   So: three durations and three curves, and everything uses them.
+
+   The curves are asymmetric on purpose, which is the single thing that most
+   separates good interface motion from bad. Things arriving decelerate hard —
+   they cover most of the distance immediately and settle softly, which reads as
+   confident. Things leaving accelerate away, because a slow exit makes the
+   interface feel like it is arguing with you. Symmetric ease-in-out, the
+   default almost everyone reaches for, reads as sluggish in both directions.
+
+   Everything animated here is `transform`, `opacity`, `box-shadow` or
+   `background-color`. Those are the properties a browser can hand to the
+   compositor; animating width, height, top or margin forces layout on every
+   frame, and on the tablets this has to feel quick on that is the difference
+   between smooth and not.
+   ========================================================================== */
+
+:root {
+  /* Arriving: most of the distance up front, then a soft landing. */
+  --ease-enter: cubic-bezier(0.05, 0.7, 0.1, 1);
+  /* Moving between two states while staying on screen. */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  /* Leaving: get out of the way. */
+  --ease-exit: cubic-bezier(0.3, 0, 1, 1);
+
+  --t-fast: 120ms;  /* hover, press, focus — must not be perceptible as motion */
+  --t-base: 220ms;  /* the default: menus, toggles, reveals */
+  --t-slow: 340ms;  /* whole surfaces: dialogs, pages, the launcher */
+
+  /* Elevation, as one ramp rather than a shadow invented per component. */
+  --lift-1: 0 1px 2px rgba(6, 27, 43, 0.1), 0 1px 3px rgba(6, 27, 43, 0.06);
+  --lift-2: 0 2px 6px rgba(6, 27, 43, 0.1), 0 6px 16px rgba(6, 27, 43, 0.08);
+  --lift-3: 0 8px 20px rgba(6, 27, 43, 0.12), 0 18px 44px rgba(6, 27, 43, 0.14);
+}
+
+/* ------------------------------ press and hover --------------------------- */
+
+/*
+ * A press should be felt before it is seen. 120ms and a 1px settle is enough to
+ * confirm the tap landed without turning a button into an animation.
+ */
+.button,
+.icon-button,
+.tool-button,
+.folder-item,
+.module-item,
+.doc-card,
+.item-card,
+.template-tile,
+.tour-tab,
+.language-chip,
+.segmented button,
+.switcher-item,
+.launcher-tile {
+  transition:
+    background-color var(--t-fast) var(--ease-standard),
+    border-color var(--t-fast) var(--ease-standard),
+    color var(--t-fast) var(--ease-standard),
+    box-shadow var(--t-base) var(--ease-standard),
+    transform var(--t-fast) var(--ease-standard);
+}
+
+.button:active,
+.icon-button:active,
+.tool-button:active,
+.template-tile:active {
+  transform: translateY(1px) scale(0.985);
+  transition-duration: 60ms; /* the press itself is instant; the release eases */
+}
+
+/* Cards rise a little under the pointer and cast a real shadow while they do.
+   The lift is 2px — enough to read as "this is a thing you can pick up",
+   little enough that a grid of twelve doesn't look like it is breathing. */
+.doc-card:hover,
+.item-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--lift-2);
+}
+
+.template-tile:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--lift-1);
+}
+
+/* Focus rings appear instantly. A focus ring that fades in is a focus ring you
+   have already stopped looking for. */
+:focus-visible {
+  transition: none;
+}
+
+/* --------------------------------- dialogs -------------------------------- */
+
+.modal-backdrop {
+  animation: fade-in var(--t-base) var(--ease-standard) both;
+}
+
+/*
+ * Dialogs scale from 96%, not from nothing. Starting at zero reads as a magic
+ * trick; starting close reads as the surface coming forward, which is what it
+ * is. The 8px rise gives it a direction.
+ */
+.modal-panel {
+  animation: dialog-in var(--t-slow) var(--ease-enter) both;
+  box-shadow: var(--lift-3);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+}
+
+/* Leaving is faster than arriving, and on the exit curve. A dialog that takes
+   as long to go as it did to come reads as reluctant. */
+.modal-backdrop.is-closing {
+  animation: fade-in var(--t-fast) var(--ease-exit) reverse both;
+}
+
+.modal-backdrop.is-closing .modal-panel {
+  animation: dialog-in var(--t-fast) var(--ease-exit) reverse both;
+}
+
+/* --------------------------------- menus ---------------------------------- */
+
+/*
+ * Popovers grow from the control that opened them, so the origin is set per
+ * menu rather than left at centre. A menu that expands from its own middle
+ * looks like it arrived from somewhere else.
+ */
+.color-popover,
+.template-popover,
+.card-menu,
+.doc-card-menu-list {
+  animation: menu-in var(--t-base) var(--ease-enter) both;
+  transform-origin: top left;
+  box-shadow: var(--lift-2);
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(-4px);
+  }
+}
+
+/* ------------------------------- views ------------------------------------ */
+
+/*
+ * Switching module or opening a document fades the new view up over 340ms.
+ *
+ * The replay is driven by a React `key` built from the route in App.jsx, which
+ * remounts the subtree. A CSS custom property would not do — changing one does
+ * not restart an animation. Keying it to the route also means the transition
+ * can never desync from what is actually on screen.
+ *
+ * The wrapper has to be invisible to layout: every module below it was written
+ * expecting to be a direct flex child of .app-main and to own its own
+ * scrolling. So it takes the same shape and hands the space straight through.
+ */
+.view-enter {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  animation: view-in var(--t-slow) var(--ease-enter) both;
+}
+
+.view-enter > * {
+  flex: 1;
+  min-height: 0;
+}
+
+@keyframes view-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/*
+ * Cards arrive in sequence rather than all at once. 22ms apart is under the
+ * threshold where it reads as a queue and over the one where it reads as
+ * nothing — it gives the grid a direction to be read in.
+ *
+ * Capped at the twelfth card: beyond that the stagger stops being a flourish
+ * and starts being a wait, and a dashboard with forty documents would spend
+ * most of a second assembling itself.
+ */
+.doc-grid > * {
+  animation: card-in var(--t-base) var(--ease-enter) both;
+}
+
+.doc-grid > *:nth-child(1) { animation-delay: 0ms; }
+.doc-grid > *:nth-child(2) { animation-delay: 22ms; }
+.doc-grid > *:nth-child(3) { animation-delay: 44ms; }
+.doc-grid > *:nth-child(4) { animation-delay: 66ms; }
+.doc-grid > *:nth-child(5) { animation-delay: 88ms; }
+.doc-grid > *:nth-child(6) { animation-delay: 110ms; }
+.doc-grid > *:nth-child(7) { animation-delay: 132ms; }
+.doc-grid > *:nth-child(8) { animation-delay: 154ms; }
+.doc-grid > *:nth-child(9) { animation-delay: 176ms; }
+.doc-grid > *:nth-child(10) { animation-delay: 198ms; }
+.doc-grid > *:nth-child(11) { animation-delay: 220ms; }
+.doc-grid > *:nth-child(n + 12) { animation-delay: 242ms; }
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+  }
+}
+
+/* --------------------------------- loading -------------------------------- */
+
+/*
+ * Skeletons rather than the word "Loading". A skeleton says what is coming and
+ * roughly how much of it, so the wait is spent understanding the shape of the
+ * page instead of reading a word you already knew.
+ *
+ * The sweep is a gradient moving under a fixed mask — one composited layer, no
+ * repaint, and it costs nothing to leave running.
+ */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-sm, 8px);
+  background: #eef1f4;
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.72),
+    transparent
+  );
+  animation: sweep 1.35s ease-in-out infinite;
+}
+
+@keyframes sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  padding: clamp(14px, 3vw, 28px);
+}
+
+.skeleton-card {
+  height: 208px;
+}
+
+.skeleton-banner {
+  height: 132px;
+  margin: clamp(14px, 3vw, 28px) clamp(14px, 3vw, 28px) 0;
+  border-radius: var(--radius, 12px);
+}
+
+/* --------------------------------- saving --------------------------------- */
+
+/* The status text swaps between Saving and Saved. Crossfading the words stops
+   the layout twitching and stops the eye being yanked to it mid-sentence. */
+.save-indicator {
+  transition: color var(--t-base) var(--ease-standard);
+}
+
+.save-indicator > * {
+  animation: fade-in var(--t-fast) var(--ease-standard) both;
+}
+
+/* -------------------------------- scrolling ------------------------------- */
+
+/* Anchored jumps glide; ordinary wheel scrolling is untouched. */
+html {
+  scroll-behavior: smooth;
+}
+
+.dashboard,
+.plan-body,
+.app-main {
+  scroll-behavior: smooth;
+  /* Stop a scroll inside a panel from grabbing the page once it bottoms out. */
+  overscroll-behavior: contain;
+}
+
+/* -------------------------------- the rail -------------------------------- */
+
+/*
+ * The sidebar swaps between 268px and a 74px rail as you move between Notes and
+ * everything else. This animates `width`, which is a layout property and the
+ * one thing the header of this file says not to animate.
+ *
+ * It is a deliberate exception. Layout cost scales with how much has to be
+ * re-measured, and this is one element whose only sibling is a single flex
+ * child — one reflow per frame on a trivial tree, not a hundred. The
+ * alternative is a 194px jump every time you change module, which is the most
+ * visible movement in the app. Worth the frames.
+ */
+.sidebar {
+  transition:
+    width var(--t-slow) var(--ease-standard),
+    flex-basis var(--t-slow) var(--ease-standard),
+    padding var(--t-slow) var(--ease-standard);
+}
+
+/* Below 900px the sidebar is a drawer that slides in, so a width transition
+   would fight the slide. Let the transform own it there. */
+@media (max-width: 900px) {
+  .sidebar {
+    transition: transform var(--t-base) var(--ease-standard);
+  }
+}
+
+/* ------------------------------ reduced motion ---------------------------- */
+
+/*
+ * Not "no animation" — animation collapsed to a duration nobody can perceive.
+ * Keeping the rules alive means every `both` fill still applies, so nothing
+ * ends up stuck at its from-state and invisible, which is the usual way a
+ * reduced-motion block breaks a page.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .doc-card:hover,
+  .item-card:hover,
+  .template-tile:hover,
+  .button:active,
+  .icon-button:active {
+    transform: none;
+  }
+
+  .skeleton::after {
+    display: none;
+  }
+}
