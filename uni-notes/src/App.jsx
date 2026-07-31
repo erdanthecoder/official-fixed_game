@@ -17,6 +17,7 @@ import TipLine from './components/TipLine.jsx';
 import UniSaveModule from './components/unisave/UniSaveModule.jsx';
 import { AUTH_STATUS, useAuth } from './context/AuthContext.jsx';
 import { JOIN, LANDING, SIGN_IN, useHashRoute } from './hooks/useHashRoute.js';
+import { useAppUpdate } from './hooks/useInstall.js';
 import { useData } from './context/DataContext.jsx';
 import { useT } from './i18n/index.jsx';
 
@@ -50,6 +51,7 @@ export default function App() {
   const { route, goToModule, goToItem, goToFolder, goToLanding, goToSignIn } = useHashRoute();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [recoveryDismissed, setRecoveryDismissed] = useState(false);
+  const { updateReady, applyUpdate } = useAppUpdate();
 
   const { module, id, folderId } = route;
   const onLanding = module === LANDING;
@@ -154,6 +156,21 @@ export default function App() {
             <p>{t('common.recovered', { count: recovered })}</p>
             <button type="button" className="icon-button small" onClick={() => setRecoveryDismissed(true)}>
               <Icon name="close" size={16} />
+            </button>
+          </div>
+        ) : null}
+
+        {/*
+          A new build is installed and waiting. The service worker deliberately
+          does not swap itself mid-session, so this is the moment the user gets
+          to say when — and it stays until they do rather than nagging.
+        */}
+        {updateReady ? (
+          <div className="update-banner" role="status">
+            <Icon name="cloud" size={17} />
+            <p>{t('common.updateReady')}</p>
+            <button type="button" className="button ghost small" onClick={applyUpdate}>
+              {t('common.updateNow')}
             </button>
           </div>
         ) : null}

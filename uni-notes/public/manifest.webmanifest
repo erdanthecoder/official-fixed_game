@@ -1,16 +1,54 @@
 {
+  "id": "/",
   "name": "Uni — university planning workspace",
   "short_name": "Uni",
-  "description": "Notes, sheets, slides, an AI study helper and vocabulary practice for planning university applications.",
+  "description": "Notes, sheets, slides, canvas boards, deadline plans and vocabulary practice for planning university applications.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "orientation": "any",
   "background_color": "#071e2f",
   "theme_color": "#0B4265",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["education", "productivity"],
+  "prefer_related_applications": false,
   "icons": [
-    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    {
+      "src": "./icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    {
+      "name": "New note",
+      "short_name": "Notes",
+      "url": "./#/notes",
+      "icons": [{ "src": "./shortcut-notes.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Deadlines",
+      "short_name": "Tasks",
+      "url": "./#/tasks",
+      "icons": [{ "src": "./shortcut-tasks.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Draw a board",
+      "short_name": "Canvas",
+      "url": "./#/canvas",
+      "icons": [{ "src": "./shortcut-canvas.png", "sizes": "96x96", "type": "image/png" }]
+    }
   ]
 }

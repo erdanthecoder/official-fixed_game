@@ -1942,3 +1942,43 @@
   opacity: 0.72;
   font-size: 0.74rem;
 }
+
+/* ------------------------------ update banner ----------------------------- */
+
+/*
+ * A new build is installed and waiting. Deliberately not a modal: nothing is
+ * broken, nothing is urgent, and interrupting someone mid-sentence to tell them
+ * about a version number is the wrong trade. It sits above the view and stays
+ * until acted on.
+ */
+.update-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px clamp(14px, 3vw, 28px) 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(26, 115, 232, 0.28);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--accent-soft, #e8f0fe);
+  color: #174ea6;
+  font-size: 0.86rem;
+}
+
+.update-banner p {
+  flex: 1;
+  min-width: 0;
+}
+
+.update-banner .button.small {
+  min-height: 32px;
+  padding: 0 14px;
+  font-size: 0.82rem;
+}
+
+.settings-installed {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}

@@ -2,12 +2,14 @@ import LanguagePicker from './LanguagePicker.jsx';
 import Icon from './ui/Icon.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useData } from '../context/DataContext.jsx';
+import { useInstall } from '../hooks/useInstall.js';
 import { useT } from '../i18n/index.jsx';
 
 export default function SettingsPage() {
   const { t } = useT();
   const { user, isCloud, isFirebaseConfigured, signOut } = useAuth();
   const { exportAll, storageMode } = useData();
+  const { canInstall, installed, install } = useInstall();
 
   const download = () => {
     const blob = new Blob([JSON.stringify(exportAll(), null, 2)], { type: 'application/json' });
@@ -62,6 +64,32 @@ export default function SettingsPage() {
           </>
         )}
       </section>
+
+      {/*
+        Installing is offered here rather than as a banner. Chrome's own
+        mini-infobar is suppressed in useInstall, so this is the only invitation
+        — and a settings page is where someone goes when they have decided they
+        like the thing, which is the right moment to ask.
+      */}
+      {canInstall || installed ? (
+        <section className="settings-card">
+          <h2>{t('settings.install')}</h2>
+          <p className="settings-hint">
+            {installed ? t('settings.installedHint') : t('settings.installHint')}
+          </p>
+          {installed ? (
+            <p className="settings-installed">
+              <Icon name="circleCheck" size={17} className="done-icon" />
+              {t('settings.installed')}
+            </p>
+          ) : (
+            <button type="button" className="button primary" onClick={install}>
+              <Icon name="download" size={16} />
+              {t('settings.installAction')}
+            </button>
+          )}
+        </section>
+      ) : null}
 
       <section className="settings-card">
         <h2>{t('settings.data')}</h2>
