@@ -7,11 +7,11 @@
  */
 
 export const LAYOUTS = [
-  { id: 'title', labelKey: 'slides.layoutTitle', icon: '🅣' },
-  { id: 'bullets', labelKey: 'slides.layoutBullets', icon: '☰' },
-  { id: 'section', labelKey: 'slides.layoutSection', icon: '▭' },
-  { id: 'quote', labelKey: 'slides.layoutQuote', icon: '❝' },
-  { id: 'two-column', labelKey: 'slides.layoutTwoColumn', icon: '▥' },
+  { id: 'title', labelKey: 'slides.layoutTitle', icon: 'heading' },
+  { id: 'bullets', labelKey: 'slides.layoutBullets', icon: 'listBullet' },
+  { id: 'section', labelKey: 'slides.layoutSection', icon: 'square' },
+  { id: 'quote', labelKey: 'slides.layoutQuote', icon: 'text' },
+  { id: 'two-column', labelKey: 'slides.layoutTwoColumn', icon: 'layout' },
 ];
 
 export const THEMES = [
@@ -146,21 +146,21 @@ export const SLIDE_TEMPLATES = [
     id: 'why-this-school',
     labelKey: 'templates.whyThisSchool',
     hintKey: 'templates.whyThisSchoolHint',
-    icon: '🏫',
+    icon: 'school',
     build: whyThisSchool,
   },
   {
     id: 'about-me',
     labelKey: 'templates.myselfDeck',
     hintKey: 'templates.myselfDeckHint',
-    icon: '🙋',
+    icon: 'person',
     build: aboutMe,
   },
   {
     id: 'research',
     labelKey: 'templates.researchDeck',
     hintKey: 'templates.researchDeckHint',
-    icon: '🔬',
+    icon: 'research',
     build: researchDeck,
   },
 ];

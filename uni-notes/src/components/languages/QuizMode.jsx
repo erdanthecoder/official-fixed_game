@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import Icon from '../ui/Icon.jsx';
 import EmptyState from '../shared/EmptyState.jsx';
 import { useT } from '../../i18n/index.jsx';
 
@@ -47,15 +48,13 @@ export default function QuizMode({ deck }) {
   const total = useMemo(() => questions.length, [questions]);
 
   if (cards.length < 4) {
-    return <EmptyState emoji="🧩" title={t('languages.needFourCards')} />;
+    return <EmptyState icon="quiz" title={t('languages.needFourCards')} />;
   }
 
   if (finished) {
     return (
       <div className="trainer-done">
-        <p className="empty-emoji" aria-hidden="true">
-          {correct === total ? '🏆' : '📈'}
-        </p>
+        <Icon name={correct === total ? 'target' : 'circleCheck'} size={34} className="done-icon" />
         <h2>{t('languages.quizDone', { correct, total })}</h2>
         <button type="button" className="button primary" onClick={restart}>
           {t('languages.studyAgain')}

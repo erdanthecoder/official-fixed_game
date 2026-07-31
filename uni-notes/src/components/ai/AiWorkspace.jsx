@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Icon from '../ui/Icon.jsx';
 import ConfirmDialog from '../ui/ConfirmDialog.jsx';
 import Scenery from '../Scenery.jsx';
 import { AI_ERROR, askUniAi, isAiAvailable } from '../../lib/aiClient.js';
@@ -8,11 +9,11 @@ import { useData } from '../../context/DataContext.jsx';
 import { useT } from '../../i18n/index.jsx';
 
 const PRESETS = [
-  { id: 'brainstorm', icon: '💡', labelKey: 'ai.presetBrainstorm', promptKey: 'ai.presetBrainstormPrompt' },
-  { id: 'improve', icon: '✍️', labelKey: 'ai.presetImprove', promptKey: 'ai.presetImprovePrompt' },
-  { id: 'explain', icon: '📖', labelKey: 'ai.presetExplain', promptKey: 'ai.presetExplainPrompt' },
-  { id: 'compare', icon: '⚖️', labelKey: 'ai.presetCompare', promptKey: 'ai.presetComparePrompt' },
-  { id: 'quiz', icon: '🎴', labelKey: 'ai.presetQuiz', promptKey: 'ai.presetQuizPrompt' },
+  { id: 'brainstorm', icon: 'sparkle', labelKey: 'ai.presetBrainstorm', promptKey: 'ai.presetBrainstormPrompt' },
+  { id: 'improve', icon: 'pen', labelKey: 'ai.presetImprove', promptKey: 'ai.presetImprovePrompt' },
+  { id: 'explain', icon: 'book', labelKey: 'ai.presetExplain', promptKey: 'ai.presetExplainPrompt' },
+  { id: 'compare', icon: 'target', labelKey: 'ai.presetCompare', promptKey: 'ai.presetComparePrompt' },
+  { id: 'quiz', icon: 'cards', labelKey: 'ai.presetQuiz', promptKey: 'ai.presetQuizPrompt' },
 ];
 
 /** Turn the first user message into a chat title for the history list. */
@@ -133,7 +134,8 @@ export default function AiWorkspace({ chatId, onOpenChat }) {
           onClick={() => onOpenChat('')}
           disabled={!chatId}
         >
-          ＋ {t('ai.newChat')}
+          <Icon name="plus" size={17} />
+          {t('ai.newChat')}
         </button>
       </Scenery>
 
@@ -159,7 +161,7 @@ export default function AiWorkspace({ chatId, onOpenChat }) {
                   aria-label={`${t('common.delete')} — ${item.title}`}
                   onClick={() => setDeleting(item)}
                 >
-                  🗑️
+                  <Icon name="trash" size={15} />
                 </button>
               </div>
             ))
@@ -169,9 +171,7 @@ export default function AiWorkspace({ chatId, onOpenChat }) {
         <div className="ai-main">
           {!canUse ? (
             <div className="ai-notice">
-              <p className="empty-emoji" aria-hidden="true">
-                🔌
-              </p>
+              <Icon name="plug" size={30} className="notice-icon" />
               <h2>{t('ai.notConfiguredTitle')}</h2>
               <p>{t('ai.notConfiguredBody')}</p>
             </div>
@@ -190,7 +190,7 @@ export default function AiWorkspace({ chatId, onOpenChat }) {
                           className="ai-preset"
                           onClick={() => startPreset(preset)}
                         >
-                          <span aria-hidden="true">{preset.icon}</span>
+                          <Icon name={preset.icon} size={17} />
                           {t(preset.labelKey)}
                         </button>
                       ))}

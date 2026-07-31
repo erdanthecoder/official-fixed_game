@@ -1,4 +1,5 @@
 import Scenery from '../Scenery.jsx';
+import Icon from '../ui/Icon.jsx';
 import { useT } from '../../i18n/index.jsx';
 
 const SORTS = [
@@ -40,7 +41,7 @@ export default function ModuleHeader({
         <div className="module-controls">
           {onQueryChange ? (
             <label className="search-field">
-              <span aria-hidden="true">🔍</span>
+              <Icon name="search" size={16} />
               <input
                 type="search"
                 value={query}

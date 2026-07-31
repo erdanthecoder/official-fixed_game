@@ -1,4 +1,5 @@
 import LanguagePicker from './LanguagePicker.jsx';
+import Icon from './ui/Icon.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useData } from '../context/DataContext.jsx';
 import { useT } from '../i18n/index.jsx';
@@ -66,7 +67,8 @@ export default function SettingsPage() {
         <h2>{t('settings.data')}</h2>
         <p className="settings-hint">{t('settings.exportHint')}</p>
         <button type="button" className="button ghost" onClick={download}>
-          ⬇ {t('settings.exportData')}
+          <Icon name="download" size={17} />
+          {t('settings.exportData')}
         </button>
       </section>
 

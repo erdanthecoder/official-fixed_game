@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Icon from './ui/Icon.jsx';
 import AppIcon from './brand/AppIcon.jsx';
 import ConfirmDialog from './ui/ConfirmDialog.jsx';
 import ProductIcon, { PRODUCTS } from './brand/ProductIcon.jsx';
@@ -156,9 +157,7 @@ export default function Sidebar({
               className={`folder-item ${activeFolderId === null ? 'is-active' : ''}`}
               onClick={() => pickFolder(null)}
             >
-              <span className="folder-emoji" aria-hidden="true">
-                📚
-              </span>
+              <Icon name="library" size={17} className="folder-icon" />
               <span className="folder-name">{t('notes.allDocs')}</span>
               <span className="folder-count">{counts.all}</span>
             </button>
@@ -173,9 +172,7 @@ export default function Sidebar({
                     className={`folder-item ${activeFolderId === folder.id ? 'is-active' : ''}`}
                     onClick={() => pickFolder(folder.id)}
                   >
-                    <span className="folder-emoji" aria-hidden="true">
-                      {folder.emoji ?? '📁'}
-                    </span>
+                    <Icon name={folder.icon ?? 'folder'} size={17} className="folder-icon" />
                     <span className="folder-name">{folder.name}</span>
                     <span className="folder-count">{counts[folder.id] ?? 0}</span>
                   </button>
@@ -187,7 +184,7 @@ export default function Sidebar({
                       aria-label={`${t('common.rename')} ${folder.name}`}
                       onClick={() => setRenamingFolder(folder)}
                     >
-                      ✏️
+                      <Icon name="edit" size={15} />
                     </button>
                     {folder.locked ? null : (
                       <button
@@ -197,7 +194,7 @@ export default function Sidebar({
                         aria-label={`${t('common.delete')} ${folder.name}`}
                         onClick={() => setDeletingFolder(folder)}
                       >
-                        🗑️
+                        <Icon name="trash" size={15} />
                       </button>
                     )}
                   </div>
@@ -210,16 +207,15 @@ export default function Sidebar({
                 className={`folder-item ${activeFolderId === 'none' ? 'is-active' : ''}`}
                 onClick={() => pickFolder('none')}
               >
-                <span className="folder-emoji" aria-hidden="true">
-                  🗂️
-                </span>
+                <Icon name="inbox" size={17} className="folder-icon" />
                 <span className="folder-name">{t('common.noCategory')}</span>
                 <span className="folder-count">{counts.uncategorised}</span>
               </button>
             ) : null}
 
             <button type="button" className="add-folder" onClick={() => setAddingFolder(true)}>
-              ＋ {t('notes.newCategory')}
+              <Icon name="plus" size={16} />
+              {t('notes.newCategory')}
             </button>
           </nav>
         ) : (
@@ -259,7 +255,7 @@ export default function Sidebar({
                 aria-label={t('common.signOut')}
                 onClick={signOut}
               >
-                ⏏
+                <Icon name="leave" size={16} />
               </button>
             ) : null}
           </div>
@@ -279,7 +275,7 @@ export default function Sidebar({
           confirmLabel={t('common.create')}
           cancelLabel={t('common.cancel')}
           onConfirm={(name) => {
-            if (name.trim()) create('folders', { name: name.trim(), emoji: '📁' }, { idPrefix: 'folder' });
+            if (name.trim()) create('folders', { name: name.trim(), icon: 'folder' }, { idPrefix: 'folder' });
           }}
           onClose={() => setAddingFolder(false)}
         />

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import Icon from '../ui/Icon.jsx';
 import { isDue, reviewCard } from '../../lib/templates/vocab.js';
 import { useT } from '../../i18n/index.jsx';
 
@@ -46,9 +47,7 @@ export default function FlashcardTrainer({ deck, onGrade }) {
   if (!card) {
     return (
       <div className="trainer-done">
-        <p className="empty-emoji" aria-hidden="true">
-          🎉
-        </p>
+        <Icon name="circleCheck" size={34} className="done-icon" />
         <h2>{t('languages.sessionDone')}</h2>
         <p>{t('languages.sessionSummary', { count: reviewed })}</p>
         <button type="button" className="button primary" onClick={restart}>

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import Icon from './Icon.jsx';
 
 /**
  * Bare-bones accessible dialog: Esc closes, backdrop click closes, focus lands
@@ -33,7 +34,7 @@ export default function Modal({ title, children, onClose, footer, width = 420 })
         <header className="modal-header">
           <h2>{title}</h2>
           <button type="button" className="icon-button" onClick={onClose} aria-label="Close">
-            ✕
+            <Icon name="close" size={17} />
           </button>
         </header>
         <div className="modal-body">{children}</div>

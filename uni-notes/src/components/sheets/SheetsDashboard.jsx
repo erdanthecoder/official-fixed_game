@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import Icon from '../ui/Icon.jsx';
 import ConfirmDialog from '../ui/ConfirmDialog.jsx';
 import EmptyState from '../shared/EmptyState.jsx';
 import ItemCard, { EditedMeta } from '../shared/ItemCard.jsx';
@@ -76,7 +77,8 @@ export default function SheetsDashboard({ onOpen }) {
         searchPlaceholder={t('sheets.searchPlaceholder')}
         actions={
           <button type="button" className="button primary on-scenery" onClick={startBlank}>
-            ＋ {t('sheets.newSheet')}
+            <Icon name="plus" size={17} />
+            {t('sheets.newSheet')}
           </button>
         }
       />
@@ -92,7 +94,7 @@ export default function SheetsDashboard({ onOpen }) {
 
       {visible.length === 0 ? (
         <EmptyState
-          emoji="📊"
+          icon="target"
           title={query ? t('notes.noMatches') : t('sheets.emptyState')}
           body={query ? t('notes.noMatchesBody', { query }) : t('sheets.emptyBody')}
           action={

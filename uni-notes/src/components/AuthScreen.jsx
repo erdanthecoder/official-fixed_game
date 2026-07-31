@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Icon from './ui/Icon.jsx';
 import AppIcon from './brand/AppIcon.jsx';
 import LanguagePicker from './LanguagePicker.jsx';
 import ProductIcon, { PRODUCTS } from './brand/ProductIcon.jsx';
@@ -118,7 +119,8 @@ export default function AuthScreen({ onBack }) {
       <main className="auth-main">
         <div className="auth-card">
           <button type="button" className="auth-back" onClick={onBack}>
-            ← {t('auth.backHome')}
+            <Icon name="back" size={16} />
+            {t('auth.backHome')}
           </button>
 
           <h1>

@@ -10,10 +10,10 @@
 export const SEED_VERSION = 1;
 
 export const DEFAULT_FOLDERS = [
-  { id: 'folder_universities', name: 'University List', emoji: '🏫', locked: true },
-  { id: 'folder_essays', name: 'Essay Drafts', emoji: '✏️', locked: true },
-  { id: 'folder_scholarships', name: 'Scholarship Notes', emoji: '💸', locked: true },
-  { id: 'folder_charts', name: 'Comparison Charts', emoji: '📊', locked: true },
+  { id: 'folder_universities', name: 'University List', icon: 'school', locked: true },
+  { id: 'folder_essays', name: 'Essay Drafts', icon: 'essay', locked: true },
+  { id: 'folder_scholarships', name: 'Scholarship Notes', icon: 'money', locked: true },
+  { id: 'folder_charts', name: 'Comparison Charts', icon: 'target', locked: true },
 ];
 
 const WELCOME_NOTE = `

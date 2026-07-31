@@ -1,4 +1,5 @@
 import { useT } from '../../i18n/index.jsx';
+import Icon from '../ui/Icon.jsx';
 
 /**
  * The row of "start from…" tiles. Templates supply i18n keys, so the same strip
@@ -18,9 +19,7 @@ export default function TemplateStrip({
     <section className="template-strip" aria-label={ariaLabel}>
       {onBlank ? (
         <button type="button" className="template-tile blank" onClick={onBlank}>
-          <span className="template-icon" aria-hidden="true">
-            ＋
-          </span>
+          <Icon name="plus" size={22} className="template-icon" />
           <span className="template-label">{t(blankLabelKey)}</span>
           <span className="template-hint">{t(blankHintKey)}</span>
         </button>
@@ -33,9 +32,7 @@ export default function TemplateStrip({
           className="template-tile"
           onClick={() => onPick(template)}
         >
-          <span className="template-icon" aria-hidden="true">
-            {template.icon}
-          </span>
+          <Icon name={template.icon} size={22} className="template-icon" />
           <span className="template-label">{t(template.labelKey)}</span>
           <span className="template-hint">{t(template.hintKey)}</span>
         </button>

@@ -111,14 +111,14 @@ export const VOCAB_TEMPLATES = [
     id: 'academic-english',
     labelKey: 'templates.academicWords',
     hintKey: 'templates.academicWordsHint',
-    icon: '📖',
+    icon: 'book',
     build: () => ({ cards: buildDeck(academicEnglish) }),
   },
   {
     id: 'application-vocabulary',
     labelKey: 'templates.applicationWords',
     hintKey: 'templates.applicationWordsHint',
-    icon: '🗂️',
+    icon: 'tabs',
     build: () => ({ cards: buildDeck(applicationVocabulary) }),
   },
 ];

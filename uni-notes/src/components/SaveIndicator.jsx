@@ -1,4 +1,5 @@
 import { SAVE_STATUS, useData } from '../context/DataContext.jsx';
+import Icon from './ui/Icon.jsx';
 import { useT } from '../i18n/index.jsx';
 
 /** "Saving… / Saved" — reflects the debounced write queue, not just local state. */
@@ -16,11 +17,24 @@ export default function SaveIndicator() {
           : t('common.saving');
 
   const icon =
-    saveStatus === SAVE_STATUS.error ? '⚠️' : saveStatus === SAVE_STATUS.saved ? '☁️' : '⋯';
+    saveStatus === SAVE_STATUS.error
+      ? 'warning'
+      : saveStatus === SAVE_STATUS.saved
+        ? 'cloud'
+        : null;
 
   return (
     <span className={`save-indicator save-${saveStatus}`} aria-live="polite">
-      <span aria-hidden="true">{icon}</span>
+      {icon ? (
+        <Icon name={icon} size={15} />
+      ) : (
+        // Mid-save: three dots that actually move, so it reads as activity.
+        <span className="saving-dots" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+        </span>
+      )}
       {label}
     </span>
   );

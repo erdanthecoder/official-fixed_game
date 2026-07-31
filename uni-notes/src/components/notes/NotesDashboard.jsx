@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import Icon from '../ui/Icon.jsx';
 import ConfirmDialog from '../ui/ConfirmDialog.jsx';
 import EmptyState from '../shared/EmptyState.jsx';
 import ItemCard, { EditedMeta } from '../shared/ItemCard.jsx';
@@ -90,7 +91,7 @@ export default function NotesDashboard({ folderId, onOpen }) {
         slot="notes"
         title={
           <>
-            {folder?.emoji ? <span aria-hidden="true">{folder.emoji} </span> : null}
+            {folder ? <Icon name={folder.icon ?? 'folder'} size={20} className="heading-icon" /> : null}
             {heading}
           </>
         }
@@ -103,7 +104,8 @@ export default function NotesDashboard({ folderId, onOpen }) {
         searchPlaceholder={t('notes.searchPlaceholder')}
         actions={
           <button type="button" className="button primary on-scenery" onClick={startBlank}>
-            ＋ {t('notes.newDoc')}
+            <Icon name="plus" size={17} />
+            {t('notes.newDoc')}
           </button>
         }
       />
@@ -145,7 +147,8 @@ export default function NotesDashboard({ folderId, onOpen }) {
                     extra={t('common.words', { count: wordCount(note.content) })}
                   />
                 }
-                tag={noteFolder ? `${noteFolder.emoji ?? '📁'} ${noteFolder.name}` : null}
+                tag={noteFolder?.name ?? null}
+                tagIcon={noteFolder ? (noteFolder.icon ?? 'folder') : null}
                 onOpen={() => onOpen(note.id)}
                 actions={[
                   { label: t('common.open'), run: () => onOpen(note.id) },

@@ -10,9 +10,9 @@
  */
 
 export const LANGUAGES = [
-  { code: 'en', label: 'English', flag: '🇬🇧' },
-  { code: 'ru', label: 'Русский', flag: '🇷🇺' },
-  { code: 'ky', label: 'Кыргызча', flag: '🇰🇬' },
+  { code: 'en', label: 'English', short: 'EN' },
+  { code: 'ru', label: 'Русский', short: 'RU' },
+  { code: 'ky', label: 'Кыргызча', short: 'KY' },
 ];
 
 export const DEFAULT_LANGUAGE = 'en';

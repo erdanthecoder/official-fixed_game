@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import Icon from '../../ui/Icon.jsx';
 
 /**
  * Swatch popover for text colour and highlight.
@@ -37,10 +38,8 @@ export default function ColorMenu({ label, icon, colors, onPick, onClear, clearL
           setOpen((value) => !value);
         }}
       >
-        <span aria-hidden="true">{icon}</span>
-        <span className="tool-caret" aria-hidden="true">
-          ▾
-        </span>
+        {icon}
+        <Icon name="chevronDown" size={14} className="tool-caret" />
       </button>
 
       {open ? (

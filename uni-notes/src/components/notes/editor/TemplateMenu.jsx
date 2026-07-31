@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import Icon from '../../ui/Icon.jsx';
 import { NOTE_TEMPLATES } from '../../../lib/templates/notes.js';
 import { useT } from '../../../i18n/index.jsx';
 
@@ -28,11 +29,9 @@ export default function TemplateMenu({ onInsert }) {
           setOpen((value) => !value);
         }}
       >
-        <span aria-hidden="true">➕</span>
+        <Icon name="plus" size={16} />
         <span className="tool-text">{t('notes.insert')}</span>
-        <span className="tool-caret" aria-hidden="true">
-          ▾
-        </span>
+        <Icon name="chevronDown" size={14} className="tool-caret" />
       </button>
 
       {open ? (
@@ -49,9 +48,7 @@ export default function TemplateMenu({ onInsert }) {
                 setOpen(false);
               }}
             >
-              <span className="template-option-icon" aria-hidden="true">
-                {template.icon}
-              </span>
+              <Icon name={template.icon} size={19} className="template-option-icon" />
               <span>
                 <strong>{t(template.labelKey)}</strong>
                 <small>{t(template.hintKey)}</small>

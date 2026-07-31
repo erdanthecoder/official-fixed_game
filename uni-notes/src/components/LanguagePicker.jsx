@@ -17,7 +17,7 @@ export default function LanguagePicker({ compact = false }) {
             onClick={() => setPrefs({ language: option.code })}
             aria-pressed={option.code === language}
           >
-            <span aria-hidden="true">{option.flag}</span>
+            <span className="language-code" aria-hidden="true">{option.short}</span>
             {option.label}
           </button>
         ))}
@@ -37,7 +37,7 @@ export default function LanguagePicker({ compact = false }) {
             onChange={() => setPrefs({ language: option.code })}
           />
           <span>
-            <span aria-hidden="true">{option.flag} </span>
+            <span className="language-code" aria-hidden="true">{option.short}</span>
             {option.label}
           </span>
         </label>

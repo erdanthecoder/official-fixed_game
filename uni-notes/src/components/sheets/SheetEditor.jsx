@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Icon from '../ui/Icon.jsx';
 import ConfirmDialog from '../ui/ConfirmDialog.jsx';
 import SaveIndicator from '../SaveIndicator.jsx';
 import {
@@ -201,7 +202,7 @@ export default function SheetEditor({ sheetId, onBack }) {
           title={t('common.back')}
           aria-label={t('common.back')}
         >
-          ←
+          <Icon name="back" size={19} />
         </button>
 
         <div className="editor-title-block">
@@ -233,11 +234,11 @@ export default function SheetEditor({ sheetId, onBack }) {
       <div className="sheet-toolbar" role="toolbar" aria-label={t('sheets.title')}>
         <div className="tool-group">
           <button type="button" className="tool-button wide" onClick={addRow}>
-            <span aria-hidden="true">⤓</span>
+            <Icon name="addRow" size={17} />
             <span className="tool-text">{t('sheets.addRow')}</span>
           </button>
           <button type="button" className="tool-button wide" onClick={addColumn}>
-            <span aria-hidden="true">⇥</span>
+            <Icon name="addColumn" size={17} />
             <span className="tool-text">{t('sheets.addColumn')}</span>
           </button>
         </div>
@@ -250,7 +251,7 @@ export default function SheetEditor({ sheetId, onBack }) {
             aria-label={t('sheets.deleteRow')}
             onClick={deleteRow}
           >
-            <span aria-hidden="true">⊟</span>
+            <Icon name="deleteRow" size={17} />
           </button>
           <button
             type="button"
@@ -259,25 +260,25 @@ export default function SheetEditor({ sheetId, onBack }) {
             aria-label={t('sheets.deleteColumn')}
             onClick={deleteColumn}
           >
-            <span aria-hidden="true">⊡</span>
+            <Icon name="deleteColumn" size={17} />
           </button>
         </div>
 
         <div className="tool-group">
           <button
             type="button"
-            className={`tool-button glyph-bold ${selectedCell?.b ? 'is-active' : ''}`}
+            className={`tool-button ${selectedCell?.b ? 'is-active' : ''}`}
             title={t('sheets.boldCell')}
             aria-label={t('sheets.boldCell')}
             aria-pressed={Boolean(selectedCell?.b)}
             onClick={toggleBold}
           >
-            B
+            <Icon name="bold" size={17} />
           </button>
           {[
-            ['left', '⬅', 'sheets.alignLeft'],
-            ['center', '↔', 'sheets.alignCentre'],
-            ['right', '➡', 'sheets.alignRight'],
+            ['left', 'alignLeft', 'sheets.alignLeft'],
+            ['center', 'alignCentre', 'sheets.alignCentre'],
+            ['right', 'alignRight', 'sheets.alignRight'],
           ].map(([align, glyph, labelKey]) => (
             <button
               key={align}
@@ -287,7 +288,7 @@ export default function SheetEditor({ sheetId, onBack }) {
               aria-label={t(labelKey)}
               onClick={() => setAlign(align)}
             >
-              <span aria-hidden="true">{glyph}</span>
+              <Icon name={glyph} size={17} />
             </button>
           ))}
         </div>
@@ -299,7 +300,7 @@ export default function SheetEditor({ sheetId, onBack }) {
             onClick={() => setHelpOpen((open) => !open)}
             aria-expanded={helpOpen}
           >
-            <span aria-hidden="true">ƒ</span>
+            <Icon name="function" size={17} />
             <span className="tool-text">{t('sheets.functionsTitle')}</span>
           </button>
           {helpOpen ? (
@@ -319,9 +320,7 @@ export default function SheetEditor({ sheetId, onBack }) {
 
       <div className="formula-bar">
         <span className="formula-ref">{selectedRef}</span>
-        <span className="formula-divider" aria-hidden="true">
-          ƒx
-        </span>
+        <Icon name="function" size={15} className="formula-divider" />
         <input
           className="formula-input"
           value={draft ?? selectedCell?.v ?? ''}

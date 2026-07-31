@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import Icon from './components/ui/Icon.jsx';
 import AiWorkspace from './components/ai/AiWorkspace.jsx';
 import AuthScreen from './components/AuthScreen.jsx';
 import LandingPage from './components/landing/LandingPage.jsx';
@@ -91,7 +92,7 @@ export default function App() {
           onClick={() => setDrawerOpen(true)}
           aria-label={t('common.appName')}
         >
-          ☰
+          <Icon name="menu" size={22} />
         </button>
 
         {/*
@@ -101,10 +102,10 @@ export default function App() {
         */}
         {recovered > 0 && !recoveryDismissed ? (
           <div className="recovery-banner" role="status">
-            <span aria-hidden="true">💾</span>
+            <Icon name="save" size={18} />
             <p>{t('common.recovered', { count: recovered })}</p>
             <button type="button" className="icon-button small" onClick={() => setRecoveryDismissed(true)}>
-              ✕
+              <Icon name="close" size={16} />
             </button>
           </div>
         ) : null}

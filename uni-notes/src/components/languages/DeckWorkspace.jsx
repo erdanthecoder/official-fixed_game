@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import Icon from '../ui/Icon.jsx';
 import ConfirmDialog from '../ui/ConfirmDialog.jsx';
 import EmptyState from '../shared/EmptyState.jsx';
 import FlashcardTrainer from './FlashcardTrainer.jsx';
@@ -10,9 +11,9 @@ import { useData } from '../../context/DataContext.jsx';
 import { useT } from '../../i18n/index.jsx';
 
 const TABS = [
-  { id: 'study', labelKey: 'languages.study', icon: '🎴' },
-  { id: 'quiz', labelKey: 'languages.quiz', icon: '🧩' },
-  { id: 'cards', labelKey: 'languages.manage', icon: '📋' },
+  { id: 'study', labelKey: 'languages.study', icon: 'cards' },
+  { id: 'quiz', labelKey: 'languages.quiz', icon: 'quiz' },
+  { id: 'cards', labelKey: 'languages.manage', icon: 'list' },
 ];
 
 /** Add / edit one card. */
@@ -119,7 +120,7 @@ export default function DeckWorkspace({ deckId, onBack }) {
           title={t('common.back')}
           aria-label={t('common.back')}
         >
-          ←
+          <Icon name="back" size={19} />
         </button>
 
         <div className="editor-title-block">
@@ -156,7 +157,8 @@ export default function DeckWorkspace({ deckId, onBack }) {
 
         <div className="editor-header-actions">
           <button type="button" className="button primary" onClick={() => setEditingCard('new')}>
-            ＋ {t('languages.addCard')}
+            <Icon name="plus" size={17} />
+            {t('languages.addCard')}
           </button>
         </div>
       </header>
@@ -171,7 +173,7 @@ export default function DeckWorkspace({ deckId, onBack }) {
             className={`deck-tab ${tab === item.id ? 'is-active' : ''}`}
             onClick={() => setTab(item.id)}
           >
-            <span aria-hidden="true">{item.icon}</span> {t(item.labelKey)}
+            <Icon name={item.icon} size={16} /> {t(item.labelKey)}
           </button>
         ))}
         <div className="deck-legend">
@@ -184,7 +186,7 @@ export default function DeckWorkspace({ deckId, onBack }) {
       <div className="deck-content">
         {cards.length === 0 ? (
           <EmptyState
-            emoji="🎴"
+            icon="cards"
             title={t('languages.noCards')}
             action={
               <button type="button" className="button primary" onClick={() => setEditingCard('new')}>
@@ -216,7 +218,7 @@ export default function DeckWorkspace({ deckId, onBack }) {
                     aria-label={`${t('languages.editCard')} — ${card.front}`}
                     onClick={() => setEditingCard(card)}
                   >
-                    ✏️
+                    <Icon name="edit" size={15} />
                   </button>
                   <button
                     type="button"
@@ -225,7 +227,7 @@ export default function DeckWorkspace({ deckId, onBack }) {
                     aria-label={`${t('languages.deleteCard')} — ${card.front}`}
                     onClick={() => setDeletingCard(card)}
                   >
-                    🗑️
+                    <Icon name="trash" size={15} />
                   </button>
                 </div>
               </li>

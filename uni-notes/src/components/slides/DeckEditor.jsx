@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import Icon from '../ui/Icon.jsx';
 import ConfirmDialog from '../ui/ConfirmDialog.jsx';
 import PresentMode from './PresentMode.jsx';
 import SaveIndicator from '../SaveIndicator.jsx';
@@ -119,7 +120,7 @@ export default function DeckEditor({ deckId, onBack }) {
           title={t('common.back')}
           aria-label={t('common.back')}
         >
-          ←
+          <Icon name="back" size={19} />
         </button>
 
         <div className="editor-title-block">
@@ -143,7 +144,8 @@ export default function DeckEditor({ deckId, onBack }) {
 
         <div className="editor-header-actions">
           <button type="button" className="button primary" onClick={() => setPresenting(true)}>
-            ▶ {t('slides.present')}
+            <Icon name="present" size={16} />
+            {t('slides.present')}
           </button>
           <button
             type="button"
@@ -170,7 +172,8 @@ export default function DeckEditor({ deckId, onBack }) {
             </button>
           ))}
           <button type="button" className="slide-strip-add" onClick={addSlide}>
-            ＋ {t('slides.addSlide')}
+            <Icon name="plus" size={15} />
+            {t('slides.addSlide')}
           </button>
         </aside>
 
@@ -214,7 +217,7 @@ export default function DeckEditor({ deckId, onBack }) {
                 onClick={() => moveSlide(-1)}
                 disabled={index === 0}
               >
-                ↑
+                <Icon name="up" size={17} />
               </button>
               <button
                 type="button"
@@ -224,7 +227,7 @@ export default function DeckEditor({ deckId, onBack }) {
                 onClick={() => moveSlide(1)}
                 disabled={index >= slides.length - 1}
               >
-                ↓
+                <Icon name="down" size={17} />
               </button>
               <button
                 type="button"
@@ -233,7 +236,7 @@ export default function DeckEditor({ deckId, onBack }) {
                 aria-label={t('slides.duplicateSlide')}
                 onClick={duplicateSlide}
               >
-                ⧉
+                <Icon name="copy" size={17} />
               </button>
               <button
                 type="button"
@@ -242,7 +245,7 @@ export default function DeckEditor({ deckId, onBack }) {
                 aria-label={t('slides.deleteSlide')}
                 onClick={deleteSlide}
               >
-                🗑️
+                <Icon name="trash" size={17} />
               </button>
             </div>
           </div>

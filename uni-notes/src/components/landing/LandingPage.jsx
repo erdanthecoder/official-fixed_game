@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Icon from '../ui/Icon.jsx';
 import AppIcon from '../brand/AppIcon.jsx';
 import LanguagePicker from '../LanguagePicker.jsx';
 import ModulePreview from './ModulePreview.jsx';
@@ -94,7 +95,8 @@ export default function LandingPage({ onStart }) {
 
           <div className="landing-cta-row">
             <button type="button" className="button primary big" onClick={onStart}>
-              {cta} <span aria-hidden="true">→</span>
+              {cta}
+              <Icon name="forward" size={18} />
             </button>
             <a className="button ghost big on-dark" href="#tour">
               {t('landing.seeInside')}
@@ -163,30 +165,22 @@ export default function LandingPage({ onStart }) {
 
         <div className="trust-grid">
           <article className="trust-card">
-            <span className="trust-icon" aria-hidden="true">
-              💾
-            </span>
+            <Icon name="save" size={24} className="trust-icon" />
             <h3>{t('landing.trustSaveTitle')}</h3>
             <p>{t('landing.trustSaveBody')}</p>
           </article>
           <article className="trust-card">
-            <span className="trust-icon" aria-hidden="true">
-              👥
-            </span>
+            <Icon name="users" size={24} className="trust-icon" />
             <h3>{t('landing.trustShareTitle')}</h3>
             <p>{t('landing.trustShareBody')}</p>
           </article>
           <article className="trust-card">
-            <span className="trust-icon" aria-hidden="true">
-              🔒
-            </span>
+            <Icon name="lock" size={24} className="trust-icon" />
             <h3>{t('landing.trustPrivateTitle')}</h3>
             <p>{t('landing.trustPrivateBody')}</p>
           </article>
           <article className="trust-card">
-            <span className="trust-icon" aria-hidden="true">
-              🌍
-            </span>
+            <Icon name="globe" size={24} className="trust-icon" />
             <h3>{t('landing.trustLangTitle')}</h3>
             <p>{t('landing.trustLangBody')}</p>
           </article>
@@ -199,7 +193,8 @@ export default function LandingPage({ onStart }) {
         <h2>{t('landing.closeTitle')}</h2>
         <p>{t('landing.closeBody')}</p>
         <button type="button" className="button primary big" onClick={onStart}>
-          {cta} <span aria-hidden="true">→</span>
+          {cta}
+          <Icon name="forward" size={18} />
         </button>
       </section>
 

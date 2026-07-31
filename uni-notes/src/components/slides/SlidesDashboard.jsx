@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import Icon from '../ui/Icon.jsx';
 import ConfirmDialog from '../ui/ConfirmDialog.jsx';
 import EmptyState from '../shared/EmptyState.jsx';
 import ItemCard, { EditedMeta } from '../shared/ItemCard.jsx';
@@ -64,7 +65,8 @@ export default function SlidesDashboard({ onOpen }) {
         searchPlaceholder={t('slides.searchPlaceholder')}
         actions={
           <button type="button" className="button primary on-scenery" onClick={startBlank}>
-            ＋ {t('slides.newDeck')}
+            <Icon name="plus" size={17} />
+            {t('slides.newDeck')}
           </button>
         }
       />
@@ -80,7 +82,7 @@ export default function SlidesDashboard({ onOpen }) {
 
       {visible.length === 0 ? (
         <EmptyState
-          emoji="🖼️"
+          icon="layout"
           title={query ? t('notes.noMatches') : t('slides.emptyState')}
           body={query ? t('notes.noMatchesBody', { query }) : t('slides.emptyBody')}
           action={

@@ -7,6 +7,8 @@
  * they get after signing in.
  */
 
+import Icon from '../ui/Icon.jsx';
+
 function Chrome({ title, accent, children }) {
   return (
     <div className="preview-window" style={{ '--preview-accent': accent }}>
@@ -39,13 +41,13 @@ function NotesPreview({ copy }) {
         <p>{copy.notesBody}</p>
         <ul className="preview-check">
           <li>
-            <span className="ticked">☑</span> {copy.notesTask1}
+            <Icon name="circleCheck" size={15} className="ticked" /> {copy.notesTask1}
           </li>
           <li>
-            <span className="ticked">☑</span> {copy.notesTask2}
+            <Icon name="circleCheck" size={15} className="ticked" /> {copy.notesTask2}
           </li>
           <li>
-            <span>☐</span> {copy.notesTask3}
+            <Icon name="circleEmpty" size={15} /> {copy.notesTask3}
           </li>
         </ul>
       </div>
@@ -64,7 +66,7 @@ function SheetsPreview({ copy }) {
     <Chrome title={copy.sheetsFile} accent="#0F9D58">
       <div className="preview-formula">
         <span className="preview-ref">D2</span>
-        <span className="preview-fx">ƒx</span>
+        <Icon name="function" size={14} className="preview-fx" />
         <code>=B2*C2</code>
       </div>
       <table className="preview-grid">

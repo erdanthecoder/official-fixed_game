@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import Icon from '../ui/Icon.jsx';
 import ConfirmDialog from '../ui/ConfirmDialog.jsx';
 import EmptyState from '../shared/EmptyState.jsx';
 import ModuleHeader, { sortItems } from '../shared/ModuleHeader.jsx';
@@ -183,7 +184,7 @@ export default function UniSaveModule({ onOpen }) {
 
       {visible.length === 0 ? (
         <EmptyState
-          emoji="🗂️"
+          icon="tabs"
           title={query ? t('notes.noMatches') : t('unisave.emptyTitle')}
           body={query ? t('notes.noMatchesBody', { query }) : t('unisave.emptyBody')}
         />
@@ -256,7 +257,7 @@ export default function UniSaveModule({ onOpen }) {
                     disabled={readOnly}
                     onClick={() => setRenaming(entry)}
                   >
-                    ✏️
+                    <Icon name="edit" size={15} />
                   </button>
                   <button
                     type="button"
@@ -265,7 +266,7 @@ export default function UniSaveModule({ onOpen }) {
                     aria-label={`${t('common.copy')} — ${entry.title}`}
                     onClick={() => duplicate(entry.collection, entry.document.id, { titleKey: entry.titleKey })}
                   >
-                    ⧉
+                    <Icon name="copy" size={15} />
                   </button>
                   {entry.isMine ? (
                     <button
@@ -275,7 +276,7 @@ export default function UniSaveModule({ onOpen }) {
                       aria-label={`${t('common.delete')} — ${entry.title}`}
                       onClick={() => setDeleting(entry)}
                     >
-                      🗑️
+                      <Icon name="trash" size={15} />
                     </button>
                   ) : (
                     <button
@@ -285,7 +286,7 @@ export default function UniSaveModule({ onOpen }) {
                       aria-label={`${t('unisave.leave')} — ${entry.title}`}
                       onClick={() => setLeaving(entry)}
                     >
-                      🚪
+                      <Icon name="leave" size={15} />
                     </button>
                   )}
                 </span>

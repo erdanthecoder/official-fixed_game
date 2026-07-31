@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import Icon from '../ui/Icon.jsx';
 import ConfirmDialog from '../ui/ConfirmDialog.jsx';
 import EmptyState from '../shared/EmptyState.jsx';
 import ItemCard, { EditedMeta } from '../shared/ItemCard.jsx';
@@ -79,7 +80,8 @@ export default function DecksDashboard({ onOpen }) {
             className="button primary on-scenery"
             onClick={() => setCreating(true)}
           >
-            ＋ {t('languages.newDeck')}
+            <Icon name="plus" size={17} />
+            {t('languages.newDeck')}
           </button>
         }
       />
@@ -95,7 +97,7 @@ export default function DecksDashboard({ onOpen }) {
 
       {visible.length === 0 ? (
         <EmptyState
-          emoji="🗣️"
+          icon="cards"
           title={query ? t('notes.noMatches') : t('languages.emptyState')}
           body={query ? t('notes.noMatchesBody', { query }) : t('languages.emptyBody')}
           action={

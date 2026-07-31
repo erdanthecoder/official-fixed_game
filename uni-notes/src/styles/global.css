@@ -721,8 +721,10 @@ button {
   text-align: center;
 }
 
-.empty-emoji {
-  font-size: 2.6rem;
+.heading-icon {
+  vertical-align: -0.16em;
+  margin-right: 8px;
+  color: var(--accent);
 }
 
 .empty-state h2 {
@@ -1369,5 +1371,133 @@ button {
 
   .template-strip {
     grid-auto-columns: minmax(150px, 1fr);
+  }
+}
+
+/* ------------------------------ icon system ------------------------------- */
+
+/*
+ * Icons are inline SVG on a 24×24 grid drawn in `currentColor`, so they inherit
+ * the colour of whatever text sits beside them. These rules only handle
+ * alignment and the few places an icon needs its own tint or motion.
+ */
+
+.icon {
+  display: inline-block;
+  flex: none;
+  vertical-align: -0.14em;
+}
+
+button .icon,
+a .icon,
+label .icon {
+  pointer-events: none;
+}
+
+.tool-caret {
+  opacity: 0.55;
+}
+
+/* Sidebar folders. */
+.folder-icon {
+  color: var(--text-muted);
+}
+
+.folder-item.is-active .folder-icon {
+  color: var(--accent);
+}
+
+/* Empty states: large, faint, centred above the message. */
+.empty-icon {
+  margin-bottom: 12px;
+  color: var(--border-strong, #c9d3dd);
+}
+
+/* Template pickers. */
+.template-icon,
+.template-option-icon {
+  color: var(--accent);
+}
+
+.template-tile.blank .template-icon {
+  color: var(--text-muted);
+}
+
+/* Card tags sit inline with a small icon. */
+.doc-card-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Inline notices and completed rows. */
+.notice-icon {
+  flex: none;
+  margin-top: 1px;
+}
+
+.done-icon {
+  color: #0f9d58;
+}
+
+/* Radio rows: the label text next to an icon. */
+.radio-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Language code badge, in place of a flag. */
+.language-code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--surface-alt);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.language-chip.is-active .language-code {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+/* Three dots that pulse while a save is in flight — the one piece of motion
+   in the status area, so it reads as "working" without a spinner. */
+.saving-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.saving-dots i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: saving-pulse 1.05s ease-in-out infinite;
+}
+
+.saving-dots i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.saving-dots i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes saving-pulse {
+  0%,
+  100% {
+    opacity: 0.28;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .saving-dots i {
+    animation: none;
+    opacity: 0.6;
   }
 }

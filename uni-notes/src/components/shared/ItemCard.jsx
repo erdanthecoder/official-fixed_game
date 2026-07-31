@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import Icon from '../ui/Icon.jsx';
 import { formatRelativeDate } from '../../lib/text.js';
 import { useT } from '../../i18n/index.jsx';
 
@@ -9,7 +10,17 @@ import { useT } from '../../i18n/index.jsx';
  * slide, a card count) while everything else — title, meta line, ⋮ menu —
  * stays consistent.
  */
-export default function ItemCard({ title, meta, preview, thumb, tag, accent, onOpen, actions = [] }) {
+export default function ItemCard({
+  title,
+  meta,
+  preview,
+  thumb,
+  tag,
+  tagIcon,
+  accent,
+  onOpen,
+  actions = [],
+}) {
   const { t } = useT();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -30,7 +41,12 @@ export default function ItemCard({ title, meta, preview, thumb, tag, accent, onO
         <h3 className="doc-card-title">{title}</h3>
         {preview ? <p className="doc-card-preview">{preview}</p> : null}
         <div className="doc-card-meta">{meta}</div>
-        {tag ? <span className="doc-card-tag">{tag}</span> : null}
+        {tag ? (
+          <span className="doc-card-tag">
+            {tagIcon ? <Icon name={tagIcon} size={13} /> : null}
+            {tag}
+          </span>
+        ) : null}
       </button>
 
       {actions.length > 0 ? (
@@ -42,7 +58,7 @@ export default function ItemCard({ title, meta, preview, thumb, tag, accent, onO
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((open) => !open)}
           >
-            ⋮
+            <Icon name="more" size={17} />
           </button>
           {menuOpen ? (
             <div className="menu-popover" role="menu">

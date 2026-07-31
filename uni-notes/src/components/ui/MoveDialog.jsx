@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Icon from './Icon.jsx';
 import Modal from './Modal.jsx';
 import { useData } from '../../context/DataContext.jsx';
 import { useT } from '../../i18n/index.jsx';
@@ -44,8 +45,9 @@ export default function MoveDialog({ note, onClose }) {
                 checked={selected === folder.id}
                 onChange={() => setSelected(folder.id)}
               />
-              <span>
-                {folder.emoji ?? '📁'} {folder.name}
+              <span className="radio-label">
+                <Icon name={folder.icon ?? 'folder'} size={16} />
+                {folder.name}
               </span>
             </label>
           ))}
@@ -57,7 +59,10 @@ export default function MoveDialog({ note, onClose }) {
             checked={selected === ''}
             onChange={() => setSelected('')}
           />
-          <span>🗂️ {t('common.noCategory')}</span>
+          <span className="radio-label">
+            <Icon name="inbox" size={16} />
+            {t('common.noCategory')}
+          </span>
         </label>
       </div>
     </Modal>

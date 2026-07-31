@@ -1,6 +1,6 @@
 import ColorMenu from './ColorMenu.jsx';
+import Icon from '../../ui/Icon.jsx';
 import TemplateMenu from './TemplateMenu.jsx';
-import { BulletListIcon, NumberListIcon } from './icons.jsx';
 import { useT } from '../../../i18n/index.jsx';
 
 const TEXT_COLORS = [
@@ -56,8 +56,8 @@ export default function Toolbar({ editorRef, formatState, onInsertTemplate }) {
   return (
     <div className="toolbar" role="toolbar" aria-label={t('notes.textStyle')}>
       <div className="tool-group">
-        {toolButton('undo', `${t('notes.undo')} (Ctrl+Z)`, '↶', 'undo')}
-        {toolButton('redo', `${t('notes.redo')} (Ctrl+Shift+Z)`, '↷', 'redo')}
+        {toolButton('undo', `${t('notes.undo')} (Ctrl+Z)`, <Icon name="undo" size={17} />, 'undo')}
+        {toolButton('redo', `${t('notes.redo')} (Ctrl+Shift+Z)`, <Icon name="redo" size={17} />, 'redo')}
       </div>
 
       <div className="tool-group">
@@ -77,30 +77,31 @@ export default function Toolbar({ editorRef, formatState, onInsertTemplate }) {
       </div>
 
       <div className="tool-group">
-        {toolButton('bold', `${t('notes.bold')} (Ctrl+B)`, 'B', 'bold', {
+        {toolButton('bold', `${t('notes.bold')} (Ctrl+B)`, <Icon name="bold" size={17} />, 'bold', {
           isActive: formatState.bold,
-          className: 'glyph-bold',
         })}
-        {toolButton('italic', `${t('notes.italic')} (Ctrl+I)`, 'I', 'italic', {
+        {toolButton('italic', `${t('notes.italic')} (Ctrl+I)`, <Icon name="italic" size={17} />, 'italic', {
           isActive: formatState.italic,
-          className: 'glyph-italic',
         })}
-        {toolButton('underline', `${t('notes.underline')} (Ctrl+U)`, 'U', 'underline', {
-          isActive: formatState.underline,
-          className: 'glyph-underline',
-        })}
+        {toolButton(
+          'underline',
+          `${t('notes.underline')} (Ctrl+U)`,
+          <Icon name="underline" size={17} />,
+          'underline',
+          { isActive: formatState.underline },
+        )}
       </div>
 
       <div className="tool-group">
         <ColorMenu
           label={t('notes.textColour')}
-          icon="🅰"
+          icon={<Icon name="textColour" size={17} />}
           colors={TEXT_COLORS}
           onPick={(color) => exec('foreColor', color)}
         />
         <ColorMenu
           label={t('notes.highlight')}
-          icon="🖍"
+          icon={<Icon name="highlight" size={17} />}
           colors={HIGHLIGHTS}
           onPick={(color) => exec('hiliteColor', color)}
           onClear={() => exec('hiliteColor', 'transparent')}
@@ -109,16 +110,16 @@ export default function Toolbar({ editorRef, formatState, onInsertTemplate }) {
       </div>
 
       <div className="tool-group">
-        {toolButton('ul', t('notes.bulletList'), <BulletListIcon />, 'insertUnorderedList', {
+        {toolButton('ul', t('notes.bulletList'), <Icon name="listBullet" size={17} />, 'insertUnorderedList', {
           isActive: formatState.unorderedList,
         })}
-        {toolButton('ol', t('notes.numberList'), <NumberListIcon />, 'insertOrderedList', {
+        {toolButton('ol', t('notes.numberList'), <Icon name="listNumber" size={17} />, 'insertOrderedList', {
           isActive: formatState.orderedList,
         })}
       </div>
 
       <div className="tool-group">
-        {toolButton('clear', t('notes.clearFormatting'), '⌫', 'removeFormat')}
+        {toolButton('clear', t('notes.clearFormatting'), <Icon name="clearFormat" size={17} />, 'removeFormat')}
       </div>
 
       <div className="tool-group push-right">

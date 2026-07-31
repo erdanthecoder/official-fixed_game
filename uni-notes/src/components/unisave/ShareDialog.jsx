@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Icon from '../ui/Icon.jsx';
 import Modal from '../ui/Modal.jsx';
 import {
   SHARE_ERROR,
@@ -207,7 +208,7 @@ export default function ShareDialog({ document: doc, onClose }) {
                         aria-label={`${t('share.remove')} — ${member.email}`}
                         onClick={() => remove(memberUid)}
                       >
-                        ✕
+                        <Icon name="close" size={15} />
                       </button>
                     </>
                   ) : (
@@ -226,7 +227,9 @@ export default function ShareDialog({ document: doc, onClose }) {
               <ul className="share-members">
                 {invites.map((item) => (
                   <li key={item.email}>
-                    <span className="share-avatar is-pending">✉</span>
+                    <span className="share-avatar is-pending">
+                      <Icon name="inbox" size={16} />
+                    </span>
                     <span className="share-who">
                       <strong>{item.email}</strong>
                       <small>{t('share.pendingHint')}</small>
@@ -241,7 +244,7 @@ export default function ShareDialog({ document: doc, onClose }) {
                       aria-label={`${t('share.withdraw')} — ${item.email}`}
                       onClick={() => withdraw(item.email)}
                     >
-                      ✕
+                      <Icon name="close" size={15} />
                     </button>
                   </li>
                 ))}

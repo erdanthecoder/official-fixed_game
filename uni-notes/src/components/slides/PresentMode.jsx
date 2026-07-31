@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import Icon from '../ui/Icon.jsx';
 import SlideView from './SlideView.jsx';
 import { useT } from '../../i18n/index.jsx';
 
@@ -75,7 +76,7 @@ export default function PresentMode({ deck, startIndex = 0, onExit }) {
             disabled={index === 0}
             aria-label={t('common.previous')}
           >
-            ←
+            <Icon name="back" size={19} />
           </button>
           <button
             type="button"
@@ -84,7 +85,7 @@ export default function PresentMode({ deck, startIndex = 0, onExit }) {
             disabled={index >= slides.length - 1}
             aria-label={t('common.next')}
           >
-            →
+            <Icon name="forward" size={19} />
           </button>
         </div>
       </div>

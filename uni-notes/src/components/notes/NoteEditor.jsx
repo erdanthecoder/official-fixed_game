@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
+import Icon from '../ui/Icon.jsx';
 import ConfirmDialog from '../ui/ConfirmDialog.jsx';
 import MoveDialog from '../ui/MoveDialog.jsx';
 import RichTextEditor from './editor/RichTextEditor.jsx';
@@ -64,7 +65,7 @@ export default function NoteEditor({ noteId, onBack }) {
           title={t('common.back')}
           aria-label={t('common.back')}
         >
-          ←
+          <Icon name="back" size={19} />
         </button>
 
         <div className="editor-title-block">
@@ -93,7 +94,8 @@ export default function NoteEditor({ noteId, onBack }) {
               onClick={() => setMoving(true)}
               title={t('notes.changeCategory')}
             >
-              {folder ? `${folder.emoji ?? '📁'} ${folder.name}` : `🗂️ ${t('common.noCategory')}`}
+              <Icon name={folder ? (folder.icon ?? 'folder') : 'inbox'} size={14} />
+              {folder ? folder.name : t('common.noCategory')}
             </button>
             <span className="dot" aria-hidden="true">
               ·

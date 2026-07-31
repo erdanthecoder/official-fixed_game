@@ -338,21 +338,29 @@
   line-height: 1.5;
 }
 
+/* Tick marker, drawn rather than typed: a disc, plus two borders of an
+   invisible box rotated 45° to make the stroke of a checkmark. */
 .tour-points li::before {
-  content: '✓';
+  content: '';
   position: absolute;
   left: 0;
   top: -1px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: 18px;
   height: 18px;
   border-radius: 50%;
   background: #e4f5ec;
-  color: #0f9d58;
-  font-size: 0.66rem;
-  font-weight: 800;
+}
+
+.tour-points li::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 4px;
+  width: 5px;
+  height: 8px;
+  border: solid #0f9d58;
+  border-width: 0 1.8px 1.8px 0;
+  transform: rotate(43deg);
 }
 
 /* the mock window */
