@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Icon from './ui/Icon.jsx';
-import AppIcon from './brand/AppIcon.jsx';
+import Logo from './brand/Logo.jsx';
 import LanguagePicker from './LanguagePicker.jsx';
 import ProductIcon, { PRODUCTS } from './brand/ProductIcon.jsx';
 import Scenery from './Scenery.jsx';
@@ -91,11 +91,7 @@ export default function AuthScreen({ onBack }) {
         <Scenery slot="signIn" className="auth-scene" overlay />
         <div className="auth-aside-inner">
           <a className="auth-brand" href="#/">
-            <AppIcon size={38} />
-            <span>
-              <strong>{t('common.appName')}</strong>
-              <small>{t('common.tagline')}</small>
-            </span>
+            <Logo size={38} sub={t('common.tagline')} wordTone="light" />
           </a>
 
           <h2>{t('auth.heroTitle')}</h2>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Icon from './ui/Icon.jsx';
-import AppIcon from './brand/AppIcon.jsx';
+import Logo from './brand/Logo.jsx';
 import ConfirmDialog from './ui/ConfirmDialog.jsx';
 import ProductIcon, { PRODUCTS } from './brand/ProductIcon.jsx';
 import PromptDialog from './ui/PromptDialog.jsx';
@@ -96,11 +96,7 @@ export default function Sidebar({
       <aside className={`sidebar ${isOpen ? 'is-open' : ''}`} aria-label={t('common.appName')}>
         <div className="sidebar-brand">
           <button type="button" className="brand-home" onClick={onGoHome} title={t('nav.home')}>
-            <AppIcon size={32} />
-            <span>
-              <strong>{t('common.appName')}</strong>
-              <small>{t(PRODUCTS[activeModule]?.labelKey ?? 'common.tagline')}</small>
-            </span>
+            <Logo size={32} sub={t(PRODUCTS[activeModule]?.labelKey ?? 'common.tagline')} />
           </button>
 
           <div className="switcher-wrap">

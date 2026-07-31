@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Icon from '../ui/Icon.jsx';
-import AppIcon from '../brand/AppIcon.jsx';
+import Logo from '../brand/Logo.jsx';
 import LanguagePicker from '../LanguagePicker.jsx';
 import ModulePreview from './ModulePreview.jsx';
 import ProductIcon, { PRODUCTS } from '../brand/ProductIcon.jsx';
@@ -69,11 +69,7 @@ export default function LandingPage({ onStart }) {
     <div className="landing">
       <header className="landing-top">
         <a className="landing-brand" href="#/">
-          <AppIcon size={34} />
-          <span>
-            <strong>{t('common.appName')}</strong>
-            <small>{t('common.tagline')}</small>
-          </span>
+          <Logo size={34} sub={t('common.tagline')} />
         </a>
 
         <div className="landing-top-actions">
@@ -189,7 +185,7 @@ export default function LandingPage({ onStart }) {
 
       {/* ------------------------------ closing ------------------------------ */}
       <section className="landing-close">
-        <AppIcon size={56} />
+        <Logo variant="mark" size={56} />
         <h2>{t('landing.closeTitle')}</h2>
         <p>{t('landing.closeBody')}</p>
         <button type="button" className="button primary big" onClick={onStart}>

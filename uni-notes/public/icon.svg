@@ -1,14 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Uni">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Uni">
   <title>Uni</title>
   <!--
-    The mark: a heavy U — the basin of Issyk-Kul, and the app's initial —
-    cradling a low amber sun.
+    The Uni mark: a letter U holding a sun — the basin of Issyk-Kul with the
+    sun sitting in it.
 
-    Rules this obeys, because an icon lives or dies at 16px:
-      · one tile colour, one light form, one warm accent. Nothing else.
-      · stroke weight 78/512 (≈15%), so the U never thins into a hairline.
-      · all art inside the central 76%, which keeps it safe under the
-        circular mask Android and iOS apply.
+    Same geometry as src/components/brand/Logo.jsx, which is where the
+    reasoning is written out in full. The short version:
+
+      · 64-unit grid, every coordinate on a whole unit
+      · walls 15 -> 49 outside, 24 -> 40 inside; constant 9-unit weight
+        (outer bowl radius 17, inner 8, and 17 - 8 = 9)
+      · the counter is 16 units across and the sun is 16 units across, so the
+        sun drops in and rests against the U on three sides
+
+    That last part is the point: there is no gap anywhere in the mark, so
+    nothing collapses at 16px. All art sits inside the central 76%, which
+    keeps it safe under the circular mask Android and iOS apply.
+
+    If you change a number here, change it in Logo.jsx too.
   -->
   <defs>
     <linearGradient id="uni-tile" x1="0.1" y1="0" x2="0.9" y2="1">
@@ -16,13 +25,13 @@
       <stop offset="55%" stop-color="#0B4265" />
       <stop offset="100%" stop-color="#062B44" />
     </linearGradient>
-    <linearGradient id="uni-stroke" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="uni-u" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#FFFFFF" />
       <stop offset="100%" stop-color="#D8ECF6" />
     </linearGradient>
     <linearGradient id="uni-sun" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#FFC978" />
-      <stop offset="100%" stop-color="#EE9134" />
+      <stop offset="0%" stop-color="#FFD089" />
+      <stop offset="100%" stop-color="#E98C2C" />
     </linearGradient>
     <radialGradient id="uni-sheen" cx="0.5" cy="0.02" r="0.85">
       <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.16" />
@@ -30,18 +39,15 @@
     </radialGradient>
   </defs>
 
-  <rect width="512" height="512" rx="116" fill="url(#uni-tile)" />
-  <rect width="512" height="512" rx="116" fill="url(#uni-sheen)" />
+  <rect width="64" height="64" rx="14.5" fill="url(#uni-tile)" />
+  <rect width="64" height="64" rx="14.5" fill="url(#uni-sheen)" />
 
-  <!-- The sun, held in the mouth of the U -->
-  <circle cx="256" cy="203" r="42" fill="url(#uni-sun)" />
+  <!-- The sun, resting in the bowl -->
+  <circle cx="32" cy="31" r="8" fill="url(#uni-sun)" />
 
-  <!-- The U: two verticals joined by a true semicircle -->
+  <!-- The U: down the outer wall, round the bowl, up, and back through the counter -->
   <path
-    d="M150 140 L150 268 A106 106 0 0 0 362 268 L362 140"
-    fill="none"
-    stroke="url(#uni-stroke)"
-    stroke-width="78"
-    stroke-linecap="round"
+    d="M15 15 L15 31 A17 17 0 0 0 49 31 L49 15 L40 15 L40 31 A8 8 0 0 1 24 31 L24 15 Z"
+    fill="url(#uni-u)"
   />
 </svg>
