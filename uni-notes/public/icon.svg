@@ -1,24 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Uni">
   <title>Uni</title>
   <!--
-    The Uni mark: a letter U with the light of the lake pooling in the bottom of
-    it — white at the tips, warming down through gold to amber where the bowl
-    turns. Issyk-Kul at the end of the day, and the app's initial, in one shape.
+    The Uni mark: a heavy oblique U with the air still coming off it.
 
     Same geometry as src/components/brand/Logo.jsx, which is where the reasoning
     is written out in full. The short version:
 
-      · 64-unit grid, every coordinate on a whole unit
-      · outer walls 13 -> 51, outer bowl r 19 centred (32, 31)
-      · inner counter 25 -> 39, inner bowl r 7 centred (32, 36)
-      · so the wall tapers from 12 units at the stems to 7 at the base, the way
-        a drawn letter modulates and a plotted one does not
+      · a bold geometric U on a 64 cap height, sheared 12 degrees — stems 14,
+        outer bowl r23, inner r9, and 23 - 9 = 14, so the weight holds constant
+        all the way round the turn
+      · three speed bars behind it, longest and thickest at the top, each fading
+        out backwards so they read as air left behind rather than as stripes
 
-    Both straight walls meet their arcs at the arc's widest point, where a
-    vertical line is tangent to a circle, so the joins are smooth without a
-    fudge curve. There is no gap anywhere in the mark, which is what lets it
-    survive 16px. All art sits inside the central 80%, keeping it safe under
-    the circular mask Android and iOS apply.
+    The bars are 6 units thick because one pixel at favicon size is four units
+    on this grid — a pixel and a half at 16px, which survives. Thinner versions
+    were tried and turned to grey mush.
 
     If you change a number here, change it in Logo.jsx too.
   -->
@@ -28,14 +24,18 @@
       <stop offset="52%" stop-color="#0B4265" />
       <stop offset="100%" stop-color="#04203A" />
     </linearGradient>
-    <linearGradient id="uni-u" x1="0.18" y1="0" x2="0.78" y2="1">
+    <linearGradient id="uni-ink" x1="0.1" y1="0" x2="0.85" y2="1">
       <stop offset="0%" stop-color="#FFFFFF" />
-      <stop offset="40%" stop-color="#FFF1D6" />
-      <stop offset="74%" stop-color="#FDBB5A" />
+      <stop offset="42%" stop-color="#FFF1D6" />
+      <stop offset="76%" stop-color="#FDBB5A" />
       <stop offset="100%" stop-color="#E4801A" />
     </linearGradient>
+    <linearGradient id="uni-speed" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#FDBB5A" stop-opacity="0" />
+      <stop offset="100%" stop-color="#FDBB5A" />
+    </linearGradient>
     <radialGradient id="uni-sheen" cx="0.5" cy="0" r="0.9">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.18" />
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.16" />
       <stop offset="62%" stop-color="#FFFFFF" stop-opacity="0" />
     </radialGradient>
   </defs>
@@ -43,9 +43,18 @@
   <rect width="64" height="64" rx="14.5" fill="url(#uni-tile)" />
   <rect width="64" height="64" rx="14.5" fill="url(#uni-sheen)" />
 
-  <!-- The U: down the outer wall, round the bowl, up, and back through the counter -->
-  <path
-    d="M13 13 L13 31 A19 19 0 0 0 51 31 L51 13 L39 13 L39 36 A7 7 0 0 1 25 36 L25 13 Z"
-    fill="url(#uni-u)"
-  />
+  <!-- The air -->
+  <rect x="8" y="19" width="16" height="6" rx="3" fill="url(#uni-speed)" />
+  <rect x="8" y="29" width="13" height="6" rx="3" fill="url(#uni-speed)" />
+  <rect x="8" y="39" width="10" height="6" rx="3" fill="url(#uni-speed)" />
+
+  <!-- The U -->
+  <g transform="translate(26 16) scale(0.53)">
+    <g transform="skewX(-12) translate(6 0)">
+      <path
+        d="M0 0 L0 41 A23 23 0 0 0 46 41 L46 0 L32 0 L32 41 A9 9 0 0 1 14 41 L14 0 Z"
+        fill="url(#uni-ink)"
+      />
+    </g>
+  </g>
 </svg>
