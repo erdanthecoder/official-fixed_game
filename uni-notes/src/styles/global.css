@@ -1286,6 +1286,83 @@ button {
   display: none;
 }
 
+/* --------------------------------- rail ----------------------------------- */
+
+/*
+ * Notes is the only module with categories. Everywhere else the sidebar has
+ * nothing to hold now that the apps live in the launcher, so it narrows to a
+ * rail: mark, nine dots, settings, avatar. An empty 260px column reads as a
+ * bug; a deliberate 74px one reads as a rail.
+ *
+ * It stays full width in the mobile drawer, where the sidebar is an overlay
+ * you opened on purpose and a sliver of icons would be a strange thing to
+ * have asked for.
+ */
+
+.sidebar.is-rail {
+  width: 74px;
+  flex: 0 0 74px;
+  padding: 18px 8px;
+  align-items: center;
+}
+
+.sidebar.is-rail .sidebar-brand {
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+}
+
+.sidebar.is-rail .brand-home {
+  flex: none;
+  padding: 0;
+}
+
+.sidebar.is-rail .sidebar-footer,
+.sidebar.is-rail .account-row,
+.sidebar.is-rail .module-item.compact {
+  width: 100%;
+  justify-content: center;
+}
+
+.sidebar.is-rail .module-text,
+.sidebar.is-rail .account-text,
+.sidebar.is-rail .account-row .icon-button,
+.sidebar.is-rail .sidebar-save {
+  display: none;
+}
+
+.sidebar.is-rail .account-row {
+  padding: 8px 0;
+  background: none;
+}
+
+@media (max-width: 900px) {
+  .sidebar.is-rail {
+    width: var(--sidebar-width);
+    flex: 0 0 var(--sidebar-width);
+    padding: 18px 14px;
+    align-items: stretch;
+  }
+
+  .sidebar.is-rail .sidebar-brand {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .sidebar.is-rail .module-text,
+  .sidebar.is-rail .account-text,
+  .sidebar.is-rail .account-row .icon-button,
+  .sidebar.is-rail .sidebar-save {
+    display: revert;
+  }
+
+  .sidebar.is-rail .sidebar-footer,
+  .sidebar.is-rail .account-row,
+  .sidebar.is-rail .module-item.compact {
+    justify-content: flex-start;
+  }
+}
+
 /* ------------------------------- responsive ------------------------------- */
 
 @media (max-width: 900px) {

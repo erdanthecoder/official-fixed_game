@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
+import AppLauncher from './AppLauncher.jsx';
 import Icon from './ui/Icon.jsx';
 import Logo from './brand/Logo.jsx';
 import ConfirmDialog from './ui/ConfirmDialog.jsx';
@@ -9,50 +10,14 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useData } from '../context/DataContext.jsx';
 import { useT } from '../i18n/index.jsx';
 
-const MODULES = ['notes', 'sheets', 'slides', 'canvas', 'tasks', 'unisave', 'ai', 'languages'];
-
-/** The grid of products, the way a suite offers its apps. */
-function AppSwitcher({ active, onPick, onClose }) {
-  const { t } = useT();
-  const panel = useRef(null);
-
-  useEffect(() => {
-    const onOutside = (event) => {
-      if (!panel.current?.contains(event.target)) onClose();
-    };
-    const onEscape = (event) => event.key === 'Escape' && onClose();
-    document.addEventListener('mousedown', onOutside);
-    document.addEventListener('keydown', onEscape);
-    return () => {
-      document.removeEventListener('mousedown', onOutside);
-      document.removeEventListener('keydown', onEscape);
-    };
-  }, [onClose]);
-
-  return (
-    <div className="switcher-panel" ref={panel} role="menu" aria-label={t('nav.switcher')}>
-      {[...MODULES, 'settings'].map((product) => (
-        <button
-          key={product}
-          type="button"
-          role="menuitem"
-          className={`switcher-item ${active === product ? 'is-active' : ''}`}
-          onClick={() => {
-            onPick(product);
-            onClose();
-          }}
-        >
-          <ProductIcon product={product} size={38} variant="solid" />
-          <span>{t(PRODUCTS[product].labelKey)}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
 /**
- * Suite navigation. The category list only appears inside Notes, since that's
- * the only module that uses folders.
+ * Suite navigation.
+ *
+ * The apps live behind the nine-dot launcher rather than in a list down the
+ * side: eight modules took the whole column and had to be re-read every time,
+ * and the sidebar is more useful given over to the thing that changes while you
+ * work. The category list only appears inside Notes, since that is the only
+ * module with folders.
  */
 export default function Sidebar({
   activeModule,
@@ -67,7 +32,6 @@ export default function Sidebar({
   const { notes, folders, create, update, deleteFolder, storageMode } = useData();
   const { user, signOut, isFirebaseConfigured } = useAuth();
 
-  const [switcherOpen, setSwitcherOpen] = useState(false);
   const [addingFolder, setAddingFolder] = useState(false);
   const [renamingFolder, setRenamingFolder] = useState(null);
   const [deletingFolder, setDeletingFolder] = useState(null);
@@ -91,60 +55,30 @@ export default function Sidebar({
     onClose?.();
   };
 
+  // Notes is the only module with categories. Everywhere else the sidebar has
+  // nothing left to hold now that the app list has moved into the launcher, so
+  // it collapses to a rail rather than standing there as an empty column.
+  const showFolders = activeModule === 'notes';
+
   return (
     <>
-      <aside className={`sidebar ${isOpen ? 'is-open' : ''}`} aria-label={t('common.appName')}>
+      <aside
+        className={`sidebar ${isOpen ? 'is-open' : ''} ${showFolders ? '' : 'is-rail'}`}
+        aria-label={t('common.appName')}
+      >
         <div className="sidebar-brand">
           <button type="button" className="brand-home" onClick={onGoHome} title={t('nav.home')}>
-            <Logo size={32} sub={t(PRODUCTS[activeModule]?.labelKey ?? 'common.tagline')} />
+            {showFolders ? (
+              <Logo size={32} sub={t(PRODUCTS[activeModule]?.labelKey ?? 'common.tagline')} />
+            ) : (
+              <Logo variant="mark" size={32} />
+            )}
           </button>
 
-          <div className="switcher-wrap">
-            <button
-              type="button"
-              className={`icon-button switcher-button ${switcherOpen ? 'is-open' : ''}`}
-              aria-label={t('nav.switcher')}
-              aria-expanded={switcherOpen}
-              onClick={() => setSwitcherOpen((open) => !open)}
-            >
-              <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-                {[2, 7.5, 13].map((y) =>
-                  [2, 7.5, 13].map((x) => (
-                    <rect key={`${x}-${y}`} x={x} y={y} width="3" height="3" rx="0.8" fill="currentColor" />
-                  )),
-                )}
-              </svg>
-            </button>
-            {switcherOpen ? (
-              <AppSwitcher
-                active={activeModule}
-                onPick={pickModule}
-                onClose={() => setSwitcherOpen(false)}
-              />
-            ) : null}
-          </div>
+          <AppLauncher active={activeModule} onPick={pickModule} />
         </div>
 
-        <nav className="module-nav" aria-label={t('common.appName')}>
-          {MODULES.map((module) => (
-            <button
-              key={module}
-              type="button"
-              className={`module-item ${activeModule === module ? 'is-active' : ''}`}
-              style={{ '--module-accent': PRODUCTS[module].colour }}
-              onClick={() => pickModule(module)}
-              aria-current={activeModule === module ? 'page' : undefined}
-            >
-              <ProductIcon product={module} size={26} />
-              <span className="module-text">
-                <strong>{t(PRODUCTS[module].labelKey)}</strong>
-                <small>{t(PRODUCTS[module].hintKey)}</small>
-              </span>
-            </button>
-          ))}
-        </nav>
-
-        {activeModule === 'notes' ? (
+        {showFolders ? (
           <nav className="folder-list" aria-label={t('notes.categories')}>
             <p className="sidebar-heading">{t('notes.categories')}</p>
 
@@ -223,6 +157,8 @@ export default function Sidebar({
             type="button"
             className={`module-item compact ${activeModule === 'settings' ? 'is-active' : ''}`}
             style={{ '--module-accent': PRODUCTS.settings.colour }}
+            title={t('nav.settings')}
+            aria-label={t('nav.settings')}
             onClick={() => pickModule('settings')}
           >
             <ProductIcon product="settings" size={26} />

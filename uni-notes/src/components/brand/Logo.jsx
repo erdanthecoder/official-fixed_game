@@ -2,26 +2,41 @@
  * The Uni logo, as a system.
  *
  * ── The mark ──────────────────────────────────────────────────────────────
- * A letter U holding a sun: the basin of Issyk-Kul with the sun sitting in it.
+ * A letter U with the light of the lake pooling in the bottom of it: white at
+ * the tips, warming down through gold to amber where the bowl turns. Issyk-Kul
+ * at the end of the day, and the app's initial, in one shape.
  *
- * Everything is drawn on a 64-unit grid and every coordinate lands on a whole
- * unit, so the mark stays crisp when it is scaled to 16, 32, 192 or 512.
+ * The previous version put a separate amber disc inside the U. Two problems
+ * with that, and they are the reasons this exists. A mark made of a letter plus
+ * a dot reads as a letter plus a dot — a symbol next to a shape, not one idea.
+ * And the disc had to fit *inside* the counter, so the U around it was forced
+ * thin and even, which is what made it look like a magnet rather than a letter.
+ * Putting the colour into the letterform itself solves both: one silhouette,
+ * one idea, and the U is free to be drawn properly.
  *
- *   outer walls   x 15 → 49   (34 wide)
- *   inner counter x 24 → 40   (16 wide)
- *   wall weight   9 units, constant — the outer bowl radius is 17 and the
- *                 inner is 8, and 17 − 8 = 9, so the curve never thins
- *   sun          r 8, centred on the bowl's own centre (32, 31)
+ * Which is the second half of this. The strokes are modulated the way a real
+ * typeface modulates them — heavy stems, a thinner bowl where the curve turns —
+ * rather than a single constant width. That contrast is most of what separates
+ * a drawn letter from a plotted one.
  *
- * That last number is the whole idea. The counter is exactly 16 units across
- * and the sun is exactly 16 units across, so the sun drops into the U and
- * settles against it on three sides. Nothing floats, and there is no gap
- * anywhere in the mark.
+ * Everything sits on a 64-unit grid and every coordinate lands on a whole unit,
+ * so it stays crisp at 16, 32, 192 and 512:
  *
- * Which matters more than it sounds: a gap of two or three units disappears
- * below one pixel at favicon size, and a mark that relies on one turns to mush
- * at 16px. Contact survives every size. Above the sun the counter stays open —
- * eight units of sky — and that is what keeps the U readable as a letter.
+ *   outer walls    x 13 → 51   (38 wide), outer bowl r 19 centred (32, 31)
+ *   inner counter  x 25 → 39   (14 wide), inner bowl r 7  centred (32, 36)
+ *   stems          12 units    (25 − 13)
+ *   bowl bottom     7 units    (50 − 43)
+ *
+ * The two bowl centres are 5 apart and the radii differ by 12, so the wall
+ * tapers smoothly from 12 at the sides to 7 at the base. Both straight walls
+ * meet their arcs at the arc's widest point, which is where a vertical line is
+ * tangent to a circle — so the join is smooth without needing a curve to fake
+ * it. The whole mark sits half a unit above centre, because a U is bottom-heavy
+ * and centring it mathematically makes it look like it is sinking.
+ *
+ * There is no gap anywhere in the mark. That matters more than it sounds: a gap
+ * of two or three units falls below one pixel at favicon size, and anything
+ * relying on one turns to mush at 16px.
  *
  * ── The lockups ───────────────────────────────────────────────────────────
  *   mark        the tile alone: favicons, avatars, tight chrome
@@ -36,20 +51,20 @@
  * Nothing is allowed inside it.
  *
  * ── Tones ─────────────────────────────────────────────────────────────────
- *   tile   full colour on the deep-blue tile — the default, and the only
- *          version an app launcher should ever get
- *   light  tile removed, U in white — for dark or photographic surfaces
- *   ink    tile removed, U in deep blue — for light surfaces and print
+ *   tile   the U on the deep lake tile — the default, and the only version an
+ *          app launcher should ever get
+ *   light  no tile, the same white-to-amber wash — for dark or photographic
+ *          surfaces
+ *   ink    no tile, lake-blue into amber — for light surfaces and print, where
+ *          a wash that starts at white would begin by being invisible
  *
  * public/icon.svg carries the same geometry for browsers and launchers, which
  * cannot read a React component. If you change a number here, change it there.
  */
 
-/** Outer wall, down the left, round the bowl, up the right, back through the counter. */
+/** Down the outer wall, round the bowl, up, and back through the counter. */
 const U_PATH =
-  'M15 15 L15 31 A17 17 0 0 0 49 31 L49 15 L40 15 L40 31 A8 8 0 0 1 24 31 L24 15 Z';
-
-const U_INK = '#0B4265';
+  'M13 13 L13 31 A19 19 0 0 0 51 31 L51 13 L39 13 L39 36 A7 7 0 0 1 25 36 L25 13 Z';
 
 let seq = 0;
 
@@ -58,6 +73,7 @@ export function LogoMark({ size = 40, tone = 'tile', className = '' }) {
   // inherits the first one's fills.
   const id = `uni-mark-${(seq += 1)}`;
   const onTile = tone === 'tile';
+  const onLight = tone === 'ink';
 
   return (
     <svg
@@ -69,24 +85,36 @@ export function LogoMark({ size = 40, tone = 'tile', className = '' }) {
       aria-label="Uni"
     >
       <defs>
-        <linearGradient id={`${id}-tile`} x1="0.1" y1="0" x2="0.9" y2="1">
-          <stop offset="0%" stopColor="#125E86" />
-          <stop offset="55%" stopColor="#0B4265" />
-          <stop offset="100%" stopColor="#062B44" />
+        <linearGradient id={`${id}-tile`} x1="0.12" y1="0" x2="0.88" y2="1">
+          <stop offset="0%" stopColor="#17739B" />
+          <stop offset="52%" stopColor="#0B4265" />
+          <stop offset="100%" stopColor="#04203A" />
         </linearGradient>
-        <linearGradient id={`${id}-u`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FFFFFF" />
-          <stop offset="100%" stopColor="#D8ECF6" />
+
+        {/* The light, raked diagonally so it falls across the letter rather
+            than washing straight down it. */}
+        <linearGradient id={`${id}-u`} x1="0.18" y1="0" x2="0.78" y2="1">
+          {onLight ? (
+            <>
+              <stop offset="0%" stopColor="#0B4265" />
+              <stop offset="46%" stopColor="#1B7FA8" />
+              <stop offset="100%" stopColor="#E4801A" />
+            </>
+          ) : (
+            <>
+              <stop offset="0%" stopColor="#FFFFFF" />
+              <stop offset="40%" stopColor="#FFF1D6" />
+              <stop offset="74%" stopColor="#FDBB5A" />
+              <stop offset="100%" stopColor="#E4801A" />
+            </>
+          )}
         </linearGradient>
-        <linearGradient id={`${id}-sun`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FFD089" />
-          <stop offset="100%" stopColor="#E98C2C" />
-        </linearGradient>
-        {/* A single soft highlight from above, so the tile has depth without
+
+        {/* One soft highlight from above, so the tile has depth without
             looking like it was rendered in 2009. */}
-        <radialGradient id={`${id}-sheen`} cx="0.5" cy="0.02" r="0.85">
-          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.16" />
-          <stop offset="60%" stopColor="#FFFFFF" stopOpacity="0" />
+        <radialGradient id={`${id}-sheen`} cx="0.5" cy="0" r="0.9">
+          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.18" />
+          <stop offset="62%" stopColor="#FFFFFF" stopOpacity="0" />
         </radialGradient>
       </defs>
 
@@ -97,11 +125,7 @@ export function LogoMark({ size = 40, tone = 'tile', className = '' }) {
         </>
       ) : null}
 
-      <circle cx="32" cy="31" r="8" fill={`url(#${id}-sun)`} />
-      <path
-        d={U_PATH}
-        fill={onTile ? `url(#${id}-u)` : tone === 'ink' ? U_INK : '#FFFFFF'}
-      />
+      <path d={U_PATH} fill={`url(#${id}-u)`} />
     </svg>
   );
 }

@@ -240,12 +240,8 @@
 
 /* ------------------------------- module nav ------------------------------- */
 
-.module-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
+/* The old vertical module list is gone — the launcher replaced it. `.module-item`
+   stays because the sidebar footer still uses one row for Settings. */
 .module-item {
   display: flex;
   align-items: center;
@@ -271,11 +267,6 @@
 
 .module-item.is-active .module-text small {
   color: #1a73e8;
-}
-
-.module-icon {
-  font-size: 1.15rem;
-  line-height: 1;
 }
 
 .module-text strong {

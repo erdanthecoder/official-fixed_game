@@ -8,7 +8,8 @@ your account, and you choose who else can open it.
 The interface speaks **English, Русский and Кыргызча**.
 
 Visiting the bare URL gets a landing page that shows each tool working before
-asking anyone to sign in — click **Let's go** to start.
+asking anyone to sign in — click **Let's go** to start. Inside, the apps live
+behind the nine-dot launcher in the top-left corner, the way a suite does.
 
 ## Run it
 
@@ -184,16 +185,18 @@ uni-notes/
       aiClient.js          calls the AI function
       seed.js              first-run content
       text.js  ids.js
-      templates/           notes / sheets / slides / vocab starters
+      templates/           notes / sheets / slides / canvas / tasks / vocab
     hooks/useHashRoute.js  #/, #/signin, #/notes, #/unisave, …
     i18n/                  provider + en / ru / ky strings + loading tips
     components/
-      brand/               AppIcon, ProductIcon (per-module colour + glyph)
+      brand/               Logo (mark, wordmark, lockups), ProductIcon
+                           (per-module colour + glyph)
       landing/             LandingPage, ModulePreview
-      AuthScreen.jsx  Sidebar.jsx  Scenery.jsx  SettingsPage.jsx
+      AuthScreen.jsx  Sidebar.jsx  AppLauncher.jsx  Scenery.jsx
+      SettingsPage.jsx
       TipLine.jsx  LanguagePicker.jsx  SaveIndicator.jsx
       shared/              ModuleHeader, TemplateStrip, ItemCard, EmptyState
-      notes/  sheets/  slides/  unisave/  languages/  ai/
+      notes/  sheets/  slides/  canvas/  tasks/  unisave/  languages/  ai/
       ui/                  Modal, PromptDialog, ConfirmDialog, MoveDialog
     styles/
       global.css           tokens, buttons, cards, dialogs, Notes editor
@@ -211,8 +214,9 @@ uni-notes/
   to `LANGUAGES`. Missing keys fall back to English per key, so a partial
   translation is safe to ship.
 - **A new module** — add it to `MODULES` in `useHashRoute.js`, give it a colour
-  and glyph in `brand/ProductIcon.jsx`, add it to `MODULES` in `Sidebar.jsx`, and
-  branch on it in `App.jsx`. Data comes from `useData()`; you don't touch
+  and glyph in `brand/ProductIcon.jsx`, add it to `LAUNCHER_APPS` in
+  `AppLauncher.jsx`, and branch on it in `App.jsx`. Keep `LAUNCHER_APPS` at nine:
+  the launcher is a 3x3 grid and the button in front of it is nine dots. Data comes from `useData()`; you don't touch
   storage. If its documents should be shareable, add the kind to `SHARED_KINDS`
   in `lib/model.js` and it appears in UniSave automatically.
 - **A new loading tip** — add a line to each language array in `i18n/tips.js`.
