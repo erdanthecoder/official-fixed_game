@@ -190,7 +190,6 @@
 
 @keyframes view-in {
   from {
-    opacity: 0;
     transform: translateY(6px);
   }
 }
@@ -223,10 +222,24 @@
 
 @keyframes card-in {
   from {
-    opacity: 0;
     transform: translateY(8px) scale(0.99);
   }
 }
+
+/*
+ * A note on every entrance animation above and below.
+ *
+ * Animations that bring CONTENT in animate transform only — never opacity from
+ * zero. `both` fill holds the from-state through the delay and keeps holding it
+ * if the animation never advances, and an Android tablet was found doing
+ * exactly that: a menu fully present, fully interactive and completely
+ * invisible. Transform-only means the worst case is "it appeared without
+ * sliding", which is a degradation rather than a broken screen.
+ *
+ * Summoned, short-lived surfaces — dialogs, menus, the scrim behind them — keep
+ * their fade on purpose. A stall there reads as "it did not open", and a second
+ * tap fixes it. A stall on content reads as an app with nothing in it.
+ */
 
 /* --------------------------------- loading -------------------------------- */
 
@@ -572,7 +585,7 @@ html {
 @media (prefers-reduced-motion: no-preference) {
   .doc-card,
   .template-tile,
-  .launcher-app,
+  .launcher-tile,
   .module-item,
   .folder-item,
   .platform-card,
@@ -601,7 +614,7 @@ html {
 
   .doc-card:active,
   .template-tile:active,
-  .launcher-app:active,
+  .launcher-tile:active,
   .module-item:active,
   .folder-item:active,
   .platform-card:active,
@@ -722,14 +735,12 @@ html {
 
 @keyframes app-launch {
   from {
-    opacity: 0;
     transform: scale(0.985);
   }
 }
 
 @keyframes banner-settle {
   from {
-    opacity: 0;
     transform: translateY(-10px) scale(1.015);
   }
 }
