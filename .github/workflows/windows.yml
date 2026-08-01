@@ -34,11 +34,27 @@ on:
         required: false
         default: 'https://erdanthecoder.github.io/official-fixed_game/'
 
+  # Also builds when this workflow or the app it packages changes. Two reasons:
+  # GitHub will not show a "Run workflow" button for a workflow that has never
+  # run, and a change to any of these paths is exactly when a fresh installer is
+  # wanted anyway. Editing the site does not trigger it — the app loads the site
+  # live, so a new installer is not needed for that.
+  push:
+    branches: [claude/uni-notes-editor-wilz3q]
+    paths:
+      - '.github/workflows/windows.yml'
+      - 'uni-desktop/**'
+
 permissions:
   contents: write # needed to publish the Release
 
 jobs:
   build:
+    # `inputs` is empty when this runs from a push rather than the button, so
+    # the address is settled once here and every step below reads it from
+    # $APP_URL instead of guessing.
+    env:
+      APP_URL: ${{ inputs.url || 'https://erdanthecoder.github.io/official-fixed_game/' }}
     runs-on: windows-latest
     defaults:
       run:
@@ -56,7 +72,7 @@ jobs:
       # message that says what is actually wrong.
       - name: Check the site is live
         run: |
-          URL="${{ inputs.url }}"
+          URL="$APP_URL"
           echo "Fetching $URL"
           curl -fsSL --retry 3 "$URL" -o /dev/null \
             || { echo "::error::$URL is not reachable. Deploy the site first, then run this again."; exit 1; }
@@ -67,7 +83,7 @@ jobs:
             const url = process.argv[1];
             new URL(url);                              // reject a malformed address now
             require('fs').writeFileSync('config.json', JSON.stringify({ url }, null, 2));
-          " "${{ inputs.url }}"
+          " "$APP_URL"
           cat config.json
 
       - name: Use the app's own icon
@@ -122,7 +138,7 @@ jobs:
           {
             echo "### Windows build"
             echo
-            echo "Points at: ${{ inputs.url }}"
+            echo "Points at: $APP_URL"
             echo
             echo "The two \`.exe\` files are on the **Releases** page of this repository —"
             echo "a plain download link that works on any computer, no GitHub login needed."

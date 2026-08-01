@@ -32,11 +32,27 @@ on:
         required: false
         default: 'https://erdanthecoder.github.io/official-fixed_game/'
 
+  # Also builds when this workflow or the app it packages changes. Two reasons:
+  # GitHub will not show a "Run workflow" button for a workflow that has never
+  # run, and a change to any of these paths is exactly when a fresh installer is
+  # wanted anyway. Editing the site does not trigger it — the app loads the site
+  # live, so a new installer is not needed for that.
+  push:
+    branches: [claude/uni-notes-editor-wilz3q]
+    paths:
+      - '.github/workflows/android.yml'
+      - 'uni-notes/twa-manifest.json'
+
 permissions:
   contents: write # needed to publish the Release
 
 jobs:
   build:
+    # `inputs` is empty when this runs from a push rather than the button, so
+    # the address is settled once here and every step below reads it from
+    # $APP_URL instead of guessing.
+    env:
+      APP_URL: ${{ inputs.url || 'https://erdanthecoder.github.io/official-fixed_game/' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -58,7 +74,7 @@ jobs:
       # Bubblewrap fails much later with something far less obvious.
       - name: Check the site is live
         run: |
-          URL="${{ inputs.url }}manifest.webmanifest"
+          URL="${APP_URL}manifest.webmanifest"
           echo "Fetching $URL"
           if ! curl -fsSL --retry 3 "$URL" -o /tmp/manifest.json; then
             echo "::error::$URL is not reachable. Deploy the site first, then run this again."
@@ -92,7 +108,7 @@ jobs:
 
       - name: Build
         env:
-          BASE: ${{ inputs.url }}
+          BASE: ${{ env.APP_URL }}
           STORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD || 'unisave' }}
           KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD || 'unisave' }}
         run: |
@@ -176,7 +192,7 @@ jobs:
           {
             echo "### Android build"
             echo
-            echo "Points at: ${{ inputs.url }}"
+            echo "Points at: $APP_URL"
             echo
             echo "\`Uni.apk\` is on the **Releases** page of this repository — open that"
             echo "link on the phone, tap the file, and allow installing from that source."
