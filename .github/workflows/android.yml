@@ -85,6 +85,25 @@ jobs:
       - name: Install Bubblewrap
         run: npm install -g @bubblewrap/cli
 
+      # Without this, Bubblewrap runs its first-time setup wizard on a fresh
+      # runner — "Do you want Bubblewrap to install the JDK?", then "Path to your
+      # existing JDK 17:" — and eats the keystore passwords piped in below as
+      # answers to those questions. Both tools are already on the runner, so the
+      # answer is just to write the config it would otherwise ask for.
+      - name: Tell Bubblewrap where the JDK and Android SDK already are
+        run: |
+          test -d "$JAVA_HOME" || { echo "::error::JAVA_HOME is not a directory: $JAVA_HOME"; exit 1; }
+          test -d "$ANDROID_HOME" || { echo "::error::ANDROID_HOME is not a directory: $ANDROID_HOME"; exit 1; }
+          mkdir -p "$HOME/.bubblewrap"
+          node -e "
+            const fs = require('fs');
+            fs.writeFileSync(process.env.HOME + '/.bubblewrap/config.json', JSON.stringify({
+              jdkPath: process.env.JAVA_HOME,
+              androidSdkPath: process.env.ANDROID_HOME,
+            }, null, 2));
+          "
+          cat "$HOME/.bubblewrap/config.json"
+
       - name: Restore the signing key
         id: key
         env:
