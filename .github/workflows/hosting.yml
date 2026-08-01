@@ -1,0 +1,138 @@
+# Publishes Uni to Firebase Hosting.
+#
+# This exists for one reason, and it is the difference between the Android app
+# feeling like an app and feeling like a bookmark.
+#
+# Android hides Chrome's address bar only when the site proves it owns the app,
+# by serving a file at the VERY ROOT of the domain:
+#
+#     https://<domain>/.well-known/assetlinks.json
+#
+# On GitHub Pages the site lives at github.io/official-fixed_game/ and the root
+# of github.io belongs to GitHub, so that file can never be put there. No amount
+# of work on the app fixes it — the address bar is a property of the domain.
+#
+# Firebase Hosting gives a root we control: unisave-e8483.web.app. The asset
+# links land where Android looks, the bar disappears, and the app opens like an
+# installed app because at that point it is one.
+#
+# Hosting is free on the Spark plan. Nothing here needs Blaze.
+#
+# ── One-time setup, in a browser ─────────────────────────────────────────────
+# Exactly the same secret the Cloud Functions workflow uses. If it is already
+# set, this workflow needs nothing at all.
+#
+#   1. Firebase Console -> gear -> Project settings -> Service accounts
+#      -> Generate new private key. A .json downloads.
+#   2. GitHub repo -> Settings -> Secrets and variables -> Actions
+#      -> New repository secret
+#        Name:  FIREBASE_SERVICE_ACCOUNT
+#        Value: the entire contents of that .json file
+#   3. Firebase Console -> Authentication -> Settings -> Authorized domains
+#      -> add unisave-e8483.web.app, or sign-in opens and closes again.
+
+name: Publish to Firebase Hosting
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/uni-notes-editor-wilz3q]
+    paths:
+      - 'uni-notes/**'
+      - '.github/workflows/hosting.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firebase-hosting
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Skip quietly rather than failing red on every push. Someone who has not
+      # set the secret yet has a working site on Pages; a red cross on every
+      # commit would just be noise telling them off for it.
+      - name: Is the secret set?
+        id: gate
+        env:
+          KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::FIREBASE_SERVICE_ACCOUNT is not set, so nothing was deployed. See the comments at the top of this workflow."
+          else
+            echo "$KEY" | node -e 'JSON.parse(require("fs").readFileSync(0,"utf8"))' \
+              || { echo "::error::FIREBASE_SERVICE_ACCOUNT is not valid JSON. Paste the whole file, braces included."; exit 1; }
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Write the credentials
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          # Outside the workspace, so no later step can upload it by accident.
+          printf '%s' "$KEY" > "$RUNNER_TEMP/gcp-key.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/gcp-key.json" >> "$GITHUB_ENV"
+          echo "PROJECT_ID=$(node -p "require('$RUNNER_TEMP/gcp-key.json').project_id")" >> "$GITHUB_ENV"
+
+      - name: Build
+        if: steps.gate.outputs.ready == 'true'
+        working-directory: uni-notes
+        env:
+          # A Firebase web config is designed to ship inside the browser and is
+          # already readable in the built bundle. It is not a credential; the
+          # Firestore rules and sign-in are what protect the data.
+          VITE_FIREBASE_API_KEY: AIzaSyBoZMgZUEc_mNf7xkKElQddGp8EZOwrjHs
+          VITE_FIREBASE_AUTH_DOMAIN: unisave-e8483.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: unisave-e8483
+          VITE_FIREBASE_STORAGE_BUCKET: unisave-e8483.firebasestorage.app
+          VITE_FIREBASE_MESSAGING_SENDER_ID: '905127413855'
+          VITE_FIREBASE_APP_ID: '1:905127413855:web:1a01eb17a3d8115908f3ea'
+          VITE_FIREBASE_REGION: us-central1
+        run: |
+          npm ci
+          npm run build
+          # The asset links are a public file, not an asset — Vite copies
+          # public/ verbatim, so this is a check rather than a copy.
+          test -f dist/.well-known/assetlinks.json \
+            && echo "Asset links will be served." \
+            || echo "::warning::No asset links yet. Run the Android build once; it writes them."
+
+      - name: Deploy
+        if: steps.gate.outputs.ready == 'true'
+        working-directory: uni-notes
+        run: |
+          npm install -g firebase-tools
+          firebase deploy --only hosting --project "$PROJECT_ID" --non-interactive
+
+      - name: What happened
+        if: always()
+        run: |
+          {
+            echo "### Firebase Hosting"
+            echo
+            if [ "${{ steps.gate.outputs.ready }}" = "true" ]; then
+              echo "Live at **https://unisave-e8483.web.app**"
+              echo
+              echo "This is the address the Android app should point at. Run"
+              echo "**Build Android APK** with that URL and the address bar goes away,"
+              echo "because the asset links are now served from a domain root we own."
+              echo
+              echo "If sign-in opens and closes immediately, add \`unisave-e8483.web.app\`"
+              echo "to Firebase Console -> Authentication -> Settings -> Authorized domains."
+            else
+              echo "Nothing deployed — \`FIREBASE_SERVICE_ACCOUNT\` is not set."
+              echo "The GitHub Pages site is unaffected and still live."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

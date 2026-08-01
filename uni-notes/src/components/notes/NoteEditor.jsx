@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { useMorphTarget } from '../../lib/morph.js';
 import Icon from '../ui/Icon.jsx';
 import ConfirmDialog from '../ui/ConfirmDialog.jsx';
 import MoveDialog from '../ui/MoveDialog.jsx';
@@ -23,6 +24,10 @@ export default function NoteEditor({ noteId, onBack }) {
   const { notes, folders, update, remove, duplicate } = useData();
 
   const editorRef = useRef(null);
+  const paperRef = useRef(null);
+
+  // The card the user tapped grows into this page.
+  useMorphTarget(paperRef);
   const [formatState, setFormatState] = useState(INITIAL_FORMAT_STATE);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [moving, setMoving] = useState(false);
@@ -129,7 +134,7 @@ export default function NoteEditor({ noteId, onBack }) {
       />
 
       <div className="editor-scroll">
-        <div className="editor-paper">
+        <div className="editor-paper" ref={paperRef}>
           <RichTextEditor
             ref={editorRef}
             documentId={noteId}

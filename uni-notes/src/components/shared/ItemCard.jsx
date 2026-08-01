@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Icon from '../ui/Icon.jsx';
+import { morphFrom } from '../../lib/morph.js';
 import { formatRelativeDate } from '../../lib/text.js';
 import { useT } from '../../i18n/index.jsx';
 
@@ -24,6 +25,17 @@ export default function ItemCard({
   const { t } = useT();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const cardRef = useRef(null);
+
+  /*
+   * Claim the morph before navigating, not after. The browser takes the
+   * "before" snapshot the moment the transition starts, so the card has to be
+   * wearing the name by then — a frame later is a frame too late.
+   */
+  const open = () => {
+    morphFrom(cardRef.current);
+    onOpen?.();
+  };
 
   useEffect(() => {
     if (!menuOpen) return undefined;
@@ -35,8 +47,17 @@ export default function ItemCard({
   }, [menuOpen]);
 
   return (
-    <article className="doc-card" style={accent ? { '--card-accent': accent } : undefined}>
-      <button type="button" className="doc-card-main" onClick={onOpen} aria-label={`${t('common.open')} ${title}`}>
+    <article
+      ref={cardRef}
+      className="doc-card"
+      style={accent ? { '--card-accent': accent } : undefined}
+    >
+      <button
+        type="button"
+        className="doc-card-main"
+        onClick={open}
+        aria-label={`${t('common.open')} ${title}`}
+      >
         {thumb ? <span className="doc-card-thumb-wrap">{thumb}</span> : null}
         <h3 className="doc-card-title">{title}</h3>
         {preview ? <p className="doc-card-preview">{preview}</p> : null}

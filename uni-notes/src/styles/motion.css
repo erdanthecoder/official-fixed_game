@@ -493,3 +493,61 @@ html {
 :root[data-motion='reduced'] ::view-transition-new(workspace) {
   animation: none;
 }
+
+/*
+ * The morph: a document card growing into the page it opens.
+ *
+ * The browser animates position and size on its own once both elements share a
+ * name. What is set here is the character of it.
+ *
+ * Slower than a page change and on the entering curve in both directions,
+ * because this is one object moving rather than two swapping — an exit curve on
+ * the outgoing half would make the card look like it was fleeing from the page
+ * it is turning into.
+ *
+ * The cross-fade between the two contents is deliberately quick and front
+ * loaded: the card's text and the page's text are different shapes, and holding
+ * both at half opacity across the whole move is what makes this effect look
+ * cheap when it is done badly. The geometry should carry it; the pixels should
+ * get out of the way.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-group(morph-doc) {
+    animation-duration: var(--t-slow);
+    animation-timing-function: var(--ease-enter);
+  }
+
+  ::view-transition-old(morph-doc) {
+    animation: vt-fade-out 100ms var(--ease-exit) both;
+  }
+
+  ::view-transition-new(morph-doc) {
+    animation: vt-fade-in var(--t-base) var(--ease-enter) both;
+  }
+
+  /* The page it lands on is a full sheet of paper, and the card was a small
+     rounded tile. Matching the corner keeps the silhouette honest through the
+     middle of the move instead of snapping at the end. */
+  ::view-transition-image-pair(morph-doc) {
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+}
+
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+:root[data-motion='reduced'] ::view-transition-group(morph-doc),
+:root[data-motion='reduced'] ::view-transition-old(morph-doc),
+:root[data-motion='reduced'] ::view-transition-new(morph-doc) {
+  animation: none;
+}

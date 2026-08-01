@@ -202,11 +202,69 @@ jobs:
           bubblewrap update --skipVersionUpgrade </dev/null
           bubblewrap build --skipPwaValidation </dev/null
 
-      - name: Collect the asset-links file
-        run: bubblewrap fingerprint generateAssetLinks --output assetlinks.json || true
+      # ------------------------------------------------------------------
+      # The file that decides whether this is an app or a bookmark.
+      #
+      # Android only hides Chrome's address bar once the site proves it owns
+      # the app, by serving /.well-known/assetlinks.json containing this
+      # keystore's SHA-256 fingerprint. Without it the app opens in a Custom
+      # Tab with a URL bar across the top — which is exactly what makes a TWA
+      # feel like a home-screen shortcut instead of a real app.
+      #
+      # Generated here and committed back, so it can never drift from the key
+      # that actually signed the APK. Doing it by hand means it is correct once
+      # and wrong after the next keystore change, silently.
+      # ------------------------------------------------------------------
+      - name: Write the digital asset links
+        env:
+          STORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD || 'unisave' }}
+        run: |
+          FINGERPRINT=$(keytool -list -v -keystore android.keystore -alias uni \
+            -storepass "$STORE_PASS" 2>/dev/null \
+            | grep -m1 'SHA256:' | sed 's/.*SHA256: *//' | tr -d '\r')
 
-      # Rename to something a person can recognise in a downloads folder.
-      # "app-release-signed.apk" tells nobody anything.
+          # A fingerprint is colon-separated hex pairs. Anything else means
+          # keytool printed a warning where the value should be, and a
+          # malformed file here fails silently later as "still shows a URL bar".
+          case "$FINGERPRINT" in
+            *:*:*) ;;
+            *) echo "::error::Could not read a SHA-256 fingerprint from the keystore."; exit 1 ;;
+          esac
+          echo "Signing fingerprint: $FINGERPRINT"
+
+          export FINGERPRINT
+          export PACKAGE="$(node -p "require('./twa-manifest.json').packageId")"
+          mkdir -p public/.well-known
+          node -e "
+            const fs = require('fs');
+            fs.writeFileSync('public/.well-known/assetlinks.json', JSON.stringify([{
+              relation: ['delegate_permission/common.handle_all_urls'],
+              target: {
+                namespace: 'android_app',
+                package_name: process.env.PACKAGE,
+                sha256_cert_fingerprints: [process.env.FINGERPRINT],
+              },
+            }], null, 2) + '\n');
+          "
+          cat public/.well-known/assetlinks.json
+
+      # Committed back so the next deploy serves it. Without this the file
+      # exists only inside a finished CI job, which helps nobody.
+      - name: Commit it if it changed
+        working-directory: .
+        run: |
+          if git diff --quiet -- uni-notes/public/.well-known/assetlinks.json; then
+            echo "Asset links already match this signing key."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add uni-notes/public/.well-known/assetlinks.json
+          git commit -m "Update Android asset links for the current signing key"
+          # No loop: this workflow only triggers on its own file and the TWA
+          # manifest, neither of which is touched here.
+          git push origin HEAD:${GITHUB_REF_NAME}
+
       - name: Name the files properly
         run: |
           cp app-release-signed.apk Uni.apk
