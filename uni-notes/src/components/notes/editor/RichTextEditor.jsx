@@ -15,7 +15,7 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from 
  * editor engine later means rewriting this one file.
  */
 
-const BLOCK_TAGS = ['h1', 'h2', 'h3', 'p'];
+const BLOCK_TAGS = ['blockquote', 'h1', 'h2', 'h3', 'p'];
 
 const RichTextEditor = forwardRef(function RichTextEditor(
   { documentId, initialHtml, onChange, onSelectionChange },
@@ -91,8 +91,14 @@ const RichTextEditor = forwardRef(function RichTextEditor(
       bold: query('bold'),
       italic: query('italic'),
       underline: query('underline'),
+      strikethrough: query('strikeThrough'),
       unorderedList: query('insertUnorderedList'),
       orderedList: query('insertOrderedList'),
+      // Which way the paragraph is aligned. Reported as one value rather than
+      // three booleans so the toolbar can light exactly one button — three
+      // separate queries can all answer false on a default paragraph, and then
+      // nothing looks selected when something clearly is.
+      align: query('justifyCenter') ? 'center' : query('justifyRight') ? 'right' : 'left',
       block,
     });
   }, [onSelectionChange]);

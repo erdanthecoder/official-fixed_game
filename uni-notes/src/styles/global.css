@@ -2085,3 +2085,72 @@ body {
 .sidebar.is-open ~ .app-main .drawer-toggle {
   display: none;
 }
+
+/* ----------------------------- the link tool ------------------------------ */
+
+.link-tool {
+  position: relative;
+  display: inline-flex;
+}
+
+/*
+ * A popover, not a browser prompt. `window.prompt` puts the site's address in a
+ * system dialog, which is the most website-looking thing an app can show, and
+ * on Android it steals focus and destroys the text selection it was opened to
+ * act on.
+ */
+.link-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  z-index: 40;
+  width: min(300px, 78vw);
+  translate: -50% 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  animation: menu-in var(--t-base) var(--ease-enter) both;
+}
+
+.link-popover input {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+}
+
+.link-popover input:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.link-popover-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* A quote should look quoted in the document, not just in the toolbar. */
+.editor-canvas blockquote {
+  margin: 14px 0;
+  padding: 2px 0 2px 16px;
+  border-left: 3px solid var(--accent-line);
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.editor-canvas a {
+  color: var(--accent-ink);
+  text-underline-offset: 2px;
+}

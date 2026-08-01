@@ -1,4 +1,5 @@
 import ColorMenu from './ColorMenu.jsx';
+import LinkButton from './LinkButton.jsx';
 import Icon from '../../ui/Icon.jsx';
 import TemplateMenu from './TemplateMenu.jsx';
 import { useT } from '../../../i18n/index.jsx';
@@ -34,7 +35,16 @@ const BLOCKS = [
 /** Minimal Google-Docs-style toolbar. Every button calls into the editor handle. */
 export default function Toolbar({ editorRef, formatState, onInsertTemplate }) {
   const { t } = useT();
-  const exec = (command, value) => editorRef.current?.exec(command, value);
+  const exec = (command, value) => {
+    // `formatBlock:blockquote` keeps toolButton's single-argument shape while
+    // still letting a block command carry its tag.
+    if (command.includes(':')) {
+      const [name, arg] = command.split(':');
+      editorRef.current?.exec(name, `<${arg}>`);
+      return;
+    }
+    editorRef.current?.exec(command, value);
+  };
 
   const toolButton = (key, label, glyph, command, { isActive = false, className = '' } = {}) => (
     <button
@@ -90,6 +100,13 @@ export default function Toolbar({ editorRef, formatState, onInsertTemplate }) {
           'underline',
           { isActive: formatState.underline },
         )}
+        {toolButton(
+          'strike',
+          t('notes.strikethrough'),
+          <Icon name="strikethrough" size={17} />,
+          'strikeThrough',
+          { isActive: formatState.strikethrough },
+        )}
       </div>
 
       <div className="tool-group">
@@ -116,6 +133,31 @@ export default function Toolbar({ editorRef, formatState, onInsertTemplate }) {
         {toolButton('ol', t('notes.numberList'), <Icon name="listNumber" size={17} />, 'insertOrderedList', {
           isActive: formatState.orderedList,
         })}
+      </div>
+
+      <div className="tool-group">
+        {toolButton('alignLeft', t('notes.alignLeft'), <Icon name="alignLeft" size={17} />, 'justifyLeft', {
+          isActive: formatState.align === 'left',
+        })}
+        {toolButton('alignCentre', t('notes.alignCentre'), <Icon name="alignCentre" size={17} />, 'justifyCenter', {
+          isActive: formatState.align === 'center',
+        })}
+        {toolButton('alignRight', t('notes.alignRight'), <Icon name="alignRight" size={17} />, 'justifyRight', {
+          isActive: formatState.align === 'right',
+        })}
+      </div>
+
+      <div className="tool-group">
+        {/* A quote is a blockquote, not italics — it survives copy and paste
+            into a document that has to be handed in. */}
+        {toolButton('quote', t('notes.quote'), <Icon name="quote" size={17} />, 'formatBlock:blockquote', {
+          isActive: formatState.block === 'blockquote',
+        })}
+        <LinkButton
+          label={t('notes.link')}
+          onApply={(url) => exec('createLink', url)}
+          onRemove={() => exec('unlink')}
+        />
       </div>
 
       <div className="tool-group">
