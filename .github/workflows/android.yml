@@ -182,8 +182,25 @@ jobs:
             fs.writeFileSync('twa-manifest.json', JSON.stringify(m, null, 2));
             console.log(JSON.stringify(m, null, 2));
           "
-          # Bubblewrap prompts for the passwords unless they arrive on stdin.
-          printf '%s\n%s\n' "$STORE_PASS" "$KEY_PASS" | bubblewrap build --skipPwaValidation
+          # Nothing here answers a prompt, which is the point. Three runs were
+          # lost to feeding answers down stdin and having them eaten by a
+          # question that was not the one being counted on. Bubblewrap has a
+          # non-interactive route for every step, so use it and pipe nothing:
+          #
+          #   update --skipVersionUpgrade  generates the Android project from
+          #     twa-manifest.json (it is not checked in — only the manifest is)
+          #     and writes manifest-checksum.txt. Without that file, `build`
+          #     stops to ask whether to regenerate. The flag also skips the one
+          #     prompt `update` itself has, for a new version name.
+          #   BUBBLEWRAP_*_PASSWORD  read before the signing prompts are shown,
+          #     so the prompts never appear.
+          #
+          # </dev/null means any prompt still left fails immediately instead of
+          # hanging for six hours waiting for a terminal that is not there.
+          export BUBBLEWRAP_KEYSTORE_PASSWORD="$STORE_PASS"
+          export BUBBLEWRAP_KEY_PASSWORD="$KEY_PASS"
+          bubblewrap update --skipVersionUpgrade </dev/null
+          bubblewrap build --skipPwaValidation </dev/null
 
       - name: Collect the asset-links file
         run: bubblewrap fingerprint generateAssetLinks --output assetlinks.json || true
