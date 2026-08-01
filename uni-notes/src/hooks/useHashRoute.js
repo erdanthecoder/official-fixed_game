@@ -20,6 +20,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { flushSync } from 'react-dom';
 
 export const MODULES = [
   'notes',
@@ -58,18 +59,49 @@ function parse(hash) {
   return { module, id: second ?? null, folderId: null };
 }
 
+/**
+ * Run a state change as a view transition when the browser has them.
+ *
+ * `startViewTransition` snapshots the page, applies the change, snapshots
+ * again, and cross-fades between the two — which is why moving between modules
+ * can look like a native app without any of the routes knowing about each
+ * other. Chrome, Edge and Android Chrome have it; Safari and Firefox do not,
+ * and there the callback simply runs and the change is instant, exactly as it
+ * was before.
+ *
+ * The reduced-motion check is explicit rather than left to CSS. A view
+ * transition is a real animation on a real pseudo-element; disabling it in the
+ * stylesheet still pays for the snapshots.
+ */
+function withTransition(apply) {
+  const reduced =
+    document.documentElement.dataset.motion === 'reduced' ||
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+  if (reduced || typeof document.startViewTransition !== 'function') {
+    apply();
+    return;
+  }
+  document.startViewTransition(apply);
+}
+
 export function useHashRoute() {
   const [route, setRoute] = useState(() => parse(window.location.hash));
 
   useEffect(() => {
-    const onChange = () => setRoute(parse(window.location.hash));
+    // Every navigation lands here, including the back gesture and a pasted
+    // link — so wrapping this one place covers all of them, rather than each
+    // of the seven helpers below having to remember.
+    const onChange = () => withTransition(() => flushSync(() => setRoute(parse(window.location.hash))));
     window.addEventListener('hashchange', onChange);
     return () => window.removeEventListener('hashchange', onChange);
   }, []);
 
   const navigate = useCallback((hash) => {
+    // Re-navigating to where you already are still needs to re-render (the
+    // module resets its own view), but there is no hashchange to hear it.
     if (window.location.hash === hash) {
-      setRoute(parse(hash));
+      withTransition(() => flushSync(() => setRoute(parse(hash))));
       return;
     }
     window.location.hash = hash;

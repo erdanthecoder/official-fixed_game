@@ -29,6 +29,37 @@ function Redirect({ to }) {
   return null;
 }
 
+/**
+ * Has this person started Uni before?
+ *
+ * The landing page is a pitch, and a pitch is for people who have not decided
+ * yet. A signed-in account answers that on its own — but device-only mode has
+ * no account to ask, so pressing "Let's go" is remembered here instead. Without
+ * it, someone using Uni without an account would be sold it again every single
+ * morning.
+ *
+ * localStorage rather than prefs: this is about the browser in front of them,
+ * not the account. A new device deserves the introduction even if the account
+ * is old.
+ */
+const STARTED_KEY = 'uni.started';
+
+function hasStarted() {
+  try {
+    return localStorage.getItem(STARTED_KEY) === '1';
+  } catch {
+    return false; // private mode — show the front door, it is not a disaster
+  }
+}
+
+function rememberStarted() {
+  try {
+    localStorage.setItem(STARTED_KEY, '1');
+  } catch {
+    /* nothing to do */
+  }
+}
+
 /** Which module opens a shared document, by the collection it lives in. */
 const SHARED_MODULES = [
   ['notes', 'notes'],
@@ -72,9 +103,36 @@ export default function App() {
 
   /** "Let's go": into the app if we can, otherwise to sign-in. */
   const start = useCallback(() => {
-    if (status === AUTH_STATUS.signedIn || status === AUTH_STATUS.local) goToModule('notes');
-    else goToSignIn();
-  }, [status, goToModule, goToSignIn]);
+    rememberStarted();
+    if (status === AUTH_STATUS.signedIn || status === AUTH_STATUS.local) {
+      goToModule(prefs?.startModule ?? 'notes');
+    } else goToSignIn();
+  }, [status, prefs?.startModule, goToModule, goToSignIn]);
+
+  /**
+   * The front door is only for people still deciding.
+   *
+   * A synced account is proof they decided, so opening the site signed in goes
+   * straight to work. Installed apps skip it too — tapping a home-screen icon
+   * is not a request for a sales pitch — and so does a device-only browser that
+   * has been through it before.
+   */
+  const skipLanding =
+    status === AUTH_STATUS.signedIn ||
+    standalone ||
+    (status === AUTH_STATUS.local && hasStarted());
+
+  /**
+   * Where the logo goes.
+   *
+   * Home means the top of the app, not the top of the funnel. Sending someone
+   * with an account back to "Everything for your university application, in one
+   * place" is telling them about the thing they are already using.
+   */
+  const goHome = useCallback(() => {
+    if (skipLanding) goToModule(prefs?.startModule ?? 'notes');
+    else goToLanding();
+  }, [skipLanding, prefs?.startModule, goToModule, goToLanding]);
 
   // Signing in from the sign-in screen should land you in the app, not back on
   // a screen asking you to sign in.
@@ -118,15 +176,14 @@ export default function App() {
   }
 
   /*
-    An installed app opens straight into the workspace. The landing page is a
-    sales pitch, and someone who tapped an icon on their home screen has
-    already bought it.
+    Straight into the workspace for anyone who is already here — see
+    `skipLanding` above for who that is.
 
     Rendered rather than navigated: replacing the hash on every cold start
     would put a landing entry in the history, so the back gesture would take
     them to the pitch instead of out of the app.
   */
-  if (onLanding && standalone) {
+  if (onLanding && skipLanding) {
     return status === AUTH_STATUS.signedOut ? (
       <AuthScreen onBack={goToLanding} />
     ) : (
@@ -139,7 +196,7 @@ export default function App() {
       <JoinPage
         code={id}
         onOpenDocument={openJoined}
-        onGoHome={goToLanding}
+        onGoHome={goHome}
         onSignIn={goToSignIn}
       />
     );
@@ -157,7 +214,7 @@ export default function App() {
         activeFolderId={folderId}
         onSelectModule={goToModule}
         onSelectFolder={goToFolder}
-        onGoHome={goToLanding}
+        onGoHome={goHome}
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
       />

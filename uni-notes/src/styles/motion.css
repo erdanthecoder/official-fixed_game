@@ -396,3 +396,100 @@ html {
 :root[data-motion="reduced"] .path-pulse {
   display: none;
 }
+
+/* ============================ view transitions =============================
+ *
+ * Moving between modules used to be a hard cut: one screen replaced by another
+ * between two frames, which is the single clearest tell that something is a web
+ * page and not an app. The browser now cross-fades the two, using the same
+ * curves as everything else in this file.
+ *
+ * The important part is what does NOT move. Naming the sidebar and the top bar
+ * gives each of them one identity across both snapshots, so the browser treats
+ * them as the same object that persisted rather than one that died and another
+ * that was born. Without that, switching from Notes to Sheets fades the sidebar
+ * out and back in — the furniture blinking while you walk between rooms.
+ */
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-fill-mode: both;
+  }
+
+  /*
+   * The old view leaves in less time than the new one takes to arrive. They
+   * still overlap — a cross-fade that waits for the old view to finish is just
+   * a delay — but the outgoing screen is gone by the halfway point, so what you
+   * are left looking at is the thing you asked for rather than two screens
+   * arguing. Equal durations are what makes a dissolve look muddy.
+   */
+  ::view-transition-old(root) {
+    animation-name: vt-out;
+    animation-duration: var(--t-fast);
+    animation-timing-function: var(--ease-exit);
+  }
+
+  ::view-transition-new(root) {
+    animation-duration: var(--t-base);
+  }
+
+  ::view-transition-new(root) {
+    animation-name: vt-in;
+    animation-timing-function: var(--ease-enter);
+  }
+
+  /* The chrome persists; only the work changes. */
+  .sidebar {
+    view-transition-name: sidebar;
+  }
+
+  .app-main {
+    view-transition-name: workspace;
+  }
+
+  ::view-transition-old(sidebar),
+  ::view-transition-new(sidebar) {
+    /* No animation at all — the sidebar is the same sidebar. Cross-fading a
+       thing against itself only makes it flicker. */
+    animation: none;
+    mix-blend-mode: normal;
+  }
+
+  ::view-transition-old(workspace) {
+    animation: vt-out var(--t-fast) var(--ease-exit) both;
+  }
+
+  ::view-transition-new(workspace) {
+    animation: vt-in var(--t-base) var(--ease-enter) both;
+  }
+}
+
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    /* Eight pixels. Enough to read as "this arrived", not enough to look like
+       a slide — a page that travels announces itself, and a workspace should
+       not announce itself nine times a morning. */
+    transform: translateY(8px);
+  }
+}
+
+@keyframes vt-out {
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/*
+ * The in-app override honours itself here too. `data-motion="reduced"` is the
+ * setting in Settings, which people set precisely because the OS says one thing
+ * and they want the other.
+ */
+:root[data-motion='reduced'] ::view-transition-old(root),
+:root[data-motion='reduced'] ::view-transition-new(root),
+:root[data-motion='reduced'] ::view-transition-old(workspace),
+:root[data-motion='reduced'] ::view-transition-new(workspace) {
+  animation: none;
+}
