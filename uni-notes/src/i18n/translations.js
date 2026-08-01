@@ -66,6 +66,12 @@ const en = {
     titleAZ: 'Title A–Z',
     sortBy: 'Sort by',
   },
+  palette: {
+    title: 'Search everything',
+    placeholder: 'Search documents, or jump to an app',
+    openApp: 'Open app',
+    nothing: 'Nothing matches “{query}”',
+  },
   nav: {
     unisave: 'UniSave',
     unisaveHint: 'Everything, shared',
@@ -773,6 +779,12 @@ const ru = {
     titleAZ: 'По названию А–Я',
     sortBy: 'Сортировка',
   },
+  palette: {
+    title: 'Искать везде',
+    placeholder: 'Найдите документ или перейдите в приложение',
+    openApp: 'Открыть приложение',
+    nothing: 'Ничего не найдено по запросу «{query}»',
+  },
   nav: {
     unisave: 'UniSave',
     unisaveHint: 'Всё и общий доступ',
@@ -1479,6 +1491,12 @@ const ky = {
     newest: 'Жаңылары',
     titleAZ: 'Аталышы А–Я',
     sortBy: 'Иреттөө',
+  },
+  palette: {
+    title: 'Баарын издөө',
+    placeholder: 'Документ издеңиз же колдонмого өтүңүз',
+    openApp: 'Колдонмону ачуу',
+    nothing: '«{query}» боюнча эч нерсе табылган жок',
   },
   nav: {
     unisave: 'UniSave',

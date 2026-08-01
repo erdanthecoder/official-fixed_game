@@ -8,6 +8,7 @@ import LandingPage from './components/landing/LandingPage.jsx';
 import LanguagesModule from './components/languages/LanguagesModule.jsx';
 import NotesModule from './components/notes/NotesModule.jsx';
 import AppsPage from './components/apps/AppsPage.jsx';
+import CommandPalette from './components/CommandPalette.jsx';
 import SettingsPage from './components/SettingsPage.jsx';
 import SheetsModule from './components/sheets/SheetsModule.jsx';
 import Sidebar from './components/Sidebar.jsx';
@@ -89,6 +90,7 @@ export default function App() {
   const { ready, recovered, prefs } = data;
   const { route, goToModule, goToItem, goToFolder, goToLanding, goToSignIn } = useHashRoute();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const [recoveryDismissed, setRecoveryDismissed] = useState(false);
   const { updateReady, applyUpdate } = useAppUpdate();
   const standalone = useStandalone();
@@ -100,6 +102,25 @@ export default function App() {
   const onJoin = module === JOIN;
 
   useHideBootSplash(status !== AUTH_STATUS.loading);
+
+  /*
+   * Ctrl+K, or Cmd+K on a Mac. Bound on the window rather than a component, so
+   * it works from inside the editor too — which is the whole point, since the
+   * moment you want another document is usually the moment you are in one.
+   *
+   * `/` is deliberately NOT bound. It is the other common shortcut for this,
+   * and it would swallow every forward slash typed into a document.
+   */
+  useEffect(() => {
+    const onKey = (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setPaletteOpen((was) => !was);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   /** "Let's go": into the app if we can, otherwise to sign-in. */
   const start = useCallback(() => {
@@ -209,10 +230,18 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        onGo={goToModule}
+        onOpenItem={goToItem}
+      />
+
       <Sidebar
         activeModule={module}
         activeFolderId={folderId}
         onSelectModule={goToModule}
+        onOpenSearch={() => setPaletteOpen(true)}
         onSelectFolder={goToFolder}
         onGoHome={goHome}
         isOpen={drawerOpen}

@@ -25,6 +25,7 @@ export default function Sidebar({
   onSelectModule,
   onSelectFolder,
   onGoHome,
+  onOpenSearch,
   isOpen,
   onClose,
 }) {
@@ -74,6 +75,21 @@ export default function Sidebar({
               <Logo variant="mark" size={32} />
             )}
           </button>
+
+          {/* A phone has no Ctrl+K, so the palette needs a button. Beside the
+              launcher, because "find something" and "go somewhere" are the same
+              question asked two ways. */}
+          {onOpenSearch ? (
+            <button
+              type="button"
+              className="icon-button sidebar-search"
+              title={`${t('palette.title')} (Ctrl+K)`}
+              aria-label={t('palette.title')}
+              onClick={onOpenSearch}
+            >
+              <Icon name="search" size={18} />
+            </button>
+          ) : null}
 
           <AppLauncher active={activeModule} onPick={pickModule} />
         </div>

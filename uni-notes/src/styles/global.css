@@ -2154,3 +2154,142 @@ body {
   color: var(--accent-ink);
   text-underline-offset: 2px;
 }
+
+/* --------------------------- search everything ----------------------------
+ *
+ * Sits high rather than centred. A box that grows downward from near the top
+ * keeps the first result under the cursor as the list changes length — centre
+ * it and every keystroke moves the answer you were about to click.
+ */
+
+.palette-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  justify-content: center;
+  padding: clamp(48px, 12vh, 140px) 16px 16px;
+  background: rgba(var(--shadow-rgb), 0.5);
+  animation: fade-in var(--t-fast) var(--ease-standard) both;
+}
+
+.palette {
+  display: flex;
+  flex-direction: column;
+  width: min(620px, 100%);
+  max-height: min(60vh, 520px);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  animation: palette-in var(--t-base) var(--ease-enter) both;
+}
+
+/* Transform only. An entrance must never be the reason something is visible. */
+@keyframes palette-in {
+  from {
+    transform: translateY(-12px) scale(0.98);
+  }
+}
+
+.palette-field {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  flex: 0 0 auto;
+  padding: 0 15px;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--text-muted);
+}
+
+.palette-field input {
+  flex: 1;
+  min-width: 0;
+  height: 54px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem;
+  outline: none;
+}
+
+.palette-esc {
+  flex: 0 0 auto;
+  padding: 3px 7px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 0.68rem;
+  font-family: inherit;
+  color: var(--text-muted);
+}
+
+.palette-list {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.palette-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* One highlight, driven by the keyboard cursor — hover sets the cursor rather
+   than painting its own state, so the mouse and the arrow keys can never
+   disagree about which row is selected. */
+.palette-row.is-cursor {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.palette-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.palette-text strong {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.palette-text small {
+  display: block;
+  margin-top: 1px;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.palette-row.is-cursor .palette-text small {
+  color: inherit;
+  opacity: 0.75;
+}
+
+.palette-empty {
+  padding: 26px 16px 30px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+.sidebar-search {
+  flex: 0 0 auto;
+}
