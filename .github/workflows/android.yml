@@ -253,13 +253,16 @@ jobs:
       - name: Commit it if it changed
         working-directory: .
         run: |
-          if git diff --quiet -- uni-notes/public/.well-known/assetlinks.json; then
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Stage FIRST, then ask. `git diff` does not report untracked files,
+          # so checking before staging says "nothing changed" the one time it
+          # matters most — the first run, when the file is brand new.
+          git add uni-notes/public/.well-known/assetlinks.json
+          if git diff --cached --quiet; then
             echo "Asset links already match this signing key."
             exit 0
           fi
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add uni-notes/public/.well-known/assetlinks.json
           git commit -m "Update Android asset links for the current signing key"
           # No loop: this workflow only triggers on its own file and the TWA
           # manifest, neither of which is touched here.
