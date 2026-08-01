@@ -85,15 +85,37 @@ jobs:
       - name: Install Bubblewrap
         run: npm install -g @bubblewrap/cli
 
-      # Without this, Bubblewrap runs its first-time setup wizard on a fresh
-      # runner — "Do you want Bubblewrap to install the JDK?", then "Path to your
-      # existing JDK 17:" — and eats the keystore passwords piped in below as
-      # answers to those questions. Both tools are already on the runner, so the
-      # answer is just to write the config it would otherwise ask for.
-      - name: Tell Bubblewrap where the JDK and Android SDK already are
+      # Two things Bubblewrap needs before it will build anything, both of them
+      # about finding tools that are already on the runner.
+      #
+      # First, without a ~/.bubblewrap/config.json it opens its first-time setup
+      # wizard — "Do you want Bubblewrap to install the JDK?" — and eats the
+      # keystore passwords piped to stdin below as answers to it.
+      #
+      # Second, it looks for sdkmanager at <sdk>/bin or <sdk>/tools/bin and
+      # refuses the path outright if neither exists. GitHub's image ships it at
+      # <sdk>/cmdline-tools/latest/bin instead, so a symlink puts it where
+      # Bubblewrap looks while leaving the SDK root — which it also uses as
+      # ANDROID_HOME for Gradle — pointing at the real thing.
+      - name: Point Bubblewrap at the JDK and Android SDK already installed
         run: |
           test -d "$JAVA_HOME" || { echo "::error::JAVA_HOME is not a directory: $JAVA_HOME"; exit 1; }
           test -d "$ANDROID_HOME" || { echo "::error::ANDROID_HOME is not a directory: $ANDROID_HOME"; exit 1; }
+
+          if [ ! -x "$ANDROID_HOME/bin/sdkmanager" ] && [ ! -x "$ANDROID_HOME/tools/bin/sdkmanager" ]; then
+            # Prefer the `latest` alias; fall back to the highest-numbered
+            # package if this image does not have one.
+            CMDLINE="$ANDROID_HOME/cmdline-tools/latest"
+            if [ ! -x "$CMDLINE/bin/sdkmanager" ]; then
+              CMDLINE=$(find "$ANDROID_HOME/cmdline-tools" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -1)
+            fi
+            test -x "$CMDLINE/bin/sdkmanager" \
+              || { echo "::error::No sdkmanager found under $ANDROID_HOME/cmdline-tools."; exit 1; }
+            ln -sfn "$CMDLINE/bin" "$ANDROID_HOME/bin" 2>/dev/null \
+              || sudo ln -sfn "$CMDLINE/bin" "$ANDROID_HOME/bin"
+          fi
+          "$ANDROID_HOME/bin/sdkmanager" --version
+
           mkdir -p "$HOME/.bubblewrap"
           node -e "
             const fs = require('fs');
