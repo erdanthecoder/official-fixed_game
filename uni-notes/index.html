@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
 
     <title>Uni — everything for your university application</title>
     <meta
@@ -17,6 +20,92 @@
     <link rel="icon" type="image/png" sizes="16x16" href="./icon-16.png" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <link rel="manifest" href="./manifest.webmanifest" />
+
+    <!--
+      iOS. Apple has never implemented the manifest properly, so an installed
+      web app needs its own set of tags to behave like an app rather than a
+      bookmark that opens Safari.
+
+      `black-translucent` puts our own background behind the status bar, which
+      is what makes the app reach the top of the screen. It also means the clock
+      overlaps our content unless the layout respects safe-area insets — global
+      .css does, via env(safe-area-inset-*).
+    -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Uni" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!--
+      Launch images. iOS has no "any size" fallback: without an exact match for
+      the device it shows a white rectangle while the app boots. One file per
+      screen size and orientation, which is why there are so many.
+    -->
+    <link rel="apple-touch-startup-image" href="./splash/iphone-se1-portrait.png"
+      media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="./splash/iphone-se1-landscape.png"
+      media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" />
+    <link rel="apple-touch-startup-image" href="./splash/iphone-8-portrait.png"
+      media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="./splash/iphone-8-landscape.png"
+      media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" />
+    <link rel="apple-touch-startup-image" href="./splash/iphone-8plus-portrait.png"
+      media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="./splash/iphone-8plus-landscape.png"
+      media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)" />
+    <link rel="apple-touch-startup-image" href="./splash/iphone-x-portrait.png"
+      media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="./splash/iphone-x-landscape.png"
+      media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)" />
+    <link rel="apple-touch-startup-image" href="./splash/iphone-xr-portrait.png"
+      media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="./splash/iphone-xr-landscape.png"
+      media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" />
+    <link rel="apple-touch-startup-image" href="./splash/iphone-xsmax-portrait.png"
+      media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="./splash/iphone-xsmax-landscape.png"
+      media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)" />
+    <link rel="apple-touch-startup-image" href="./splash/iphone-12-portrait.png"
+      media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="./splash/iphone-12-landscape.png"
+      media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)" />
+    <link rel="apple-touch-startup-image" href="./splash/iphone-12promax-portrait.png"
+      media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="./splash/iphone-12promax-landscape.png"
+      media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)" />
+    <link rel="apple-touch-startup-image" href="./splash/iphone-14pro-portrait.png"
+      media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="./splash/iphone-14pro-landscape.png"
+      media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)" />
+    <link rel="apple-touch-startup-image" href="./splash/iphone-14promax-portrait.png"
+      media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="./splash/iphone-14promax-landscape.png"
+      media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)" />
+    <link rel="apple-touch-startup-image" href="./splash/ipad-portrait.png"
+      media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="./splash/ipad-landscape.png"
+      media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" />
+    <link rel="apple-touch-startup-image" href="./splash/ipad-10-portrait.png"
+      media="(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="./splash/ipad-10-landscape.png"
+      media="(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" />
+    <link rel="apple-touch-startup-image" href="./splash/ipad-air-portrait.png"
+      media="(device-width: 820px) and (device-height: 1180px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="./splash/ipad-air-landscape.png"
+      media="(device-width: 820px) and (device-height: 1180px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" />
+    <link rel="apple-touch-startup-image" href="./splash/ipad-pro105-portrait.png"
+      media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="./splash/ipad-pro105-landscape.png"
+      media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" />
+    <link rel="apple-touch-startup-image" href="./splash/ipad-pro11-portrait.png"
+      media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="./splash/ipad-pro11-landscape.png"
+      media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" />
+    <link rel="apple-touch-startup-image" href="./splash/ipad-pro129-portrait.png"
+      media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="./splash/ipad-pro129-landscape.png"
+      media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" />
 
     <!-- Social preview -->
     <meta property="og:title" content="Uni — everything for your university application" />

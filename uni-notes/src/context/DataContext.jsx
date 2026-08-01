@@ -356,6 +356,53 @@ export function DataProvider({ children }) {
     [merged, prefs, repository.mode],
   );
 
+  /**
+   * Merge a backup back in.
+   *
+   * Merge rather than replace, and skip anything whose id is already here.
+   * Two consequences, both wanted: importing the same file twice does nothing
+   * the second time, and importing a backup never destroys work done since it
+   * was taken. "Restore" that silently deletes a week of notes is a data-loss
+   * bug wearing a feature's clothes.
+   *
+   * Ownership is re-stamped rather than copied. A document exported from one
+   * account and imported into another belongs to the account importing it —
+   * carrying the old memberUids across would grant access to people who were
+   * never invited to this copy.
+   */
+  const importAll = useCallback(
+    (backup) => {
+      const collections = backup?.collections ?? {};
+      let count = 0;
+
+      COLLECTIONS.forEach((name) => {
+        const incoming = collections[name];
+        if (!Array.isArray(incoming)) return;
+        const existing = new Set((merged[name] ?? []).map((item) => item.id));
+
+        incoming.forEach((item) => {
+          if (!item?.id || existing.has(item.id)) return;
+          const { ownerUid, memberUids, roles, members, joinCode, joinRole, joinExpiresAt, ...rest } =
+            item;
+          queueWrite(
+            name,
+            item.id,
+            {
+              ...rest,
+              ...(isShared(name) ? ownershipFor(identity.current) : {}),
+              updatedAt: Date.now(),
+            },
+            { immediate: true, isNew: true },
+          );
+          count += 1;
+        });
+      });
+
+      return count;
+    },
+    [merged, queueWrite],
+  );
+
   const mayEdit = useCallback((document) => canEdit(document, uid), [uid]);
 
   // First run for this account (or this browser in local mode): lay down the
@@ -396,6 +443,7 @@ export function DataProvider({ children }) {
       setPrefs,
       flush,
       exportAll,
+      importAll,
     }),
     [
       merged,
@@ -414,6 +462,7 @@ export function DataProvider({ children }) {
       setPrefs,
       flush,
       exportAll,
+      importAll,
     ],
   );
 

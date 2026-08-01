@@ -1,16 +1,25 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import Icon from '../ui/Icon.jsx';
 import ConfirmDialog from '../ui/ConfirmDialog.jsx';
+import CoursePath from './CoursePath.jsx';
 import EmptyState from '../shared/EmptyState.jsx';
 import FlashcardTrainer from './FlashcardTrainer.jsx';
+import LessonPlayer from './LessonPlayer.jsx';
 import Modal from '../ui/Modal.jsx';
 import QuizMode from './QuizMode.jsx';
 import SaveIndicator from '../SaveIndicator.jsx';
+import { completeLesson, courseState, loseHeart } from '../../lib/course.js';
 import { deckStats, makeCard } from '../../lib/templates/vocab.js';
 import { useData } from '../../context/DataContext.jsx';
 import { useT } from '../../i18n/index.jsx';
 
+/*
+  Learn is the front door now. Flashcards and the quiz stay because they are
+  genuinely better for cramming the night before something — the course is for
+  learning a deck, they are for revising one you already know.
+*/
 const TABS = [
+  { id: 'learn', labelKey: 'course.learn', icon: 'star' },
   { id: 'study', labelKey: 'languages.study', icon: 'cards' },
   { id: 'quiz', labelKey: 'languages.quiz', icon: 'quiz' },
   { id: 'cards', labelKey: 'languages.manage', icon: 'list' },
@@ -68,12 +77,20 @@ export default function DeckWorkspace({ deckId, onBack }) {
   const { vocabDecks, update } = useData();
 
   const deck = vocabDecks.find((item) => item.id === deckId);
-  const [tab, setTab] = useState('study');
+  const [tab, setTab] = useState('learn');
+  const [lessonAt, setLessonAt] = useState(null);
   const [editingCard, setEditingCard] = useState(null); // card object or 'new'
   const [deletingCard, setDeletingCard] = useState(null);
 
   const writeCards = useCallback(
     (cards, options) => update('decks', deckId, { cards }, options),
+    [deckId, update],
+  );
+
+  const course = useMemo(() => (deck ? courseState(deck) : null), [deck]);
+
+  const writeProgress = useCallback(
+    (progress) => update('decks', deckId, { progress }, { immediate: true }),
     [deckId, update],
   );
 
@@ -109,6 +126,23 @@ export default function DeckWorkspace({ deckId, onBack }) {
       );
     }
   };
+
+  if (lessonAt !== null && course?.lessons[lessonAt]) {
+    return (
+      <LessonPlayer
+        key={lessonAt}
+        deck={deck}
+        lesson={course.lessons[lessonAt]}
+        hearts={course.hearts}
+        onLoseHeart={() => writeProgress(loseHeart(deck))}
+        onFinish={({ correct, total }) => {
+          writeProgress(completeLesson({ deck, index: lessonAt, correct, total }).progress);
+          setLessonAt(null);
+        }}
+        onQuit={() => setLessonAt(null)}
+      />
+    );
+  }
 
   return (
     <div className="deck-workspace">
@@ -193,6 +227,14 @@ export default function DeckWorkspace({ deckId, onBack }) {
                 {t('languages.addFirstCard')}
               </button>
             }
+          />
+        ) : tab === 'learn' ? (
+          <CoursePath
+            deck={deck}
+            state={course}
+            onStart={setLessonAt}
+            onSetGoal={(goal) => writeProgress({ ...course.progress, goal })}
+            onPractise={() => setTab('study')}
           />
         ) : tab === 'study' ? (
           <FlashcardTrainer key={deck.id} deck={deck} onGrade={handleGrade} />

@@ -18,8 +18,16 @@ import UniSaveModule from './components/unisave/UniSaveModule.jsx';
 import { AUTH_STATUS, useAuth } from './context/AuthContext.jsx';
 import { JOIN, LANDING, SIGN_IN, useHashRoute } from './hooks/useHashRoute.js';
 import { useAppUpdate } from './hooks/useInstall.js';
+import { useStandalone } from './hooks/useStandalone.js';
+import { useAppearance } from './hooks/useAppearance.js';
 import { useData } from './context/DataContext.jsx';
 import { useT } from './i18n/index.jsx';
+
+/** Fires a navigation once, on mount, and shows nothing while it happens. */
+function Redirect({ to }) {
+  useEffect(to, [to]);
+  return null;
+}
 
 /** Which module opens a shared document, by the collection it lives in. */
 const SHARED_MODULES = [
@@ -47,11 +55,13 @@ export default function App() {
   const { t } = useT();
   const { status } = useAuth();
   const data = useData();
-  const { ready, recovered } = data;
+  const { ready, recovered, prefs } = data;
   const { route, goToModule, goToItem, goToFolder, goToLanding, goToSignIn } = useHashRoute();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [recoveryDismissed, setRecoveryDismissed] = useState(false);
   const { updateReady, applyUpdate } = useAppUpdate();
+  const standalone = useStandalone();
+  useAppearance(prefs);
 
   const { module, id, folderId } = route;
   const onLanding = module === LANDING;
@@ -104,6 +114,23 @@ export default function App() {
         <p>{t('common.loading')}</p>
         <TipLine className="on-dark" />
       </div>
+    );
+  }
+
+  /*
+    An installed app opens straight into the workspace. The landing page is a
+    sales pitch, and someone who tapped an icon on their home screen has
+    already bought it.
+
+    Rendered rather than navigated: replacing the hash on every cold start
+    would put a landing entry in the history, so the back gesture would take
+    them to the pitch instead of out of the app.
+  */
+  if (onLanding && standalone) {
+    return status === AUTH_STATUS.signedOut ? (
+      <AuthScreen onBack={goToLanding} />
+    ) : (
+      <Redirect to={() => goToModule(prefs?.startModule ?? 'notes')} />
     );
   }
 

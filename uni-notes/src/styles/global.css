@@ -1578,3 +1578,101 @@ label .icon {
     opacity: 0.6;
   }
 }
+
+/* ------------------------------- safe areas ------------------------------- */
+
+/*
+ * An installed iOS app with `black-translucent` reaches the very top and bottom
+ * of the screen. That is what makes it feel like an app rather than a page —
+ * and it also means the clock, the notch and the home indicator sit *over* the
+ * layout unless we pad around them.
+ *
+ * env(safe-area-inset-*) reports 0 everywhere else, so these rules cost nothing
+ * on Android or a laptop. They only need `viewport-fit=cover` in the viewport
+ * meta to report real numbers, which index.html sets.
+ */
+
+.app-shell {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.sidebar {
+  padding-top: calc(18px + env(safe-area-inset-top));
+  padding-bottom: calc(18px + env(safe-area-inset-bottom));
+}
+
+.app-main {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Full-bleed screens paint their own background behind the status bar, so they
+   pad rather than inset — otherwise a white strip appears above the scenery. */
+.landing,
+.auth-screen,
+.join-page,
+.boot-screen {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.drawer-toggle {
+  top: calc(12px + env(safe-area-inset-top));
+}
+
+/* The launcher and dialogs are fixed to the viewport, which on iOS includes the
+   area under the home indicator. */
+.launcher-overlay,
+.modal-backdrop {
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+}
+
+/* ------------------------------ settings extras --------------------------- */
+
+.settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* A checkbox row that is actually tappable: the whole strip is the target, not
+   the 13px box. */
+.settings-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.settings-toggle:hover {
+  background: var(--surface-alt);
+}
+
+.settings-toggle input {
+  margin-top: 2px;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  flex: none;
+}
+
+.settings-toggle strong {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.settings-toggle small {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.settings-card .segmented {
+  margin-top: 4px;
+}

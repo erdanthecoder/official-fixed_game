@@ -345,6 +345,11 @@ html {
  * ends up stuck at its from-state and invisible, which is the usual way a
  * reduced-motion block breaks a page.
  */
+/*
+ * Two ways in: the operating system's setting, and the toggle in Settings for
+ * anyone whose OS says one thing and who wants the other here. Same rules, so
+ * either route gives exactly the same result.
+ */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -366,4 +371,28 @@ html {
   .skeleton::after {
     display: none;
   }
+}
+
+
+/* The in-app toggle, mirroring the media query above. */
+:root[data-motion="reduced"] *,
+:root[data-motion="reduced"] *::before,
+:root[data-motion="reduced"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+:root[data-motion="reduced"] .doc-card:hover,
+:root[data-motion="reduced"] .item-card:hover,
+:root[data-motion="reduced"] .template-tile:hover,
+:root[data-motion="reduced"] .button:active,
+:root[data-motion="reduced"] .icon-button:active {
+  transform: none;
+}
+
+:root[data-motion="reduced"] .skeleton::after,
+:root[data-motion="reduced"] .path-pulse {
+  display: none;
 }

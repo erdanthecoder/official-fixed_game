@@ -196,6 +196,39 @@ const P = {
   ),
   send: <path d="M20 4 3.6 10.6l6.6 2.8 2.8 6.6Zm0 0-9.8 9.4" />,
 
+  /* -------------------------------- learning ------------------------------- */
+  // Drawn as solid shapes rather than outlines: these are score-keeping, and a
+  // hollow heart next to a full one has to read at a glance.
+  heart: (
+    <path
+      d="M12 20.4 4.4 13a4.7 4.7 0 0 1 6.6-6.7l1 1 1-1A4.7 4.7 0 0 1 19.6 13Z"
+      fill="currentColor"
+      stroke="none"
+    />
+  ),
+  flame: (
+    <path
+      d="M12.6 2.6c.4 3 2.2 4 3.7 5.8a6.8 6.8 0 1 1-10.4.5c1-1.2 1.6-1.9 1.9-3.1.5 1.2 1.2 1.8 2 2.3.6-2.2 1.4-3.9 2.8-5.5Z"
+      fill="currentColor"
+      stroke="none"
+    />
+  ),
+  bolt: <path d="M13.4 2.4 4.6 13.6h5.4l-.8 8 8.8-11.2h-5.4Z" fill="currentColor" stroke="none" />,
+  star: (
+    <path
+      d="M12 3.2 14.7 9l6.3.8-4.6 4.3 1.2 6.2L12 17.4 6.4 20.3l1.2-6.2L3 9.8 9.3 9Z"
+      fill="currentColor"
+      stroke="none"
+    />
+  ),
+  trophy: (
+    <>
+      <path d="M7 4.4h10v5.2a5 5 0 0 1-10 0Z" fill="currentColor" stroke="none" />
+      <path d="M7 6H4.6v1.6A3.4 3.4 0 0 0 7.6 11M17 6h2.4v1.6A3.4 3.4 0 0 1 16.4 11" />
+      <path d="M12 14.6v3.2M8.4 20.4h7.2" strokeLinecap="round" />
+    </>
+  ),
+
   /* --------------------------------- sheets -------------------------------- */
   addRow: (
     <>

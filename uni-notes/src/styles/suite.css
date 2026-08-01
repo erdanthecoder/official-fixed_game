@@ -2327,3 +2327,501 @@
     padding-left: 10px;
   }
 }
+
+/* ================================= course ================================== */
+
+/*
+ * The learning path. Two ideas run through the whole thing: state should be
+ * legible at a glance without reading anything, and finishing something should
+ * feel like it happened.
+ */
+
+.course-path {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: clamp(14px, 3vw, 28px) 20px 80px;
+}
+
+.course-head {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding-bottom: 14px;
+  margin-bottom: 10px;
+  background: linear-gradient(var(--page, #f7f8fa) 74%, transparent);
+}
+
+.course-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.course-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 6px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-muted);
+}
+
+.course-stat strong {
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.course-stat small {
+  font-size: 0.68rem;
+  text-align: center;
+}
+
+.course-stat.is-hot {
+  color: #e8720c;
+  border-color: rgba(232, 114, 12, 0.3);
+  background: #fff6ec;
+}
+
+.course-stat.is-hot strong {
+  color: #e8720c;
+}
+
+.course-stat.is-empty {
+  color: var(--danger, #d93025);
+  border-color: rgba(217, 48, 37, 0.28);
+  background: #fdeceb;
+}
+
+.heart.is-full {
+  color: #e0245e;
+}
+
+.heart.is-spent {
+  color: rgba(6, 43, 68, 0.16);
+}
+
+.course-goal {
+  margin-top: 12px;
+}
+
+.course-goal-bar {
+  overflow: hidden;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--surface-alt);
+}
+
+.course-goal-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ffc978, #e8a020);
+  transition: width var(--t-slow, 340ms) var(--ease-enter, ease);
+}
+
+.course-goal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.course-goal-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.select-field.small select {
+  height: 28px;
+  font-size: 0.76rem;
+}
+
+/* --- the path --- */
+
+.path-list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * Each node is nudged sideways by --offset, a sine of its index set inline.
+ * A sine rather than an alternation because strict left-right-left reads as a
+ * zigzag; a wave reads as a road.
+ */
+.path-list li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 0;
+  transform: translateX(var(--offset, 0));
+  transition: transform var(--t-base, 220ms) var(--ease-standard, ease);
+}
+
+.path-node {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 62px;
+  height: 62px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-alt);
+  color: var(--text-muted);
+  cursor: pointer;
+  /* The lip underneath is what makes it read as a physical button to press. */
+  box-shadow: 0 4px 0 rgba(6, 43, 68, 0.12);
+  transition:
+    transform var(--t-fast, 120ms) var(--ease-standard, ease),
+    box-shadow var(--t-fast, 120ms) var(--ease-standard, ease);
+}
+
+.path-node:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(6, 43, 68, 0.14);
+}
+
+.path-node:not(:disabled):active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 rgba(6, 43, 68, 0.14);
+}
+
+.path-node:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow: none;
+}
+
+.path-node.is-done {
+  background: linear-gradient(#3ecf7a, #14a352);
+  color: #fff;
+  box-shadow: 0 4px 0 #0d7d3e;
+}
+
+.path-node.is-current {
+  background: linear-gradient(#ffd089, #e8a020);
+  color: #4a2c00;
+  box-shadow: 0 4px 0 #b87708;
+}
+
+/* A single ring, once, so the eye lands on where you are without a disco. */
+.path-pulse {
+  position: absolute;
+  inset: -6px;
+  border: 3px solid #e8a020;
+  border-radius: 50%;
+  animation: path-pulse 2.4s var(--ease-standard, ease) infinite;
+}
+
+@keyframes path-pulse {
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  60%,
+  100% {
+    opacity: 0;
+    transform: scale(1.22);
+  }
+}
+
+.path-label {
+  min-width: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.path-label small {
+  display: block;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.course-practise,
+.course-finished {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-soft);
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+.course-finished {
+  color: #0f9d58;
+  font-weight: 600;
+}
+
+/* ================================= lesson ================================== */
+
+/*
+ * Full screen, on purpose. A lesson is thirty seconds of attention and the
+ * sidebar has nothing to offer during it.
+ */
+
+.lesson-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--surface);
+}
+
+.lesson-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px clamp(14px, 4vw, 28px);
+}
+
+.lesson-bar {
+  flex: 1;
+  overflow: hidden;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--surface-alt);
+}
+
+.lesson-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #4ad07f, #14a352);
+  transition: width var(--t-base, 220ms) var(--ease-enter, ease);
+}
+
+.lesson-hearts {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.lesson-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  width: min(560px, 100%);
+  margin: 0 auto;
+  padding: 0 clamp(14px, 4vw, 28px);
+}
+
+.lesson-kind {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lesson-prompt {
+  font-family: var(--display, Georgia, serif);
+  font-size: clamp(1.5rem, 5vw, 2.2rem);
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+.lesson-input {
+  width: 100%;
+  height: 54px;
+  padding: 0 16px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: 1.05rem;
+}
+
+.lesson-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.lesson-options {
+  display: grid;
+  gap: 10px;
+}
+
+.lesson-option {
+  padding: 15px 18px;
+  border: 2px solid var(--border);
+  border-bottom-width: 4px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: 0.98rem;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--t-fast, 120ms) var(--ease-standard, ease),
+    border-color var(--t-fast, 120ms) var(--ease-standard, ease),
+    transform var(--t-fast, 120ms) var(--ease-standard, ease);
+}
+
+.lesson-option:not(:disabled):hover {
+  background: var(--surface-alt);
+}
+
+.lesson-option:not(:disabled):active {
+  transform: translateY(2px);
+  border-bottom-width: 2px;
+}
+
+.lesson-option.is-right {
+  border-color: #14a352;
+  background: #e6f7ee;
+  color: #0b6b36;
+}
+
+.lesson-option.is-wrong {
+  border-color: var(--danger, #d93025);
+  background: #fdeceb;
+  color: #a5170f;
+}
+
+/* The footer is the verdict. Colouring the whole band rather than a line of
+   text is what makes right-or-wrong readable without looking at it. */
+.lesson-foot {
+  padding: 16px clamp(14px, 4vw, 28px) calc(20px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border-soft);
+  transition: background var(--t-base, 220ms) var(--ease-standard, ease);
+}
+
+.lesson-foot.is-right {
+  background: #e6f7ee;
+  border-top-color: #b9e8cd;
+}
+
+.lesson-foot.is-wrong {
+  background: #fdeceb;
+  border-top-color: #f6cbc7;
+}
+
+.lesson-verdict {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(560px, 100%);
+  margin: 0 auto;
+  animation: verdict-in var(--t-base, 220ms) var(--ease-enter, ease) both;
+}
+
+.lesson-verdict > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.lesson-verdict strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.lesson-verdict small {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.lesson-verdict em {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.lesson-foot.is-right .lesson-verdict {
+  color: #0b6b36;
+}
+
+.lesson-foot.is-wrong .lesson-verdict {
+  color: #a5170f;
+}
+
+@keyframes verdict-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.button.block {
+  width: min(560px, 100%);
+  margin: 0 auto;
+  display: flex;
+}
+
+.lesson-result,
+.lesson-out {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  height: 100%;
+  padding: 24px;
+  text-align: center;
+}
+
+.lesson-result h1,
+.lesson-out h1 {
+  font-family: var(--display, Georgia, serif);
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-weight: 400;
+}
+
+.lesson-result.is-perfect {
+  color: #e8a020;
+}
+
+.lesson-result .icon {
+  animation: trophy-in 0.5s var(--ease-enter, ease) both;
+}
+
+@keyframes trophy-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5) rotate(-12deg);
+  }
+}
+
+.lesson-score {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.lesson-out .icon {
+  color: rgba(6, 43, 68, 0.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .path-pulse {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+/*
+ * A lesson takes the whole screen, so the drawer handle has nothing to open and
+ * sits on top of the lesson's own close button. `:has()` lets the shell react to
+ * what it is currently showing without threading state through three components
+ * just to set a class.
+ */
+.app-main:has(.lesson-page) .drawer-toggle {
+  display: none;
+}

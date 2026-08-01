@@ -1,5 +1,9 @@
+import { useRef, useState } from 'react';
 import LanguagePicker from './LanguagePicker.jsx';
 import Icon from './ui/Icon.jsx';
+import ConfirmDialog from './ui/ConfirmDialog.jsx';
+import { PRODUCTS } from './brand/ProductIcon.jsx';
+import { TEXT_SIZES } from '../hooks/useAppearance.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useData } from '../context/DataContext.jsx';
 import { useInstall } from '../hooks/useInstall.js';
@@ -8,7 +12,11 @@ import { useT } from '../i18n/index.jsx';
 export default function SettingsPage() {
   const { t } = useT();
   const { user, isCloud, isFirebaseConfigured, signOut } = useAuth();
-  const { exportAll, storageMode } = useData();
+  const { exportAll, importAll, prefs, setPrefs, storageMode } = useData();
+  const fileRef = useRef(null);
+  const [importing, setImporting] = useState(null);
+  const [imported, setImported] = useState(null);
+  const [cleared, setCleared] = useState(false);
   const { canInstall, installed, install } = useInstall();
 
   const download = () => {
@@ -20,6 +28,45 @@ export default function SettingsPage() {
     link.click();
     URL.revokeObjectURL(url);
   };
+
+  /*
+    Import reads and parses before asking anything, so the confirmation can say
+    what is actually in the file. "Are you sure?" is a worse question than
+    "merge 14 notes and 3 sheets?".
+  */
+  const chooseFile = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    try {
+      const parsed = JSON.parse(await file.text());
+      const counts = Object.entries(parsed?.collections ?? {})
+        .filter(([, value]) => Array.isArray(value) && value.length)
+        .map(([key, value]) => `${value.length} ${key}`);
+      setImporting({ parsed, summary: counts.join(', ') || t('settings.importEmpty') });
+    } catch {
+      setImporting({ error: true });
+    }
+  };
+
+  /*
+    Clearing the offline copy, not the data. Everything lives in the account, so
+    this is a repair tool for a bad cache rather than a delete button — worth
+    saying plainly, because "clear" next to "data" reads as destructive.
+  */
+  const clearCache = async () => {
+    if ('caches' in window) {
+      await Promise.all((await caches.keys()).map((key) => caches.delete(key)));
+    }
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister()));
+    }
+    setCleared(true);
+    setTimeout(() => window.location.reload(), 700);
+  };
+
+  const startModules = ['notes', 'sheets', 'slides', 'canvas', 'tasks', 'unisave', 'languages'];
 
   return (
     <div className="settings-page">
@@ -92,12 +139,95 @@ export default function SettingsPage() {
       ) : null}
 
       <section className="settings-card">
+        <h2>{t('settings.appearance')}</h2>
+        <p className="settings-hint">{t('settings.textSizeHint')}</p>
+        <div className="segmented" role="group" aria-label={t('settings.textSize')}>
+          {TEXT_SIZES.map((size) => (
+            <button
+              key={size.id}
+              type="button"
+              className={(prefs?.textSize ?? 'normal') === size.id ? 'is-active' : ''}
+              aria-pressed={(prefs?.textSize ?? 'normal') === size.id}
+              onClick={() => setPrefs({ textSize: size.id })}
+            >
+              {t(size.labelKey)}
+            </button>
+          ))}
+        </div>
+
+        <label className="settings-toggle">
+          <input
+            type="checkbox"
+            checked={prefs?.reduceMotion ?? false}
+            onChange={(event) => setPrefs({ reduceMotion: event.target.checked })}
+          />
+          <span>
+            <strong>{t('settings.reduceMotion')}</strong>
+            <small>{t('settings.reduceMotionHint')}</small>
+          </span>
+        </label>
+      </section>
+
+      <section className="settings-card">
+        <h2>{t('settings.startPage')}</h2>
+        <p className="settings-hint">{t('settings.startPageHint')}</p>
+        <label className="select-field">
+          <span className="sr-only">{t('settings.startPage')}</span>
+          <select
+            value={prefs?.startModule ?? 'notes'}
+            onChange={(event) => setPrefs({ startModule: event.target.value })}
+          >
+            {startModules.map((module) => (
+              <option key={module} value={module}>
+                {t(PRODUCTS[module].labelKey)}
+              </option>
+            ))}
+          </select>
+        </label>
+      </section>
+
+      <section className="settings-card">
         <h2>{t('settings.data')}</h2>
         <p className="settings-hint">{t('settings.exportHint')}</p>
-        <button type="button" className="button ghost" onClick={download}>
-          <Icon name="download" size={17} />
-          {t('settings.exportData')}
-        </button>
+        <div className="settings-actions">
+          <button type="button" className="button ghost" onClick={download}>
+            <Icon name="download" size={17} />
+            {t('settings.exportData')}
+          </button>
+          <button type="button" className="button ghost" onClick={() => fileRef.current?.click()}>
+            <Icon name="up" size={17} />
+            {t('settings.importData')}
+          </button>
+        </div>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="application/json,.json"
+          className="sr-only"
+          onChange={chooseFile}
+        />
+        {imported ? (
+          <p className="settings-installed">
+            <Icon name="circleCheck" size={17} className="done-icon" />
+            {t('settings.imported', { count: imported })}
+          </p>
+        ) : null}
+      </section>
+
+      <section className="settings-card">
+        <h2>{t('settings.offline')}</h2>
+        <p className="settings-hint">{t('settings.offlineHint')}</p>
+        {cleared ? (
+          <p className="settings-installed">
+            <Icon name="circleCheck" size={17} className="done-icon" />
+            {t('settings.cacheCleared')}
+          </p>
+        ) : (
+          <button type="button" className="button ghost" onClick={clearCache}>
+            <Icon name="redo" size={17} />
+            {t('settings.clearCache')}
+          </button>
+        )}
       </section>
 
       <section className="settings-card">
@@ -112,6 +242,22 @@ export default function SettingsPage() {
           {storageMode === 'cloud' ? 'Firebase' : t('settings.localOnly')}
         </p>
       </section>
+
+      {importing ? (
+        <ConfirmDialog
+          title={importing.error ? t('settings.importBadFile') : t('settings.importTitle')}
+          message={
+            importing.error ? t('settings.importBadFileBody') : t('settings.importBody', { what: importing.summary })
+          }
+          confirmLabel={importing.error ? t('common.done') : t('settings.importConfirm')}
+          cancelLabel={t('common.cancel')}
+          onConfirm={() => {
+            if (importing.error) return;
+            setImported(importAll(importing.parsed));
+          }}
+          onClose={() => setImporting(null)}
+        />
+      ) : null}
     </div>
   );
 }
