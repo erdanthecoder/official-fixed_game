@@ -92,17 +92,21 @@ jobs:
       # wizard — "Do you want Bubblewrap to install the JDK?" — and eats the
       # keystore passwords piped to stdin below as answers to it.
       #
-      # Second, it looks for sdkmanager at <sdk>/bin or <sdk>/tools/bin and
-      # refuses the path outright if neither exists. GitHub's image ships it at
-      # <sdk>/cmdline-tools/latest/bin instead, so a symlink puts it where
-      # Bubblewrap looks while leaving the SDK root — which it also uses as
-      # ANDROID_HOME for Gradle — pointing at the real thing.
+      # Second, it looks for sdkmanager at <sdk>/tools/bin or <sdk>/bin and
+      # refuses the SDK path outright if neither exists. GitHub's image ships the
+      # command-line tools at <sdk>/cmdline-tools/latest instead. The link below
+      # is to that whole directory rather than to its bin/, because the
+      # sdkmanager script locates its own jars at ../lib relative to itself —
+      # linking bin/ alone leaves it looking for <sdk>/lib and failing with
+      # "Could not find or load main class ... SdkManagerCli". Linking the pair
+      # keeps bin/ and lib/ together, and <sdk> itself stays the real SDK root,
+      # which is what Bubblewrap passes to Gradle as ANDROID_HOME.
       - name: Point Bubblewrap at the JDK and Android SDK already installed
         run: |
           test -d "$JAVA_HOME" || { echo "::error::JAVA_HOME is not a directory: $JAVA_HOME"; exit 1; }
           test -d "$ANDROID_HOME" || { echo "::error::ANDROID_HOME is not a directory: $ANDROID_HOME"; exit 1; }
 
-          if [ ! -x "$ANDROID_HOME/bin/sdkmanager" ] && [ ! -x "$ANDROID_HOME/tools/bin/sdkmanager" ]; then
+          if [ ! -x "$ANDROID_HOME/tools/bin/sdkmanager" ] && [ ! -x "$ANDROID_HOME/bin/sdkmanager" ]; then
             # Prefer the `latest` alias; fall back to the highest-numbered
             # package if this image does not have one.
             CMDLINE="$ANDROID_HOME/cmdline-tools/latest"
@@ -111,10 +115,12 @@ jobs:
             fi
             test -x "$CMDLINE/bin/sdkmanager" \
               || { echo "::error::No sdkmanager found under $ANDROID_HOME/cmdline-tools."; exit 1; }
-            ln -sfn "$CMDLINE/bin" "$ANDROID_HOME/bin" 2>/dev/null \
-              || sudo ln -sfn "$CMDLINE/bin" "$ANDROID_HOME/bin"
+            ln -sfn "$CMDLINE" "$ANDROID_HOME/tools" 2>/dev/null \
+              || sudo ln -sfn "$CMDLINE" "$ANDROID_HOME/tools"
           fi
-          "$ANDROID_HOME/bin/sdkmanager" --version
+          # Proves the whole chain — script found, jars found, Java happy — here
+          # rather than fifteen steps later inside Gradle.
+          "$ANDROID_HOME/tools/bin/sdkmanager" --version
 
           mkdir -p "$HOME/.bubblewrap"
           node -e "
