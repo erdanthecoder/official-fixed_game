@@ -13,6 +13,12 @@
 
 import { useEffect } from 'react';
 
+export const THEMES = [
+  { id: 'system', labelKey: 'settings.themeSystem' },
+  { id: 'light', labelKey: 'settings.themeLight' },
+  { id: 'dark', labelKey: 'settings.themeDark' },
+];
+
 export const TEXT_SIZES = [
   { id: 'small', scale: 0.92, labelKey: 'settings.textSmall' },
   { id: 'normal', scale: 1, labelKey: 'settings.textNormal' },
@@ -23,6 +29,37 @@ export const TEXT_SIZES = [
 export function useAppearance(prefs) {
   const size = prefs?.textSize ?? 'normal';
   const reduceMotion = prefs?.reduceMotion ?? false;
+  const theme = prefs?.theme ?? 'system';
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+
+    // `system` is not a third theme — it resolves to one of the other two and
+    // keeps resolving, so the app turns dark when the phone does at sunset
+    // rather than only on the next reload.
+    const apply = () => {
+      const dark = theme === 'dark' || (theme === 'system' && media.matches);
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      // Mirrored to localStorage purely so the snippet in index.html can paint
+      // the right background before React has loaded. Prefs themselves still
+      // live in the account; this is a cache of one boolean, not a second copy
+      // of the setting.
+      try {
+        localStorage.setItem('uni.theme', theme);
+      } catch {
+        /* private mode; the app just starts light for a frame */
+      }
+      // The browser chrome — address bar, notch area — reads this, and it is
+      // what stops an installed app from having a white bar above a dark page.
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', dark ? '#0e1418' : '#ffffff');
+    };
+
+    apply();
+    if (theme !== 'system') return undefined;
+    media.addEventListener('change', apply);
+    return () => media.removeEventListener('change', apply);
+  }, [theme]);
 
   useEffect(() => {
     const scale = TEXT_SIZES.find((s) => s.id === size)?.scale ?? 1;

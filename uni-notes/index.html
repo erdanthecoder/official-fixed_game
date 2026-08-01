@@ -182,6 +182,26 @@
         }
       }
     </style>
+
+    <!--
+      Runs before the first paint. Without it a dark-mode user gets one white
+      frame on every launch, which on a phone reads as a flash. It only decides
+      light or dark; the real setting still lives in the account and takes over
+      the moment React mounts.
+    -->
+    <script>
+      (function () {
+        try {
+          var pref = localStorage.getItem('uni.theme') || 'system';
+          var dark =
+            pref === 'dark' ||
+            (pref === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        } catch (e) {
+          /* nothing to do — the app starts light */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="boot">

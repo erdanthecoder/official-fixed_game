@@ -1,0 +1,112 @@
+# Deploys the Cloud Functions — Uni AI and the four sharing functions.
+#
+# Exists so this can be done from a tablet. `firebase deploy --only functions`
+# needs the CLI and an interactive login; this needs a button.
+#
+# ── One-time setup, all of it in a browser ────────────────────────────────
+#
+# 1. Upgrade the Firebase project to Blaze. Functions are not available on the
+#    free plan; nothing else here works until this is done.
+#
+# 2. Make a service account key so this workflow can act on the project:
+#      Firebase Console -> gear -> Project settings -> Service accounts
+#      -> Generate new private key. A .json downloads.
+#    Then: GitHub repo -> Settings -> Secrets and variables -> Actions
+#      -> New repository secret
+#      Name:  FIREBASE_SERVICE_ACCOUNT
+#      Value: the entire contents of that .json file
+#
+# 3. For Uni AI only, the Anthropic key. It never goes in a GitHub secret and
+#    never in this repo — it goes to Google Secret Manager, which is where the
+#    function reads it from at runtime:
+#      console.cloud.google.com -> Security -> Secret Manager -> Create secret
+#      Name:  ANTHROPIC_API_KEY
+#      Value: the key from console.anthropic.com
+#    Then grant the function's service account access to it:
+#      the secret -> Permissions -> Grant access
+#      Principal: <project-id>@appspot.gserviceaccount.com
+#      Role:      Secret Manager Secret Accessor
+#
+#    Sharing works without step 3. askUniAi simply reports that it is not
+#    configured, and the other four functions never touch the key.
+#
+# ── Why the key is not a GitHub secret ────────────────────────────────────
+# A GitHub secret is readable by anything that can run a workflow in this repo.
+# Secret Manager is readable by one service account at runtime and by nothing
+# else — including this deploy. The key is never in the same room as CI.
+
+name: Deploy Cloud Functions
+
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: 'Which functions (blank = all)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check the secret is present
+        env:
+          KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "::error::FIREBASE_SERVICE_ACCOUNT is not set. See the comments at the top of this workflow."
+            exit 1
+          fi
+          # Fail here rather than three minutes later inside the CLI.
+          echo "$KEY" | node -e 'JSON.parse(require("fs").readFileSync(0,"utf8"))' \
+            || { echo "::error::FIREBASE_SERVICE_ACCOUNT is not valid JSON. Paste the whole file, including the braces."; exit 1; }
+
+      - name: Write the credentials to disk
+        env:
+          KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          # Outside the workspace, so a later step cannot upload it by accident.
+          printf '%s' "$KEY" > "$RUNNER_TEMP/gcp-key.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/gcp-key.json" >> "$GITHUB_ENV"
+          echo "PROJECT_ID=$(node -p "require('$RUNNER_TEMP/gcp-key.json').project_id")" >> "$GITHUB_ENV"
+
+      - name: Install
+        working-directory: uni-notes/functions
+        run: npm install
+
+      - name: Deploy
+        working-directory: uni-notes
+        run: |
+          npm install -g firebase-tools
+          TARGET="functions"
+          if [ -n "${{ inputs.only }}" ]; then TARGET="functions:${{ inputs.only }}"; fi
+          echo "Deploying $TARGET to $PROJECT_ID"
+          firebase deploy --only "$TARGET" --project "$PROJECT_ID" --non-interactive
+
+      - name: What happened
+        if: always()
+        run: |
+          {
+            echo "### Cloud Functions"
+            echo
+            echo "| Function | What it does |"
+            echo "|---|---|"
+            echo "| \`askUniAi\` | Uni AI — needs ANTHROPIC_API_KEY in Secret Manager |"
+            echo "| \`shareDocument\` | Invite someone by email address |"
+            echo "| \`revokeAccess\` | Remove a member or withdraw an invitation |"
+            echo "| \`claimInvites\` | Picks up invitations sent before the account existed |"
+            echo "| \`listInvites\` | Shows pending invitations in the share dialog |"
+            echo
+            echo "Test it: open **AI** in the app and ask something, then open any"
+            echo "document → **Share** and invite an email address."
+          } >> "$GITHUB_STEP_SUMMARY"

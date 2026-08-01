@@ -3,7 +3,7 @@ import LanguagePicker from './LanguagePicker.jsx';
 import Icon from './ui/Icon.jsx';
 import ConfirmDialog from './ui/ConfirmDialog.jsx';
 import { PRODUCTS } from './brand/ProductIcon.jsx';
-import { TEXT_SIZES } from '../hooks/useAppearance.js';
+import { TEXT_SIZES, THEMES } from '../hooks/useAppearance.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useData } from '../context/DataContext.jsx';
 import { useInstall } from '../hooks/useInstall.js';
@@ -140,6 +140,33 @@ export default function SettingsPage() {
 
       <section className="settings-card">
         <h2>{t('settings.appearance')}</h2>
+
+        <p className="settings-hint">{t('settings.themeHint')}</p>
+        <div className="theme-choices" role="group" aria-label={t('settings.appTheme')}>
+          {THEMES.map((option) => {
+            const active = (prefs?.theme ?? 'system') === option.id;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                className={`theme-choice${active ? ' is-active' : ''}`}
+                aria-pressed={active}
+                onClick={() => setPrefs({ theme: option.id })}
+              >
+                {/* A miniature of the app rather than a swatch: a page, a
+                    sidebar and a card, so the choice is legible without
+                    reading the label. `system` is shown split down the
+                    middle, which is the only honest picture of "both". */}
+                <span className={`theme-preview is-${option.id}`} aria-hidden="true">
+                  <span className="theme-preview-bar" />
+                  <span className="theme-preview-card" />
+                </span>
+                <span className="theme-choice-label">{t(option.labelKey)}</span>
+              </button>
+            );
+          })}
+        </div>
+
         <p className="settings-hint">{t('settings.textSizeHint')}</p>
         <div className="segmented" role="group" aria-label={t('settings.textSize')}>
           {TEXT_SIZES.map((size) => (

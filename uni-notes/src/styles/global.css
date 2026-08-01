@@ -4,8 +4,29 @@
    → dialogs → responsive
    ========================================================================== */
 
+/*
+ * Two themes, one set of names.
+ *
+ * Every rule in the app reads these; none of them names a colour directly.
+ * The pair below is the whole of the light/dark story — if a surface looks
+ * wrong in dark mode it is because a rule somewhere still hardcodes a hex,
+ * not because the theme is incomplete.
+ *
+ * Three tokens are channels — `R, G, B` with no alpha — because the rules that
+ * use them each pick their own opacity. They are not interchangeable:
+ *
+ *   --ink-rgb, --shade-rgb   hairlines, hover washes, faint text. These FLIP
+ *                            with the theme: a dark hairline over a dark
+ *                            surface is nothing at all, so in dark mode they
+ *                            become light and lift off the surface instead.
+ *   --shadow-rgb             shadows and modal scrims. These do NOT flip. They
+ *                            are depth rather than surface, and a light shadow
+ *                            is a glow.
+ */
+
 :root {
   --bg: #f1f3f4;
+  --page: #f7f8fa;
   --surface: #ffffff;
   --surface-alt: #f8f9fa;
   --border: #dadce0;
@@ -13,17 +34,151 @@
   --text: #202124;
   --text-muted: #5f6368;
   --accent: #1a73e8;
+  --accent-hover: #1765cc;
+  /* Text and icons printed ON a filled accent or danger button. It is not
+     always white: in dark mode the fill is a light blue, so the label has to
+     go dark or it disappears into its own button. */
+  --on-accent: #ffffff;
   --accent-soft: #e8f0fe;
   --danger: #d93025;
+  --danger-soft: #fce8e6;
   --success: #188038;
+  --success-soft: #e6f7ee;
+  --warn: #b06000;
+  --warn-soft: #fff6ec;
+  /* `-ink` is the text that sits on the matching `-soft` tint; `-line` is its
+     border. They are separate tokens because in dark mode the tint gets darker
+     while its text gets lighter — one derived colour cannot do both. */
+  --accent-ink: #174ea6;
+  --accent-line: #a8c7fa;
+  --danger-ink: #b3261e;
+  --danger-line: #f3c2be;
+  --success-ink: #0b6b3f;
+  --success-line: #a7d8b4;
+  --warn-ink: #b45309;
+  --warn-line: #fbd38d;
+  --teal-soft: #dff1ee;
+  --teal-ink: #0f7b6c;
+  --purple-soft: #f3e8fd;
+  --purple-ink: #4a1d78;
+  /* Neutral fill: progress-bar troughs, avatar placeholders, empty slots. */
+  --track: #e8eaed;
+  --border-strong: #c9d3dd;
+  /* Frosted panels that float over photography or over the page while it
+     scrolls beneath them. Opaque enough to read on, not so opaque that the
+     blur behind them stops meaning anything. */
+  --glass: rgba(255, 255, 255, 0.96);
+  --glass-soft: rgba(247, 248, 250, 0.86);
+  --ink-rgb: 6, 43, 68;
+  --shade-rgb: 60, 64, 67;
   --radius: 12px;
   --radius-sm: 8px;
-  --shadow-sm: 0 1px 2px rgba(60, 64, 67, 0.16);
-  --shadow-md: 0 1px 3px rgba(60, 64, 67, 0.2), 0 4px 8px rgba(60, 64, 67, 0.1);
-  --shadow-lg: 0 8px 24px rgba(60, 64, 67, 0.2);
+  /* Shadows and modal scrims stay black in both themes. They are depth, not
+     surface: a light-channel shadow on a dark page is a glow, and a light
+     scrim behind a dialog would brighten the room instead of dimming it. */
+  --shadow-rgb: 0, 0, 0;
+  --shadow-sm: 0 1px 2px rgba(var(--shadow-rgb), 0.16);
+  --shadow-md: 0 1px 3px rgba(var(--shadow-rgb), 0.2), 0 4px 8px rgba(var(--shadow-rgb), 0.1);
+  --shadow-lg: 0 8px 24px rgba(var(--shadow-rgb), 0.2);
   --sidebar-width: 268px;
   --font: 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, system-ui, sans-serif;
   --serif: 'Georgia', 'Times New Roman', serif;
+}
+
+/*
+ * Dark. Not the light theme inverted — inverting makes white text on pure
+ * black, which vibrates. Surfaces climb a short ladder of near-blacks with a
+ * blue cast (the same hue family as the brand lake), so a card sitting on the
+ * page is lighter than the page rather than outlined against it, exactly as in
+ * light mode. Text steps down from #e8eaed rather than up to #fff for the same
+ * reason: full-contrast white on dark reads as glare.
+ *
+ * The accent lightens. #1a73e8 passes on white and fails on near-black.
+ */
+:root[data-theme='dark'] {
+  --bg: #0e1418;
+  --page: #10171c;
+  --surface: #171f26;
+  --surface-alt: #1e272f;
+  --border: #2e3a44;
+  --border-soft: #232d36;
+  --text: #e3e7ea;
+  --text-muted: #9aa6b1;
+  --accent: #7cb0f5;
+  --accent-hover: #9cc4f8;
+  --on-accent: #0b1116;
+  --accent-soft: #1b2c45;
+  --danger: #f28b82;
+  --danger-soft: #3c211f;
+  --success: #7bd398;
+  --success-soft: #17301f;
+  --warn: #f3b563;
+  --warn-soft: #33261a;
+  --accent-ink: #a8c7fa;
+  --accent-line: #2f4a6b;
+  --danger-ink: #f6a9a2;
+  --danger-line: #5c322e;
+  --success-ink: #8fdcaa;
+  --success-line: #2b4d38;
+  --warn-ink: #f0c088;
+  --warn-line: #55401f;
+  --teal-soft: #16332f;
+  --teal-ink: #7fd6c6;
+  --purple-soft: #2a1f3d;
+  --purple-ink: #c8a9f0;
+  --track: #2a343d;
+  --border-strong: #3d4a55;
+  --glass: rgba(23, 31, 38, 0.94);
+  --glass-soft: rgba(16, 23, 28, 0.88);
+  --ink: #e3e7ea;
+  --ink-soft: #9aa6b1;
+  /* Light channels, not dark ones. Every hairline and hover wash in the app is
+     `rgba(var(--ink-rgb), small-alpha)`; keeping these black would make all of
+     them disappear against a dark surface instead of lifting off it. The alphas
+     at the call sites are tuned low, which is what stops white reading as glare. */
+  --ink-rgb: 226, 234, 240;
+  --shade-rgb: 226, 234, 240;
+  /* Shadows go deeper because there is less contrast between a card and the
+     page to do the lifting; borders carry the rest. */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.6), 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+
+/*
+ * The one exception to the theme: paper.
+ *
+ * A note's text colours and a board's pen strokes are picked by the person
+ * writing them, stored in the document, and chosen while looking at white.
+ * Turning that paper dark would leave black handwriting on a black board — the
+ * app cannot recolour content it does not own. So the chrome goes dark and the
+ * page stays a page, which is also what it will look like when printed.
+ *
+ * Slides are not listed here because a deck already carries its own theme, and
+ * sheets are not because a cell has no colour of its own to lose.
+ */
+:root[data-theme='dark'] .editor-paper,
+:root[data-theme='dark'] .board-view,
+:root[data-theme='dark'] .board-card-thumb {
+  /* Locally back to the light theme. Re-declaring the tokens rather than
+     setting two properties means everything inside the paper — placeholder
+     text, table rules, the selection tint — comes back with it, instead of
+     having to be listed one rule at a time. */
+  --surface: #ffffff;
+  --surface-alt: #f8f9fa;
+  --page: #f7f8fa;
+  --text: #202124;
+  --text-muted: #5f6368;
+  --border: #dadce0;
+  --border-soft: #e8eaed;
+  --ink: #101d27;
+  --ink-soft: #46586a;
+  --ink-rgb: 6, 43, 68;
+  --shade-rgb: 60, 64, 67;
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
 }
 
 *,
@@ -103,12 +258,12 @@ button {
 
 .button.primary {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   box-shadow: var(--shadow-sm);
 }
 
 .button.primary:hover {
-  background: #1765cc;
+  background: var(--accent-hover);
   box-shadow: var(--shadow-md);
 }
 
@@ -125,21 +280,21 @@ button {
 
 .button.danger {
   background: var(--danger);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .button.danger:hover {
-  background: #b3261e;
+  background: var(--danger-ink);
 }
 
 .button.danger-ghost {
-  border-color: #f3c2be;
+  border-color: var(--danger-line);
   color: var(--danger);
   background: var(--surface);
 }
 
 .button.danger-ghost:hover {
-  background: #fce8e6;
+  background: var(--danger-soft);
 }
 
 .icon-button {
@@ -158,7 +313,7 @@ button {
 }
 
 .icon-button:hover {
-  background: rgba(60, 64, 67, 0.08);
+  background: rgba(var(--shade-rgb), 0.08);
 }
 
 .icon-button.small {
@@ -326,7 +481,7 @@ button {
 
 .folder-item.is-active {
   background: var(--accent-soft);
-  color: #174ea6;
+  color: var(--accent-ink);
   font-weight: 600;
 }
 
@@ -593,7 +748,7 @@ button {
   position: absolute;
   inset: 0 0 auto;
   height: 4px;
-  background: var(--owner-color, var(--accent));
+  background: var(--owner-color);
 }
 
 .doc-card:hover {
@@ -627,7 +782,7 @@ button {
 .doc-card-thumb-line {
   height: 5px;
   border-radius: 3px;
-  background: #dfe3e8;
+  background: var(--track);
 }
 
 .doc-card-thumb-line.short {
@@ -878,12 +1033,12 @@ button {
 
 .tool-button:hover,
 .tool-button.is-open {
-  background: rgba(60, 64, 67, 0.1);
+  background: rgba(var(--shade-rgb), 0.1);
 }
 
 .tool-button.is-active {
   background: var(--accent-soft);
-  color: #174ea6;
+  color: var(--accent-ink);
 }
 
 .tool-button.wide {
@@ -952,7 +1107,7 @@ button {
 .swatch {
   width: 26px;
   height: 26px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--border);
   border-radius: 50%;
   cursor: pointer;
 }
@@ -1045,7 +1200,7 @@ button {
 
 .editor-canvas:empty::before {
   content: 'Start typing…';
-  color: #9aa0a6;
+  color: var(--text-muted);
 }
 
 .editor-canvas h1 {
@@ -1113,7 +1268,7 @@ button {
 }
 
 .editor-canvas tbody tr:nth-child(even) td {
-  background: #fcfcfd;
+  background: var(--surface-alt);
 }
 
 /* checklists */
@@ -1178,7 +1333,7 @@ button {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(32, 33, 36, 0.45);
+  background: rgba(var(--shadow-rgb), 0.45);
 }
 
 .modal-panel {
@@ -1386,7 +1541,7 @@ button {
     position: fixed;
     inset: 0;
     z-index: 50;
-    background: rgba(32, 33, 36, 0.4);
+    background: rgba(var(--shadow-rgb), 0.4);
   }
 
   .drawer-toggle {
@@ -1487,7 +1642,7 @@ label .icon {
 /* Empty states: large, faint, centred above the message. */
 .empty-icon {
   margin-bottom: 12px;
-  color: var(--border-strong, #c9d3dd);
+  color: var(--border-strong);
 }
 
 /* Template pickers. */
@@ -1514,7 +1669,7 @@ label .icon {
 }
 
 .done-icon {
-  color: #0f9d58;
+  color: var(--success-ink);
 }
 
 /* Radio rows: the label text next to an icon. */
@@ -1535,7 +1690,8 @@ label .icon {
 }
 
 .language-chip.is-active .language-code {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(var(--shadow-rgb), 0.14);
+  color: inherit;
 }
 
 /* Three dots that pulse while a save is in flight — the one piece of motion
@@ -1633,6 +1789,121 @@ label .icon {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+/* --------------------------- theme picker --------------------------------- */
+
+/*
+ * Three miniatures of the app rather than three words. The previews are
+ * deliberately NOT drawn with the theme tokens — a "Light" preview has to look
+ * light while the app around it is dark, so these are the only fixed colours in
+ * the file and they are meant to be.
+ */
+
+.theme-choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.theme-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+  transition:
+    border-color var(--t-fast) var(--ease-standard),
+    box-shadow var(--t-fast) var(--ease-standard);
+}
+
+.theme-choice:hover {
+  border-color: var(--border-strong);
+}
+
+.theme-choice.is-active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.theme-preview {
+  position: relative;
+  display: block;
+  height: 54px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f1f3f4;
+}
+
+.theme-preview-bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 30%;
+  background: #ffffff;
+}
+
+.theme-preview-card {
+  position: absolute;
+  top: 12px;
+  right: 9px;
+  left: calc(30% + 9px);
+  height: 30px;
+  border-radius: 4px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+.theme-preview.is-dark {
+  background: #10171c;
+}
+
+.theme-preview.is-dark .theme-preview-bar {
+  background: #171f26;
+}
+
+.theme-preview.is-dark .theme-preview-card {
+  background: #1e272f;
+  box-shadow: none;
+}
+
+/*
+ * "System" is the light miniature with the dark one laid over its right half
+ * on a diagonal — the same picture the OS settings use, and the only honest
+ * way to show two answers at once. The dark half is a full copy of the
+ * miniature rather than a wash, so the split lands on the page, the sidebar
+ * and the card together instead of cutting across them.
+ */
+.theme-preview.is-system::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(58% 0, 100% 0, 100% 100%, 42% 100%);
+  background:
+    linear-gradient(90deg, #171f26 0 30%, #10171c 30% 100%);
+}
+
+.theme-preview.is-system::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  right: 9px;
+  left: calc(30% + 9px);
+  height: 30px;
+  z-index: 1;
+  border-radius: 4px;
+  clip-path: polygon(40% 0, 100% 0, 100% 100%, 17% 100%);
+  background: #1e272f;
+}
+
+.theme-choice-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
 }
 
 /* A checkbox row that is actually tappable: the whole strip is the target, not
