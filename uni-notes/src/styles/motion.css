@@ -551,3 +551,185 @@ html {
 :root[data-motion='reduced'] ::view-transition-new(morph-doc) {
   animation: none;
 }
+
+/* ======================== the app you can feel =============================
+ *
+ * Everything below is about the half-second after a finger lands. An app feels
+ * premium when it answers immediately and in proportion — not when it has more
+ * animation, but when nothing you touch stays still.
+ */
+
+/* ------------------------------- press ------------------------------------
+ *
+ * The single biggest difference between a website and an app on a phone.
+ * A website's button changes colour on tap. An app's button moves.
+ *
+ * 0.97 and not lower: enough to read as depression under a fingertip, small
+ * enough that a mis-tap does not look like the layout jumped. Instant on the
+ * way down and eased on the way up, because a press should feel like it
+ * happened at the moment of contact and a release should feel like a spring.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .doc-card,
+  .template-tile,
+  .launcher-app,
+  .module-item,
+  .folder-item,
+  .platform-card,
+  .download-row,
+  .theme-choice,
+  .deck-card,
+  .filter-chip {
+    transition:
+      transform 260ms var(--ease-enter),
+      box-shadow 260ms var(--ease-standard),
+      border-color var(--t-fast) var(--ease-standard),
+      background var(--t-fast) var(--ease-standard);
+  }
+
+  /* Lift on hover, only where there is a pointer that can hover. A phone
+     applies :hover on tap and leaves it applied, so without this the last
+     thing touched stays raised. */
+  @media (hover: hover) {
+    .doc-card:hover,
+    .template-tile:hover,
+    .deck-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--lift-2);
+    }
+  }
+
+  .doc-card:active,
+  .template-tile:active,
+  .launcher-app:active,
+  .module-item:active,
+  .folder-item:active,
+  .platform-card:active,
+  .download-row:active,
+  .theme-choice:active,
+  .deck-card:active,
+  .filter-chip:active {
+    transform: scale(0.975);
+    transition-duration: 60ms;
+  }
+
+  /* Buttons are small, so they take a smaller squeeze — the same 3% on a 40px
+     pill reads as a glitch rather than a press. */
+  .button:active,
+  .icon-button:active {
+    transform: scale(0.94);
+    transition-duration: 60ms;
+  }
+
+  /* Pressing while hovering is still a press: the lift is given up on the way
+     down, so the card goes from raised to pushed in one movement rather than
+     doing both at once. */
+  @media (hover: hover) {
+    .doc-card:active,
+    .template-tile:active,
+    .deck-card:active {
+      transform: scale(0.975);
+      box-shadow: var(--lift-1);
+    }
+  }
+}
+
+/* --------------------------- the active pill ------------------------------
+ *
+ * The selected row's background grows from its left edge rather than appearing.
+ * It is 200ms of one property and it is the difference between a list that
+ * responds and a list that redraws.
+ */
+.folder-item,
+.module-item {
+  position: relative;
+  isolation: isolate;
+}
+
+.folder-item::before,
+.module-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--accent-soft);
+  opacity: 0;
+  transform: scaleX(0.4);
+  transform-origin: left center;
+  transition:
+    opacity var(--t-fast) var(--ease-standard),
+    transform var(--t-base) var(--ease-enter);
+}
+
+.folder-item.is-active::before,
+.module-item.is-active::before {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+/* ------------------------- everything arrives -----------------------------
+ *
+ * The stagger was on the document grid only, so a dashboard's cards flowed in
+ * and the row of templates above them simply appeared — the eye caught the
+ * disagreement even where it could not name it. Now the whole page assembles in
+ * one direction: templates, then documents.
+ *
+ * Same 22ms step and the same twelve-item cap as the grid, for the same reason:
+ * past that it stops being a flourish and becomes a wait.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .template-strip > *,
+  .platform-card,
+  .settings-card,
+  .filter-row > * {
+    animation: card-in var(--t-base) var(--ease-enter) both;
+  }
+
+  .template-strip > *:nth-child(1), .platform-card:nth-child(1),
+  .settings-card:nth-child(1), .filter-row > *:nth-child(1) { animation-delay: 0ms; }
+  .template-strip > *:nth-child(2), .platform-card:nth-child(2),
+  .settings-card:nth-child(2), .filter-row > *:nth-child(2) { animation-delay: 30ms; }
+  .template-strip > *:nth-child(3), .platform-card:nth-child(3),
+  .settings-card:nth-child(3), .filter-row > *:nth-child(3) { animation-delay: 60ms; }
+  .template-strip > *:nth-child(4), .platform-card:nth-child(4),
+  .settings-card:nth-child(4), .filter-row > *:nth-child(4) { animation-delay: 90ms; }
+  .template-strip > *:nth-child(5), .platform-card:nth-child(5),
+  .settings-card:nth-child(5), .filter-row > *:nth-child(5) { animation-delay: 120ms; }
+  .template-strip > *:nth-child(n + 6), .platform-card:nth-child(n + 6),
+  .settings-card:nth-child(n + 6), .filter-row > *:nth-child(n + 6) { animation-delay: 150ms; }
+}
+
+/* ---------------------- the installed app is different --------------------
+ *
+ * Someone who installed this did something a visitor did not, and the app
+ * should behave like it noticed. In standalone there is no browser chrome to
+ * borrow weight from, so the app supplies its own: the banner settles in from
+ * slightly further, and the whole workspace arrives rather than being there.
+ *
+ * Only on launch. `display-mode: standalone` is true for every navigation, but
+ * this animation is on the shell, which mounts once.
+ */
+@media (display-mode: standalone) and (prefers-reduced-motion: no-preference) {
+  .app-shell {
+    animation: app-launch 420ms var(--ease-enter) both;
+  }
+
+  .module-banner {
+    animation: banner-settle 520ms var(--ease-enter) both;
+  }
+}
+
+@keyframes app-launch {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+}
+
+@keyframes banner-settle {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(1.015);
+  }
+}

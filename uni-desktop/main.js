@@ -88,6 +88,12 @@ function createWindow() {
     title: 'Uni',
     show: false,
     autoHideMenuBar: true,
+    // Rounded corners so it sits on the desktop like a program rather than a
+    // browser someone resized. Deliberately NOT `backgroundMaterial: 'mica'` —
+    // it is a Windows 11 effect that cannot be tested from here, it fights an
+    // opaque backgroundColor, and an untested window effect that renders wrong
+    // is worse than a plain window that renders right.
+    roundedCorners: true,
     webPreferences: {
       // This window renders a remote site. It gets no Node, no preload bridge
       // and its own isolated context — the app has never needed anything from
@@ -101,7 +107,35 @@ function createWindow() {
   });
 
   if (state.maximized) win.maximize();
-  win.once('ready-to-show', () => win.show());
+
+  /*
+   * Fade the window in rather than having it appear.
+   *
+   * Electron shows a window instantly, which after a second of nothing reads as
+   * a stutter — the app looks like it hung and then gave up. Starting at zero
+   * opacity and easing up over ~180ms costs nothing and is the difference
+   * between "it appeared" and "it opened".
+   *
+   * ready-to-show fires after the first paint, so this never reveals a blank
+   * frame.
+   */
+  win.once('ready-to-show', () => {
+    win.setOpacity(0);
+    win.show();
+    const step = 1 / 11; // ~180ms at 60fps
+    let value = 0;
+    const timer = setInterval(() => {
+      value = Math.min(1, value + step);
+      // Cheap ease-out: fast at first, settling at the end.
+      win.setOpacity(1 - (1 - value) ** 2);
+      if (value >= 1) clearInterval(timer);
+    }, 16);
+    // A window that never finishes fading is worse than one that never faded.
+    setTimeout(() => {
+      clearInterval(timer);
+      if (!win.isDestroyed()) win.setOpacity(1);
+    }, 600);
+  });
 
   // Anything that is not Uni opens in the real browser. Without this, clicking
   // a link to a university's website would replace the app with that website
