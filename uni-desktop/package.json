@@ -1,0 +1,52 @@
+{
+  "name": "uni-desktop",
+  "version": "1.0.0",
+  "description": "Uni — everything for your university application",
+  "main": "main.js",
+  "private": true,
+  "author": "Uni",
+  "repository": "https://github.com/erdanthecoder/official-fixed_game",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.uni.workspace",
+    "productName": "Uni",
+    "copyright": "Uni",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": ["main.js", "offline.html", "config.json"],
+    "win": {
+      "icon": "build/icon.png",
+      "artifactName": "Uni-Setup-${version}.${ext}",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "portable": {
+      "artifactName": "Uni-Portable-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Uni"
+    }
+  }
+}

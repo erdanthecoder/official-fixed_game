@@ -1,0 +1,8 @@
+node_modules/
+release/
+# Written by the build workflow, and specific to whichever address that build
+# points at — checking one in would mean an installer that silently opens the
+# wrong site.
+config.json
+# Copied from the app's own icon at build time.
+build/

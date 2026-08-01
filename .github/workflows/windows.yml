@@ -1,0 +1,132 @@
+# Builds Uni for Windows and puts it somewhere a person can actually download it.
+#
+# Run it from the Actions tab: "Build Windows app" -> Run workflow.
+#
+# It produces two files, and which one to use depends on the computer:
+#
+#   Uni-Setup-1.0.0.exe      the installer. Adds Uni to the Start menu and the
+#                            desktop. Installs into the user's own folder, so it
+#                            does NOT need an administrator password — which
+#                            matters on a school laptop.
+#   Uni-Portable-1.0.0.exe   one file, no installation. Put it on a USB stick,
+#                            double-click, done. Nothing is written to the
+#                            computer except the app's own settings.
+#
+# Both land on the repository's Releases page as plain download links, so they
+# can be fetched on any computer without signing in to GitHub and without
+# unzipping anything. That is the whole reason this publishes a Release instead
+# of a build artifact.
+#
+# ── About the blue "Windows protected your PC" box ────────────────────────────
+# It will appear the first time, and it is not a sign anything is wrong. Windows
+# shows it for every program that has not been signed with a certificate from a
+# commercial authority, which costs a few hundred pounds a year and is the only
+# thing that removes the message. Click "More info", then "Run anyway". After
+# that Windows remembers and never asks again.
+
+name: Build Windows app
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'Address the app should open (with https://)'
+        required: false
+        default: 'https://erdanthecoder.github.io/official-fixed_game/'
+
+permissions:
+  contents: write # needed to publish the Release
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: uni-desktop
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Fail here rather than after a four-minute Electron download, and with a
+      # message that says what is actually wrong.
+      - name: Check the site is live
+        run: |
+          URL="${{ inputs.url }}"
+          echo "Fetching $URL"
+          curl -fsSL --retry 3 "$URL" -o /dev/null \
+            || { echo "::error::$URL is not reachable. Deploy the site first, then run this again."; exit 1; }
+
+      - name: Point this build at that address
+        run: |
+          node -e "
+            const url = process.argv[1];
+            new URL(url);                              // reject a malformed address now
+            require('fs').writeFileSync('config.json', JSON.stringify({ url }, null, 2));
+          " "${{ inputs.url }}"
+          cat config.json
+
+      - name: Use the app's own icon
+        run: |
+          mkdir -p build
+          cp ../uni-notes/public/icon-512.png build/icon.png
+          # electron-builder silently falls back to the stock Electron icon if
+          # this is missing, and an app with the wrong icon looks like a fake.
+          test -s build/icon.png || { echo "::error::icon-512.png not found."; exit 1; }
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npx electron-builder --win --publish never
+
+      - name: Show what was built
+        run: ls -lh release/*.exe
+
+      # Artifacts need a GitHub login and arrive as a zip. A Release is a plain
+      # link, which is the difference between "here is the app" and "here is a
+      # set of instructions".
+      - name: Publish to the Releases page
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: installers
+          name: Uni — install it
+          # Both workflows write to this one tag, so the Android and Windows
+          # downloads sit together on one page.
+          files: uni-desktop/release/*.exe
+          body: |
+            Download Uni here. No account, no app store, nothing to unzip.
+
+            **Android** — download `Uni.apk`, open it, and allow installing from
+            that source when asked. It appears in the app drawer with its own
+            icon like anything else.
+
+            **Windows** — `Uni-Setup` installs it properly, with a Start menu and
+            desktop shortcut, and never asks for an administrator password.
+            `Uni-Portable` is a single file that runs from anywhere, including a
+            USB stick.
+
+            The first time Windows opens it, a blue "Windows protected your PC"
+            box appears. That is normal for any program without a paid
+            certificate — click **More info**, then **Run anyway**. Once only.
+
+            Signing in, syncing and sharing work exactly as they do on the
+            website. It is the same Uni, in its own window.
+      - name: What happened
+        if: always()
+        run: |
+          {
+            echo "### Windows build"
+            echo
+            echo "Points at: ${{ inputs.url }}"
+            echo
+            echo "The two \`.exe\` files are on the **Releases** page of this repository —"
+            echo "a plain download link that works on any computer, no GitHub login needed."
+            echo
+            echo "First launch shows a blue \"Windows protected your PC\" box:"
+            echo "**More info** -> **Run anyway**. Once only."
+          } >> "$GITHUB_STEP_SUMMARY"

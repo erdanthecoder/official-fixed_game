@@ -1,40 +1,39 @@
 # Builds the Android app, so nobody needs a JDK, the Android SDK or Bubblewrap
 # on their own machine.
 #
-# Run it from the repo's Actions tab: "Build Android APK" -> Run workflow.
-# It produces two downloads:
+# Run it from the Actions tab: "Build Android APK" -> Run workflow. It puts
+# `Uni.apk` on the repository's Releases page as a plain download link — open
+# that link on the phone, tap the file, allow installing from that source, done.
+# No Play Store, no GitHub login, nothing to unzip.
 #
-#   uni-android       the .apk to sideload, and the .aab if you ever want Play
-#   uni-assetlinks    the file that removes the URL bar (see the summary)
-#
-# The app is a Trusted Web Activity around the deployed PWA, so the site has to
+# The app is a Trusted Web Activity around the deployed site, so the site has to
 # be live first. It reads uni-notes/twa-manifest.json, which is checked in —
 # that is what keeps the build non-interactive.
 #
-# SIGNING. First run generates a keystore and hands it back as an artifact,
-# because Android will not install an update signed with a different key than
-# the version already on the phone. Save it into the repo secrets straight away
-# and every later build reuses it:
+# SIGNING. First run generates a keystore and hands it back as an artifact —
+# never as part of the Release, which is public. Android refuses to install an
+# update signed with a different key than the version already on the phone, so
+# save it into the repo secrets straight away and every later build reuses it:
 #
 #   ANDROID_KEYSTORE_BASE64   base64 of android.keystore
 #   ANDROID_KEYSTORE_PASSWORD
 #   ANDROID_KEY_PASSWORD
 #
 # Lose the keystore and you cannot update an installed app — only uninstall and
-# reinstall, which is fine for two phones and fatal on Play.
+# reinstall, which is a shrug for two phones and fatal on Play.
 
 name: Build Android APK
 
 on:
   workflow_dispatch:
     inputs:
-      host:
-        description: 'Deployed host (no https://)'
+      url:
+        description: 'Address the app should open (with https://)'
         required: false
-        default: 'unisave-e8483.web.app'
+        default: 'https://erdanthecoder.github.io/official-fixed_game/'
 
 permissions:
-  contents: read
+  contents: write # needed to publish the Release
 
 jobs:
   build:
@@ -59,10 +58,10 @@ jobs:
       # Bubblewrap fails much later with something far less obvious.
       - name: Check the site is live
         run: |
-          URL="https://${{ inputs.host }}/manifest.webmanifest"
+          URL="${{ inputs.url }}manifest.webmanifest"
           echo "Fetching $URL"
-          if ! curl -fsS "$URL" -o /tmp/manifest.json; then
-            echo "::error::$URL is not reachable. Deploy first: npm run deploy"
+          if ! curl -fsSL --retry 3 "$URL" -o /tmp/manifest.json; then
+            echo "::error::$URL is not reachable. Deploy the site first, then run this again."
             exit 1
           fi
           cat /tmp/manifest.json
@@ -93,23 +92,32 @@ jobs:
 
       - name: Build
         env:
-          HOST: ${{ inputs.host }}
+          BASE: ${{ inputs.url }}
           STORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD || 'unisave' }}
           KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD || 'unisave' }}
         run: |
-          # Point the checked-in manifest at whichever host was asked for.
+          # Retarget the checked-in manifest. This takes a whole base URL rather
+          # than a hostname because GitHub Pages serves the app from a subpath
+          # (/official-fixed_game/), so swapping the host alone would leave every
+          # path pointing at the root of the domain, where nothing exists.
           node -e "
             const fs = require('fs');
-            const host = process.env.HOST;
+            const base = new URL(process.env.BASE.endsWith('/') ? process.env.BASE : process.env.BASE + '/');
+            const at = (p) => new URL(p.replace(/^\\//, ''), base).href;   // absolute, under the base
+            const rel = (p) => base.pathname + p.replace(/^\\//, '');       // path the app navigates to
             const m = JSON.parse(fs.readFileSync('twa-manifest.json', 'utf8'));
-            const swap = (s) => typeof s === 'string' ? s.replaceAll(m.host, host) : s;
-            m.iconUrl = swap(m.iconUrl);
-            m.maskableIconUrl = swap(m.maskableIconUrl);
-            m.webManifestUrl = swap(m.webManifestUrl);
-            m.fullScopeUrl = swap(m.fullScopeUrl);
-            (m.shortcuts || []).forEach((s) => { s.chosenIconUrl = swap(s.chosenIconUrl); });
-            m.host = host;
+            m.host = base.host;
+            m.startUrl = rel('/');
+            m.webManifestUrl = at('manifest.webmanifest');
+            m.iconUrl = at('icon-512.png');
+            m.maskableIconUrl = at('icon-maskable-512.png');
+            m.fullScopeUrl = base.href;
+            (m.shortcuts || []).forEach((sc) => {
+              sc.url = rel(sc.url.replace(base.pathname, '/'));
+              sc.chosenIconUrl = at(sc.chosenIconUrl.split('/').pop());
+            });
             fs.writeFileSync('twa-manifest.json', JSON.stringify(m, null, 2));
+            console.log(JSON.stringify(m, null, 2));
           "
           # Bubblewrap prompts for the passwords unless they arrive on stdin.
           printf '%s\n%s\n' "$STORE_PASS" "$KEY_PASS" | bubblewrap build --skipPwaValidation
@@ -117,33 +125,75 @@ jobs:
       - name: Collect the asset-links file
         run: bubblewrap fingerprint generateAssetLinks --output assetlinks.json || true
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: uni-android
-          path: |
-            uni-notes/app-release-signed.apk
-            uni-notes/app-release-bundle.aab
-            uni-notes/android.keystore
-          if-no-files-found: error
+      # Rename to something a person can recognise in a downloads folder.
+      # "app-release-signed.apk" tells nobody anything.
+      - name: Name the files properly
+        run: |
+          cp app-release-signed.apk Uni.apk
+          ls -lh Uni.apk
 
+      # The keystore goes to an artifact, never to the Release. A Release is
+      # public; the signing key must not be.
       - uses: actions/upload-artifact@v4
         with:
-          name: uni-assetlinks
-          path: uni-notes/assetlinks.json
+          name: uni-android-keystore
+          path: |
+            uni-notes/android.keystore
+            uni-notes/app-release-bundle.aab
+            uni-notes/assetlinks.json
           if-no-files-found: warn
 
-      - name: What to do next
+      # A plain download link, no GitHub login, no zip to unpack — which is the
+      # difference between "here is the app" and "here is a set of instructions".
+      # Shares the tag with the Windows build so both downloads sit on one page.
+      - name: Publish to the Releases page
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: installers
+          name: Uni — install it
+          files: uni-notes/Uni.apk
+          body: |
+            Download Uni here. No account, no app store, nothing to unzip.
+
+            **Android** — download `Uni.apk`, open it, and allow installing from
+            that source when asked. It appears in the app drawer with its own
+            icon like anything else.
+
+            **Windows** — `Uni-Setup` installs it properly, with a Start menu and
+            desktop shortcut, and never asks for an administrator password.
+            `Uni-Portable` is a single file that runs from anywhere, including a
+            USB stick.
+
+            The first time Windows opens it, a blue "Windows protected your PC"
+            box appears. That is normal for any program without a paid
+            certificate — click **More info**, then **Run anyway**. Once only.
+
+            Signing in, syncing and sharing work exactly as they do on the
+            website. It is the same Uni, in its own window.
+      - name: What happened
+        if: always()
         run: |
           {
-            echo "### Android build finished"
+            echo "### Android build"
             echo
-            echo "1. Download the **uni-android** artifact below."
+            echo "Points at: ${{ inputs.url }}"
+            echo
+            echo "\`Uni.apk\` is on the **Releases** page of this repository — open that"
+            echo "link on the phone, tap the file, and allow installing from that source."
+            echo
             if [ "${{ steps.key.outputs.generated }}" = "true" ]; then
-              echo "2. **Save the keystore now.** Run \`base64 -w0 android.keystore\` and put the result in repo secrets as \`ANDROID_KEYSTORE_BASE64\`. Without it, a later build produces an app that will not install over this one."
+              echo "> **Save the signing key now.** This run made a new one. Download the"
+              echo "> **uni-android-keystore** artifact and put \`android.keystore\` into repo"
+              echo "> secrets as \`ANDROID_KEYSTORE_BASE64\` (base64 encoded). Without it, the"
+              echo "> next build produces an app that refuses to install over this one."
             else
-              echo "2. Signed with the stored keystore, so it installs over the previous version."
+              echo "Signed with the stored key, so it installs over the previous version."
             fi
-            echo "3. Copy \`app-release-signed.apk\` to the phone and open it. Allow installing from that source once."
             echo
-            echo "**To remove the URL bar:** download **uni-assetlinks**, put \`assetlinks.json\` at \`uni-notes/public/.well-known/assetlinks.json\`, run \`npm run deploy\`, then reinstall the APK."
+            echo "**About the address bar at the top of the app.** Android hides it only"
+            echo "when the site proves it owns the app, by serving a file at the very root"
+            echo "of the domain: \`/.well-known/assetlinks.json\`. On GitHub Pages the app"
+            echo "lives at a subpath and the root belongs to github.io, so that file cannot"
+            echo "be put there. Deploying to Firebase Hosting instead gives a domain root"
+            echo "we control, and then the bar disappears. Everything else works either way."
           } >> "$GITHUB_STEP_SUMMARY"
