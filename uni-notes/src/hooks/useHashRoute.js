@@ -13,7 +13,6 @@
  *   #/tasks   #/tasks/:planId
  *   #/languages  #/languages/:deckId
  *   #/unisave                everything, with sharing
- *   #/ai  #/ai/:chatId
  *   #/settings
  *
  * The hash keeps refresh and the browser back button working without pulling in
@@ -29,8 +28,8 @@ export const MODULES = [
   'canvas',
   'tasks',
   'unisave',
-  'ai',
   'languages',
+  'apps',
   'settings',
 ];
 

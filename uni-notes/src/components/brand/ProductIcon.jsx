@@ -18,9 +18,9 @@ export const PRODUCTS = {
   canvas: { colour: '#0F7B6C', soft: '#DFF1EE', labelKey: 'nav.canvas', hintKey: 'nav.canvasHint' },
   tasks: { colour: '#C5372C', soft: '#FBE9E7', labelKey: 'nav.tasks', hintKey: 'nav.tasksHint' },
   unisave: { colour: '#0F7B6C', soft: '#DFF1EE', labelKey: 'nav.unisave', hintKey: 'nav.unisaveHint' },
-  ai: { colour: '#8430CE', soft: '#F3E8FD', labelKey: 'nav.ai', hintKey: 'nav.aiHint' },
   languages: { colour: '#C5372C', soft: '#FBE9E7', labelKey: 'nav.languages', hintKey: 'nav.languagesHint' },
   settings: { colour: '#5F6368', soft: '#EEF0F2', labelKey: 'nav.settings', hintKey: null },
+  apps: { colour: '#0F7B6C', soft: '#DFF1EE', labelKey: 'nav.apps', hintKey: 'nav.appsHint' },
 };
 
 export function productColour(product) {
@@ -85,18 +85,6 @@ function Glyph({ product, colour }) {
         </>
       );
 
-    case 'ai':
-      // A four-point spark, plus a small one — the standard "assist" cue.
-      return (
-        <>
-          <path
-            d="M10 3.4 11.7 8 16.3 9.7 11.7 11.4 10 16 8.3 11.4 3.7 9.7 8.3 8Z"
-            fill={colour}
-          />
-          <path d="M17.4 13.2 18.4 16l2.8 1-2.8 1-1 2.8-1-2.8-2.8-1 2.8-1Z" fill={colour} opacity="0.72" />
-        </>
-      );
-
     case 'languages':
       // Two speech bubbles overlapping: one language answering another.
       return (
@@ -115,6 +103,36 @@ function Glyph({ product, colour }) {
             strokeWidth="1.7"
             strokeLinejoin="round"
             opacity="0.8"
+          />
+        </>
+      );
+
+    case 'apps':
+      // An arrow coming down into a tray. The universal download mark, which is
+      // worth more here than anything cleverer — this tile has to read as "get
+      // the file" to someone who has never seen the app before.
+      return (
+        <>
+          <path
+            d="M12 3.8v9.4"
+            stroke={colour}
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+          <path
+            d="m8.2 9.6 3.8 3.8 3.8-3.8"
+            fill="none"
+            stroke={colour}
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M4.8 15.4v2.6a2 2 0 0 0 2 2h10.4a2 2 0 0 0 2-2v-2.6"
+            fill="none"
+            stroke={colour}
+            strokeWidth="1.8"
+            strokeLinecap="round"
           />
         </>
       );

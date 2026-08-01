@@ -173,25 +173,29 @@ const P = {
       <path d="M16 5.6a3.2 3.2 0 0 1 0 5.9M17.6 19.4a5.6 5.6 0 0 0-2.2-4.5" />
     </>
   ),
+  phone: (
+    <>
+      <rect x="6.8" y="2.8" width="10.4" height="18.4" rx="2.4" />
+      <path d="M10.4 18.4h3.2" />
+    </>
+  ),
+  monitor: (
+    <>
+      <rect x="2.8" y="4.2" width="18.4" height="12.4" rx="2" />
+      <path d="M8.6 20.4h6.8M12 16.6v3.8" />
+    </>
+  ),
+  info: (
+    <>
+      <circle cx="12" cy="12" r="8.2" />
+      <path d="M12 11.2v5" />
+      <path d="M12 7.9v.1" strokeWidth="2.2" />
+    </>
+  ),
   globe: (
     <>
       <circle cx="12" cy="12" r="8" />
       <path d="M4.2 12h15.6M12 4a13 13 0 0 1 0 16 13 13 0 0 1 0-16Z" />
-    </>
-  ),
-  sparkle: (
-    <>
-      <path
-        d="M10 3.6 11.7 8.3 16.4 10 11.7 11.7 10 16.4 8.3 11.7 3.6 10 8.3 8.3Z"
-        fill="currentColor"
-        stroke="none"
-      />
-      <path
-        d="M17.4 13.6 18.4 16.4l2.8 1-2.8 1-1 2.8-1-2.8-2.8-1 2.8-1Z"
-        fill="currentColor"
-        stroke="none"
-        opacity="0.7"
-      />
     </>
   ),
   send: <path d="M20 4 3.6 10.6l6.6 2.8 2.8 6.6Zm0 0-9.8 9.4" />,

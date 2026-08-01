@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import Icon from './components/ui/Icon.jsx';
-import AiWorkspace from './components/ai/AiWorkspace.jsx';
 import AuthScreen from './components/AuthScreen.jsx';
 import CanvasModule from './components/canvas/CanvasModule.jsx';
 import JoinPage from './components/JoinPage.jsx';
@@ -8,6 +7,7 @@ import Skeleton from './components/shared/Skeleton.jsx';
 import LandingPage from './components/landing/LandingPage.jsx';
 import LanguagesModule from './components/languages/LanguagesModule.jsx';
 import NotesModule from './components/notes/NotesModule.jsx';
+import AppsPage from './components/apps/AppsPage.jsx';
 import SettingsPage from './components/SettingsPage.jsx';
 import SheetsModule from './components/sheets/SheetsModule.jsx';
 import Sidebar from './components/Sidebar.jsx';
@@ -237,8 +237,8 @@ export default function App() {
             onOpen={(deckId) => goToItem('languages', deckId)}
             onBack={() => goToModule('languages')}
           />
-        ) : module === 'ai' ? (
-          <AiWorkspace chatId={id} onOpenChat={(chatId) => goToItem('ai', chatId)} />
+        ) : module === 'apps' ? (
+          <AppsPage />
         ) : module === 'settings' ? (
           <SettingsPage />
         ) : (

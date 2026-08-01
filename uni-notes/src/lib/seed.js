@@ -18,12 +18,13 @@ export const DEFAULT_FOLDERS = [
 
 const WELCOME_NOTE = `
   <h1>Start here</h1>
-  <p>This is your workspace. Five parts, all synced to your account:</p>
+  <p>This is your workspace. Everything here syncs to your account:</p>
   <ul>
     <li><b>Notes</b> — essays, research, checklists. This document is one.</li>
     <li><b>Sheets</b> — compare tuition costs and track deadlines with real formulas.</li>
     <li><b>Slides</b> — build a presentation for a class or an interview.</li>
-    <li><b>AI</b> — ask for help brainstorming or improving a paragraph.</li>
+    <li><b>Canvas</b> — draw the idea out when writing it down is slower.</li>
+    <li><b>Tasks</b> — every deadline in one place, counting down.</li>
     <li><b>Languages</b> — flashcards for the words that keep coming up.</li>
   </ul>
   <p>Try the <b>Insert</b> menu above — the University Comparison Table and the

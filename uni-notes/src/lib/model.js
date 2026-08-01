@@ -23,7 +23,7 @@ export const KIND_TO_COLLECTION = Object.fromEntries(
   Object.entries(SHARED_KINDS).map(([collection, kind]) => [kind, collection]),
 );
 
-export const PRIVATE_COLLECTIONS = ['folders', 'chats'];
+export const PRIVATE_COLLECTIONS = ['folders'];
 
 export const ALL_COLLECTIONS = [...Object.keys(SHARED_KINDS), ...PRIVATE_COLLECTIONS];
 

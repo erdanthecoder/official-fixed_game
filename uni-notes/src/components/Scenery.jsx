@@ -75,15 +75,6 @@ export const SLOTS = {
     water: ['#4aa3b8', '#2d7f97'],
     sun: '#ffeccb',
   },
-  ai: {
-    file: 'night.jpg',
-    sky: ['#0a1830', '#1b3157'],
-    peaks: ['#132745', '#1b3357'],
-    snow: '#d9e6f7',
-    water: ['#0d2440', '#08192e'],
-    sun: '#e8f0ff',
-    stars: true,
-  },
 };
 
 const PHOTO_BASE = `${import.meta.env.BASE_URL ?? '/'}images/issyk-kul/`;

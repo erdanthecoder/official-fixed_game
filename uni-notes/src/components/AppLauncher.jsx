@@ -28,8 +28,8 @@ export const LAUNCHER_APPS = [
   'canvas',
   'tasks',
   'unisave',
-  'ai',
   'languages',
+  'apps',
   'settings',
 ];
 

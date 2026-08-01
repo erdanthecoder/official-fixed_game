@@ -1947,3 +1947,141 @@ label .icon {
 .settings-card .segmented {
   margin-top: 4px;
 }
+
+/* ========================== touch and desktop fit ==========================
+ *
+ * Measured on a 390px phone rather than guessed: thirteen 28x28 icon buttons,
+ * a 38px launcher, a 32px logo button, 13px checkboxes. All of them fine with a
+ * mouse and all of them a coin-flip with a thumb.
+ *
+ * The fix expands the *hit area* and leaves the drawing alone. A transparent
+ * ::after centred on the control stretches it to 44px in both directions, so
+ * every control keeps the size it was designed at and none of the layout moves.
+ * Growing the buttons themselves would have reflowed six toolbars to solve a
+ * problem that only exists on touch.
+ *
+ * `pointer: coarse` and not a width query: a small window on a laptop still has
+ * a mouse, and a large tablet still has fingers. Screen size was never the
+ * question.
+ */
+
+@media (pointer: coarse) {
+  .icon-button,
+  .launcher-button,
+  .drawer-toggle,
+  .platform-head,
+  .filter-chip,
+  .folder-item,
+  .theme-choice,
+  .segmented button {
+    position: relative;
+  }
+
+  /*
+   * Vertically only, and this is the important part. A 44px-wide box centred on
+   * a 28px button reaches 8px past each edge, and the icon buttons on a
+   * document row sit 2-3px apart — so the box for Copy would cover a third of
+   * Delete, and the one later in the DOM wins. Measured: 13px of overlap
+   * between exactly those two. A thumb aiming at Copy would have deleted the
+   * document, which is worse than the small target it was meant to fix.
+   *
+   * Height is safe because rows are far apart and the worst case is selecting
+   * the row above — visible, and undone by tapping again.
+   */
+  .icon-button::after,
+  .launcher-button::after,
+  .drawer-toggle::after,
+  .filter-chip::after,
+  .folder-item::after,
+  .segmented button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: max(100%, 44px);
+    transform: translateY(-50%);
+  }
+
+  /*
+   * Sideways reach is bought with real pixels instead. Only these two clusters
+   * pack icon buttons tightly, and only on touch: a 34px button with a 10px gap
+   * is a 44px pitch, so neighbouring targets stay genuinely separate rather
+   * than merely appearing to.
+   */
+  .folder-actions,
+  .file-actions {
+    gap: 10px;
+  }
+
+  .folder-actions .icon-button.small,
+  .file-actions .icon-button.small {
+    width: 34px;
+    height: 34px;
+  }
+
+  /* Full-width rows are easy to hit sideways and were only ever short. Raising
+     them costs nothing, because the height there is padding, not content. */
+  .module-item,
+  .file-main,
+  .add-folder,
+  .download-row,
+  .platform-head {
+    min-height: 46px;
+  }
+
+  /* A checkbox is 13px and cannot be grown, but its whole row is already the
+     label — this makes the row do the work the box cannot. */
+  .settings-toggle {
+    min-height: 44px;
+    padding: 6px 0;
+  }
+
+  /* Android paints a grey rectangle over anything tapped. It fires on scroll
+     starts too, which reads as the app flickering. The :active and :focus
+     styles already say what was pressed. */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/*
+ * Pulling down at the top of a list on Android reloads the page. In a browser
+ * that is a feature; in an app it throws away where you were, for a gesture
+ * nobody meant to make. The app has a Save indicator and syncs on its own, so
+ * there is nothing a refresh would fetch that is not already coming.
+ */
+html,
+body {
+  overscroll-behavior-y: none;
+}
+
+/*
+ * Wide screens. The app was laid out for a laptop and simply keeps stretching,
+ * which on a 27-inch monitor leaves a settings form four words wide with a
+ * metre of nothing beside it. These caps are the same measures the editor
+ * already uses, applied to the pages that never got them.
+ */
+@media (min-width: 1500px) {
+  .module-grid,
+  .module-toolbar,
+  .settings-page,
+  .apps-body,
+  .unisave-body {
+    max-width: 1280px;
+    margin-inline: auto;
+  }
+}
+
+/*
+ * With the drawer open on a phone, the sidebar slides over the button that
+ * opened it — and the sidebar's Home button lands exactly on top. Tapping where
+ * the close button visibly is would navigate home instead, which is a tap that
+ * looks like it did nothing and actually left the page.
+ *
+ * The scrim is how the drawer closes, so the button has no job while it is
+ * open. Removing it removes the collision.
+ */
+.sidebar.is-open ~ .app-main .drawer-toggle {
+  display: none;
+}

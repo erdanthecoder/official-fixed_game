@@ -16,7 +16,7 @@ const en = [
   'Reloading is safe. Anything you typed is written down before it can be lost.',
   'Share a document from UniSave and the other person edits the same copy — no versions flying about.',
   'Invite someone as a viewer when you want an opinion but not an editor.',
-  'Ask Uni AI why a paragraph is weak, not just to rewrite it. You learn more.',
+  'Canvas is quicker than Notes when the shape of the idea matters more than the words.',
   'Deadlines and tuition change every year. Check them on the university’s own site.',
   'Flashcards work best in short daily bursts, not one long evening.',
   'In Present mode: arrow keys or space to move, Esc to get out.',

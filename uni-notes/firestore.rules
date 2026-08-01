@@ -13,7 +13,7 @@ rules_version = '2';
 //                         Cloud Functions, which is the only way to turn an
 //                         email address into a uid.
 //
-//   users/{uid}/…         Personal: folders, AI chats, preferences. Only that
+//   users/{uid}/…         Personal: folders and preferences. Only that
 //                         account, ever.
 //
 //   invites/{inviteId}    Written by the sharing functions. Deliberately
@@ -156,7 +156,7 @@ service cloud.firestore {
 
     // --- personal data -------------------------------------------------------
 
-    // users/{uid}/folders|chats/{id} and users/{uid}/meta/prefs
+    // users/{uid}/folders/{id} and users/{uid}/meta/prefs
     match /users/{uid} {
       allow read, write: if isOwner(uid);
 

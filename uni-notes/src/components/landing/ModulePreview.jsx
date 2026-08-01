@@ -149,17 +149,6 @@ function UniSavePreview({ copy }) {
   );
 }
 
-function AiPreview({ copy }) {
-  return (
-    <Chrome title={copy.aiFile} accent="#8430CE">
-      <div className="preview-chat">
-        <p className="preview-ask">{copy.aiAsk}</p>
-        <p className="preview-answer">{copy.aiAnswer}</p>
-      </div>
-    </Chrome>
-  );
-}
-
 function LanguagesPreview({ copy }) {
   return (
     <Chrome title={copy.langFile} accent="#C5372C">
@@ -244,7 +233,6 @@ const PREVIEWS = {
   canvas: CanvasPreview,
   tasks: TasksPreview,
   unisave: UniSavePreview,
-  ai: AiPreview,
   languages: LanguagesPreview,
 };
 
