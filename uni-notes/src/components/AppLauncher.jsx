@@ -17,6 +17,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import ProductIcon, { PRODUCTS } from './brand/ProductIcon.jsx';
 import { useT } from '../i18n/index.jsx';
 
@@ -120,7 +121,22 @@ export default function AppLauncher({ active, onPick, className = '' }) {
         onToggle={() => setPhase(open ? 'closing' : 'opening')}
       />
 
-      {phase === 'closed' ? null : (
+      {/*
+        Rendered into <body>, not here.
+
+        On a narrow screen the sidebar slides in with `transform`, and a
+        transformed element becomes the containing block for every
+        `position: fixed` descendant. The overlay was therefore not covering the
+        screen at all — it was confined to the 268px sidebar and stacked inside
+        it, which is why it appeared behind the page instead of over it.
+
+        A portal is the only real fix. Raising z-index cannot help: the overlay
+        is inside the sidebar's stacking context, so no value can lift it above
+        the sidebar's own siblings.
+      */}
+      {phase === 'closed'
+        ? null
+        : createPortal(
         <div
           className={`launcher-overlay ${phase === 'closing' ? 'is-closing' : ''}`}
           onMouseDown={(event) => {
@@ -160,7 +176,8 @@ export default function AppLauncher({ active, onPick, className = '' }) {
               ))}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
