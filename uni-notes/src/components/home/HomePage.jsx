@@ -1,7 +1,7 @@
 /**
  * Home.
  *
- * Until now, opening Uni dropped you into Notes — a folder of documents, which
+ * Until now, opening Kadam dropped you into Notes — a folder of documents, which
  * tells you nothing you did not already know. This is the screen that answers
  * the question actually being asked at nine in the morning: what is close, and
  * what was I doing?

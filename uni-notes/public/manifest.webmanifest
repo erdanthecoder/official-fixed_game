@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "Uni — university planning workspace",
-  "short_name": "Uni",
+  "name": "Kadam — university planning workspace",
+  "short_name": "Kadam",
   "description": "Notes, sheets, slides, canvas boards, deadline plans and vocabulary practice for planning university applications.",
   "start_url": "./",
   "scope": "./",

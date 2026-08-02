@@ -1,5 +1,5 @@
 /**
- * Uni for Windows.
+ * Kadam for Windows.
  *
  * This is a window around the deployed app, not a second copy of it. That is a
  * deliberate choice rather than laziness:
@@ -9,7 +9,7 @@
  *    loaded its own bundled copy off the disk could draw every screen and then
  *    fail at the only one that matters.
  *  - There is one app. Fix something, deploy it, and the desktop app has it on
- *    the next launch — no rebuilding an installer and no version of Uni that is
+ *    the next launch — no rebuilding an installer and no version of Kadam that is
  *    three weeks behind the one on the phone.
  *  - Offline still works. The site's service worker caches it on first run, so
  *    this window opens without a connection exactly like the phone does.
@@ -85,7 +85,7 @@ function createWindow() {
     // Matches the app's dark page, so a cold start does not flash white before
     // the first paint arrives.
     backgroundColor: '#0e1418',
-    title: 'Uni',
+    title: 'Kadam',
     show: false,
     autoHideMenuBar: true,
     // Rounded corners so it sits on the desktop like a program rather than a
@@ -137,7 +137,7 @@ function createWindow() {
     }, 600);
   });
 
-  // Anything that is not Uni opens in the real browser. Without this, clicking
+  // Anything that is not Kadam opens in the real browser. Without this, clicking
   // a link to a university's website would replace the app with that website
   // and leave no way back.
   const external = (url) => {

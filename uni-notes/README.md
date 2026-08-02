@@ -1,4 +1,4 @@
-# Uni
+# Kadam
 
 Eight tools for getting into university, in one place: **Notes**, **Sheets**,
 **Slides**, **Canvas**, **Tasks**, **UniSave**, an **AI** study helper, and
@@ -20,7 +20,7 @@ npm run dev          # http://localhost:5173
 ```
 
 It runs with no setup at all — no `.env`, no account — saving to that browser's
-local storage, with Uni AI switched off. To turn on Google sign-in, cross-device
+local storage, with Kadam AI switched off. To turn on Google sign-in, cross-device
 sync and AI, follow **[FIREBASE_SETUP.md](FIREBASE_SETUP.md)**.
 
 ```bash
@@ -155,7 +155,7 @@ list — membership changes go through Cloud Functions, because turning an email
 address into an account needs admin rights the browser must never have.
 
 **Reloading is safe.** Writes are debounced, which normally leaves a window
-where an edit exists only in memory. Uni closes that window: every edit is
+where an edit exists only in memory. Kadam closes that window: every edit is
 appended to a local-storage journal *synchronously* before anything else, and
 flushed on `pagehide`. Anything still in the journal at startup is replayed and
 you get a note saying so. Closing the tab mid-sentence loses nothing.
@@ -267,7 +267,7 @@ stop a client writing anyone's membership — including its own.
 
 ## Good to know
 
-- Uni AI can be wrong. Check anything that costs money or has a deadline against
+- Kadam AI can be wrong. Check anything that costs money or has a deadline against
   the university's own website — the app says this next to the chat box too.
 - The Anthropic API is the only part with a real per-use cost. See the **Cost**
   section of FIREBASE_SETUP.md, and set a budget alert.

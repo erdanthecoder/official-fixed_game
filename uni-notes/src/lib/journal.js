@@ -35,7 +35,7 @@ function write(entries) {
   } catch (error) {
     // Out of quota or private-browsing: the app still works, it just loses the
     // extra safety net. Not worth interrupting the user over.
-    console.warn('[Uni] Could not journal a pending edit.', error);
+    console.warn('[Kadam] Could not journal a pending edit.', error);
   }
 }
 

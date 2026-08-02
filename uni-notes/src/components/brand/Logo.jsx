@@ -1,5 +1,5 @@
 /**
- * The Uni logo, as a system.
+ * The Kadam logo, as a system.
  *
  * ── The idea ──────────────────────────────────────────────────────────────
  * Motorsport logotypes: a heavy oblique letterform with the air still coming
@@ -7,7 +7,7 @@
  *
  * This is an original mark in that tradition — the letterforms, the slant, the
  * bar geometry and the colour are all ours. Borrowing a *genre* is what design
- * traditions are for; copying a specific famous mark would make Uni look like a
+ * traditions are for; copying a specific famous mark would make Kadam look like a
  * knock-off of someone else's brand, which is the opposite of the point.
  *
  * ── The letterforms ───────────────────────────────────────────────────────
@@ -55,6 +55,16 @@ const SHEAR = 12;
 
 /* Letterforms, unsheared, on a 64 cap height. */
 const GLYPH = {
+  /*
+   * K, on the same grid and at the same weight as the U it replaces: stem 14,
+   * arm and leg 14 across the diagonal, everything inside the same 46-unit
+   * width so the tile composition did not have to move. Drawn as one polygon
+   * because a K has no curves — the only judgement in it is where the arm and
+   * leg meet the stem, which is set high (y 25 and 39) so the counter above the
+   * junction stays open at favicon size. It was checked at 16px before it was
+   * kept.
+   */
+  K: 'M0 0 L14 0 L14 25 L33 0 L46 0 L25 32 L46 64 L31 64 L14 39 L14 64 L0 64 Z',
   U: 'M0 0 L0 41 A23 23 0 0 0 46 41 L46 0 L32 0 L32 41 A9 9 0 0 1 14 41 L14 0 Z',
   n: 'M0 64 L0 44 A20 20 0 0 1 40 44 L40 64 L28 64 L28 44 A8 8 0 0 0 12 44 L12 64 Z',
   i: 'M0 24 L12 24 L12 64 L0 64 Z',
@@ -115,7 +125,7 @@ function Defs({ id, tone }) {
 }
 
 export function LogoMark({ size = 40, tone = 'tile', className = '' }) {
-  const id = `uni-mark-${(seq += 1)}`;
+  const id = `kadam-mark-${(seq += 1)}`;
   const onTile = tone === 'tile';
 
   return (
@@ -125,7 +135,7 @@ export function LogoMark({ size = 40, tone = 'tile', className = '' }) {
       viewBox="0 0 64 64"
       className={`logo-mark ${className}`}
       role="img"
-      aria-label="Uni"
+      aria-label="Kadam"
     >
       <Defs id={id} tone={tone} />
 
@@ -150,7 +160,7 @@ export function LogoMark({ size = 40, tone = 'tile', className = '' }) {
 
       <g transform="translate(26 16) scale(0.53)">
         <g transform={`skewX(-${SHEAR}) translate(6 0)`}>
-          <path d={GLYPH.U} fill={`url(#${id}-ink)`} />
+          <path d={GLYPH.K} fill={`url(#${id}-ink)`} />
         </g>
       </g>
     </svg>
@@ -158,36 +168,59 @@ export function LogoMark({ size = 40, tone = 'tile', className = '' }) {
 }
 
 /**
- * "Uni", drawn.
+ * "Kadam", set.
  *
- * Height-driven rather than width-driven: `size` is the cap height in pixels
- * and the width follows, which is how a logotype behaves when it sits next to
- * text set at a known size.
+ * The K is drawn, because it is the mark and it has to survive being sixteen
+ * pixels wide. "adam" is type — Inter at its heaviest, sheared to the same
+ * twelve degrees and filled with the same gradient, so it belongs to the K
+ * without four more letterforms being invented by hand to sit beside it.
+ *
+ * `textLength` is not decoration: without it the wordmark's width depends on
+ * whether a webfont has finished loading, and the lockup would reflow as the
+ * page settles.
+ *
+ * Height-driven rather than width-driven — `size` is the cap height in pixels
+ * and the width follows, which is how a logotype behaves next to text set at a
+ * known size.
  */
-export function UniWordmark({ size = 22, tone = 'ink', className = '' }) {
-  const id = `uni-word-${(seq += 1)}`;
+export function KadamWordmark({ size = 22, tone = 'ink', className = '' }) {
+  const id = `kadam-word-${(seq += 1)}`;
   const fill = `url(#${id}-ink)`;
 
   return (
     <svg
       // Bounds include the shear: at the baseline every glyph has moved left by
       // 64·tan(12°) ≈ 13.6 units, so the box starts negative.
-      viewBox="-15 0 134 66"
+      viewBox="-15 0 218 66"
       height={size * (66 / 64)}
       className={`logo-lettering ${className}`}
       role="img"
-      aria-label="Uni"
+      aria-label="Kadam"
     >
       <Defs id={id} tone={tone} />
       <g transform={`skewX(-${SHEAR})`}>
-        <path d={GLYPH.U} fill={fill} />
-        <g transform="translate(54 0)">
-          <path d={GLYPH.n} fill={fill} />
-        </g>
-        <g transform="translate(104 0)">
-          <path d={GLYPH.i} fill={fill} />
-          <path d={GLYPH.iDot} fill="#E4801A" />
-        </g>
+        <path d={GLYPH.K} fill={fill} />
+        {/*
+          Stroked as well as filled. Inter at its heaviest still has stems
+          around nine units where the drawn K has fourteen, and a wordmark whose
+          first letter is visibly fatter than the rest looks like two logos
+          stuck together. Four units of stroke on each side closes the gap.
+        */}
+        <text
+          x="52"
+          y="64"
+          fontFamily="Inter, 'Segoe UI', Roboto, system-ui, sans-serif"
+          fontWeight="800"
+          fontSize="64"
+          textLength="144"
+          lengthAdjust="spacingAndGlyphs"
+          fill={fill}
+          stroke={fill}
+          strokeWidth="4"
+          strokeLinejoin="round"
+        >
+          adam
+        </text>
       </g>
     </svg>
   );
@@ -196,7 +229,7 @@ export function UniWordmark({ size = 22, tone = 'ink', className = '' }) {
 export function Wordmark({ sub = null, tone = 'ink', size = 22, className = '' }) {
   return (
     <span className={`logo-word is-${tone} ${className}`}>
-      <UniWordmark size={size} tone={tone} />
+      <KadamWordmark size={size} tone={tone} />
       {sub ? <small>{sub}</small> : null}
     </span>
   );

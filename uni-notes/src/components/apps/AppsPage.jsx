@@ -1,5 +1,5 @@
 /**
- * Get Uni — the page that hands over the installers.
+ * Get Kadam — the page that hands over the installers.
  *
  * The whole design rests on one decision: the device you are reading this on
  * gets its own card, at the top, opened, with the download already visible.

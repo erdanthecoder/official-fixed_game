@@ -1,5 +1,5 @@
 /**
- * Every keyboard shortcut in Uni, in one list.
+ * Every keyboard shortcut in Kadam, in one list.
  *
  * One list, not two, and that is the point. The usual failure is a help dialog
  * written by hand: it starts correct, a shortcut changes, and now the app

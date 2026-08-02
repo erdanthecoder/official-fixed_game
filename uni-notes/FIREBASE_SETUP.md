@@ -1,6 +1,6 @@
 # Firebase setup
 
-Takes Uni from "runs on my laptop" to "syncs to my account, shares with my
+Takes Kadam from "runs on my laptop" to "syncs to my account, shares with my
 cousin, and lives at a real web address" — **on the free plan, with no card
 anywhere.** That is the whole of Part One, and it is the part you want.
 
@@ -23,7 +23,7 @@ You need a Google account, Node 22+, and about twenty minutes.
 | **Sharing by link** | yes | |
 | Hosting it at a real URL | yes | |
 | Sharing by email address | | yes |
-| Uni AI | | yes |
+| Kadam AI | | yes |
 
 The free allowances are 50,000 reads and 20,000 writes a day, 10 GB of hosting,
 and unlimited sign-ins. Two people writing essays will use a rounding error of
@@ -46,7 +46,7 @@ there unless somebody deliberately upgrades it.
 ## 2. Register the web app and fill in .env
 
 1. On the project overview, click the **Web** icon (`</>`). Nickname it
-   `Uni web`. Tick **"Also set up Firebase Hosting"** — you will want it in
+   `Kadam web`. Tick **"Also set up Firebase Hosting"** — you will want it in
    step 6 and it costs nothing.
 2. Firebase shows a `firebaseConfig` object. Keep that tab open.
 3. In this folder:
@@ -162,7 +162,7 @@ storage and 360 MB of transfer a day.
 
 # Part Two — the two things that need a server
 
-**Only read this if you want email invitations or Uni AI.** Skipping it costs
+**Only read this if you want email invitations or Kadam AI.** Skipping it costs
 you nothing you already have.
 
 Both need Cloud Functions, and Cloud Functions require the **Blaze** plan, which

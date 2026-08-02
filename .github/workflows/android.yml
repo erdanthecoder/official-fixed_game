@@ -2,7 +2,7 @@
 # on their own machine.
 #
 # Run it from the Actions tab: "Build Android APK" -> Run workflow. It puts
-# `Uni.apk` on the repository's Releases page as a plain download link — open
+# `Kadam.apk` on the repository's Releases page as a plain download link — open
 # that link on the phone, tap the file, allow installing from that source, done.
 # No Play Store, no GitHub login, nothing to unzip.
 #
@@ -148,7 +148,7 @@ jobs:
             keytool -genkeypair -v -keystore android.keystore \
               -alias uni -keyalg RSA -keysize 2048 -validity 10000 \
               -storepass unisave -keypass unisave \
-              -dname "CN=Uni, OU=Uni, O=Uni, L=Bishkek, C=KG"
+              -dname "CN=Kadam, OU=Kadam, O=Kadam, L=Bishkek, C=KG"
             echo "generated=true" >> "$GITHUB_OUTPUT"
             echo "::warning::A new keystore was generated. Download the uni-android artifact and save android.keystore into repo secrets as ANDROID_KEYSTORE_BASE64, or future builds will not install over this one."
           fi
@@ -270,8 +270,8 @@ jobs:
 
       - name: Name the files properly
         run: |
-          cp app-release-signed.apk Uni.apk
-          ls -lh Uni.apk
+          cp app-release-signed.apk Kadam.apk
+          ls -lh Kadam.apk
 
       # The keystore goes to an artifact, never to the Release. A Release is
       # public; the signing key must not be.
@@ -291,18 +291,18 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: installers
-          name: Uni — install it
-          files: uni-notes/Uni.apk
+          name: Kadam — install it
+          files: uni-notes/Kadam.apk
           body: |
-            Download Uni here. No account, no app store, nothing to unzip.
+            Download Kadam here. No account, no app store, nothing to unzip.
 
-            **Android** — download `Uni.apk`, open it, and allow installing from
+            **Android** — download `Kadam.apk`, open it, and allow installing from
             that source when asked. It appears in the app drawer with its own
             icon like anything else.
 
-            **Windows** — `Uni-Setup` installs it properly, with a Start menu and
+            **Windows** — `Kadam-Setup` installs it properly, with a Start menu and
             desktop shortcut, and never asks for an administrator password.
-            `Uni-Portable` is a single file that runs from anywhere, including a
+            `Kadam-Portable` is a single file that runs from anywhere, including a
             USB stick.
 
             The first time Windows opens it, a blue "Windows protected your PC"
@@ -310,7 +310,7 @@ jobs:
             certificate — click **More info**, then **Run anyway**. Once only.
 
             Signing in, syncing and sharing work exactly as they do on the
-            website. It is the same Uni, in its own window.
+            website. It is the same Kadam, in its own window.
       - name: What happened
         if: always()
         run: |
@@ -319,7 +319,7 @@ jobs:
             echo
             echo "Points at: $APP_URL"
             echo
-            echo "\`Uni.apk\` is on the **Releases** page of this repository — open that"
+            echo "\`Kadam.apk\` is on the **Releases** page of this repository — open that"
             echo "link on the phone, tap the file, and allow installing from that source."
             echo
             if [ "${{ steps.key.outputs.generated }}" = "true" ]; then

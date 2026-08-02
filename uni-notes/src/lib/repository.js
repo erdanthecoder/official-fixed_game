@@ -74,7 +74,7 @@ function readLocal() {
 
     return { collections: {}, prefs: {} };
   } catch (error) {
-    console.warn('[Uni] Could not read local data, starting fresh.', error);
+    console.warn('[Kadam] Could not read local data, starting fresh.', error);
     return { collections: {}, prefs: {} };
   }
 }
@@ -84,7 +84,7 @@ function writeLocal(state) {
     localStorage.setItem(LOCAL_KEY, JSON.stringify(state));
     return true;
   } catch (error) {
-    console.warn('[Uni] Could not save locally.', error);
+    console.warn('[Kadam] Could not save locally.', error);
     return false;
   }
 }
@@ -211,7 +211,7 @@ export function createCloudRepository(uid) {
         sharedCache = snapshot.docs.map((d) => ({ ...d.data(), id: d.id }));
         fanOut();
       },
-      (error) => console.warn('[Uni] Sync failed for shared documents.', error),
+      (error) => console.warn('[Kadam] Sync failed for shared documents.', error),
     );
     unsubscribers.add(sharedUnsubscribe);
   };
@@ -236,7 +236,7 @@ export function createCloudRepository(uid) {
       const unsubscribe = onSnapshot(
         privateCollection(uid, name),
         (snapshot) => callback(snapshot.docs.map((d) => ({ ...d.data(), id: d.id }))),
-        (error) => console.warn(`[Uni] Sync failed for ${name}.`, error),
+        (error) => console.warn(`[Kadam] Sync failed for ${name}.`, error),
       );
       unsubscribers.add(unsubscribe);
       return () => {
@@ -264,7 +264,7 @@ export function createCloudRepository(uid) {
       const unsubscribe = onSnapshot(
         prefsDoc(uid),
         (snapshot) => callback(snapshot.exists() ? snapshot.data() : {}),
-        (error) => console.warn('[Uni] Sync failed for settings.', error),
+        (error) => console.warn('[Kadam] Sync failed for settings.', error),
       );
       unsubscribers.add(unsubscribe);
       return () => {

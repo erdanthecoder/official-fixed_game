@@ -166,16 +166,20 @@ jobs:
                 '
           }
 
-          SITE="$(read_sites | head -n1)"
+          # The name we want, if we can have it. An existing site with this
+          # name is reused; otherwise it is created. Only if both fail does an
+          # older site get used, so a rename does not silently keep publishing
+          # under the previous name.
+          WANTED=kadam
+          EXISTING="$(read_sites)"
 
-          if [ -z "$SITE" ]; then
-            for candidate in uni uniapp getuni uniplan unistudy unihq uni-suite planuni; do
-              if firebase hosting:sites:create "$candidate" --project "$PROJECT_ID" --non-interactive; then
-                SITE="$candidate"
-                break
-              fi
-              echo "$candidate is taken, trying the next one."
-            done
+          if echo "$EXISTING" | grep -qx "$WANTED"; then
+            SITE="$WANTED"
+          elif firebase hosting:sites:create "$WANTED" --project "$PROJECT_ID" --non-interactive; then
+            SITE="$WANTED"
+          else
+            echo "$WANTED is taken; falling back to a site this project already has."
+            SITE="$(echo "$EXISTING" | head -n1)"
           fi
 
           if [ -z "$SITE" ]; then

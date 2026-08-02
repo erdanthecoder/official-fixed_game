@@ -91,7 +91,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!isFirebaseConfigured) return;
     getRedirectResult(auth).catch((error) => {
-      console.warn('[Uni] Sign-in did not complete.', error?.code ?? error);
+      console.warn('[Kadam] Sign-in did not complete.', error?.code ?? error);
       setErrorKey(MESSAGES[error?.code] ?? 'auth.errorGeneric');
     });
   }, []);
@@ -145,7 +145,7 @@ export function AuthProvider({ children }) {
             name: nextUser.displayName ?? '',
           });
         } catch (error) {
-          console.warn('[Uni] Could not move earlier work into the account.', error);
+          console.warn('[Kadam] Could not move earlier work into the account.', error);
         }
 
         try {
@@ -153,14 +153,14 @@ export function AuthProvider({ children }) {
         } catch (error) {
           // Whatever went wrong looking for invitations, it must not stand
           // between someone and their own documents.
-          console.info('[Uni] Skipped checking for invitations.', error?.message ?? error);
+          console.info('[Kadam] Skipped checking for invitations.', error?.message ?? error);
         }
       },
       // Firebase can fail this listener outright rather than call it back.
       // Without this the failure is silent and the screen stays on "Loading".
       (error) => {
         clearTimeout(giveUp);
-        console.warn('[Uni] Could not check who is signed in.', error);
+        console.warn('[Kadam] Could not check who is signed in.', error);
         setUser(null);
         setStatus(AUTH_STATUS.signedOut);
       },
@@ -183,7 +183,7 @@ export function AuthProvider({ children }) {
     } catch (error) {
       const code = error?.code ?? '';
       if (!SILENT.has(code)) {
-        console.warn('[Uni] Sign-in problem.', code || error);
+        console.warn('[Kadam] Sign-in problem.', code || error);
         setErrorKey(MESSAGES[code] ?? 'auth.errorGeneric');
       }
       return false;

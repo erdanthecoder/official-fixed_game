@@ -1,10 +1,10 @@
 {
   "name": "uni-desktop",
   "version": "1.0.0",
-  "description": "Uni — everything for your university application",
+  "description": "Kadam — everything for your university application",
   "main": "main.js",
   "private": true,
-  "author": "Uni",
+  "author": "Kadam",
   "repository": "https://github.com/erdanthecoder/official-fixed_game",
   "scripts": {
     "start": "electron .",
@@ -16,8 +16,8 @@
   },
   "build": {
     "appId": "com.uni.workspace",
-    "productName": "Uni",
-    "copyright": "Uni",
+    "productName": "Kadam",
+    "copyright": "Kadam",
     "directories": {
       "output": "release",
       "buildResources": "build"
@@ -25,7 +25,7 @@
     "files": ["main.js", "offline.html", "config.json"],
     "win": {
       "icon": "build/icon.png",
-      "artifactName": "Uni-Setup-${version}.${ext}",
+      "artifactName": "Kadam-Setup-${version}.${ext}",
       "target": [
         {
           "target": "nsis",
@@ -38,7 +38,7 @@
       ]
     },
     "portable": {
-      "artifactName": "Uni-Portable-${version}.${ext}"
+      "artifactName": "Kadam-Portable-${version}.${ext}"
     },
     "nsis": {
       "oneClick": false,
@@ -46,7 +46,7 @@
       "allowToChangeInstallationDirectory": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Uni"
+      "shortcutName": "Kadam"
     }
   }
 }

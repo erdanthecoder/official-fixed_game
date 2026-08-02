@@ -1,8 +1,8 @@
 {
   "packageId": "app.web.unisave_e8483.twa",
   "host": "unisave-e8483.web.app",
-  "name": "Uni — university planning workspace",
-  "launcherName": "Uni",
+  "name": "Kadam — university planning workspace",
+  "launcherName": "Kadam",
   "display": "standalone",
   "orientation": "default",
   "themeColor": "#0B4265",

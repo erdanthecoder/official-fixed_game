@@ -1,5 +1,5 @@
 /**
- * Boards for Uni Canvas.
+ * Boards for Kadam Canvas.
  *
  * A board is `{ title, background, shapes: [...] }`. Every shape is plain data,
  * never pixels, which is the decision the whole module rests on:

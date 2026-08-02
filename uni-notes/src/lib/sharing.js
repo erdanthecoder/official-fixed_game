@@ -195,7 +195,7 @@ export async function claimInvites() {
     );
   } catch (error) {
     // Old rules, or offline. Neither is worth interrupting a sign-in for.
-    console.info('[Uni] Could not check for invitations.', error?.message ?? error);
+    console.info('[Kadam] Could not check for invitations.', error?.message ?? error);
     return { claimed: 0 };
   }
 
@@ -221,7 +221,7 @@ export async function claimInvites() {
       });
       claimed += 1;
     } catch (error) {
-      console.info('[Uni] Could not accept an invitation.', error?.message ?? error);
+      console.info('[Kadam] Could not accept an invitation.', error?.message ?? error);
     }
   }
 

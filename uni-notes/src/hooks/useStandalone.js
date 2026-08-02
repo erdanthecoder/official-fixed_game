@@ -3,7 +3,7 @@
  *
  * It matters because the landing page is a sales pitch. Someone who tapped an
  * icon on their home screen has already bought it — showing them "here is what
- * Uni does, click Let's go" every single launch would be absurd. Installed
+ * Kadam does, click Let's go" every single launch would be absurd. Installed
  * launches go straight to the app.
  *
  * Three ways to detect it, because no single one covers every platform:

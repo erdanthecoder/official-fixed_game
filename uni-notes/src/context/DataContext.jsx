@@ -134,7 +134,7 @@ export function DataProvider({ children }) {
       clearTimeout(savedTimer.current);
       savedTimer.current = setTimeout(() => setSaveStatus(SAVE_STATUS.saved), SAVED_FLASH);
     } catch (error) {
-      console.warn('[Uni] Save failed.', error);
+      console.warn('[Kadam] Save failed.', error);
       // Leave the journal entries in place: they are now the only copy.
       setSaveStatus(SAVE_STATUS.error);
     }
@@ -216,7 +216,7 @@ export function DataProvider({ children }) {
     const outstanding = pendingFor(repository.scope);
     if (outstanding.length === 0) return;
 
-    console.info(`[Uni] Replaying ${outstanding.length} unsaved edit(s) from the last session.`);
+    console.info(`[Kadam] Replaying ${outstanding.length} unsaved edit(s) from the last session.`);
     outstanding.forEach((entry) => {
       queueWrite(entry.collection, entry.id, entry.data, {
         deleted: entry.deleted,
@@ -313,7 +313,7 @@ export function DataProvider({ children }) {
         .setPrefs(patch)
         .then(() => setSaveStatus(SAVE_STATUS.saved))
         .catch((error) => {
-          console.warn('[Uni] Could not save settings.', error);
+          console.warn('[Kadam] Could not save settings.', error);
           setSaveStatus(SAVE_STATUS.error);
         });
     },

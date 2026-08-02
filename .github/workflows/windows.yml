@@ -1,14 +1,14 @@
-# Builds Uni for Windows and puts it somewhere a person can actually download it.
+# Builds Kadam for Windows and puts it somewhere a person can actually download it.
 #
 # Run it from the Actions tab: "Build Windows app" -> Run workflow.
 #
 # It produces two files, and which one to use depends on the computer:
 #
-#   Uni-Setup-1.0.0.exe      the installer. Adds Uni to the Start menu and the
+#   Kadam-Setup-1.0.0.exe      the installer. Adds Kadam to the Start menu and the
 #                            desktop. Installs into the user's own folder, so it
 #                            does NOT need an administrator password — which
 #                            matters on a school laptop.
-#   Uni-Portable-1.0.0.exe   one file, no installation. Put it on a USB stick,
+#   Kadam-Portable-1.0.0.exe   one file, no installation. Put it on a USB stick,
 #                            double-click, done. Nothing is written to the
 #                            computer except the app's own settings.
 #
@@ -110,20 +110,20 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: installers
-          name: Uni — install it
+          name: Kadam — install it
           # Both workflows write to this one tag, so the Android and Windows
           # downloads sit together on one page.
           files: uni-desktop/release/*.exe
           body: |
-            Download Uni here. No account, no app store, nothing to unzip.
+            Download Kadam here. No account, no app store, nothing to unzip.
 
-            **Android** — download `Uni.apk`, open it, and allow installing from
+            **Android** — download `Kadam.apk`, open it, and allow installing from
             that source when asked. It appears in the app drawer with its own
             icon like anything else.
 
-            **Windows** — `Uni-Setup` installs it properly, with a Start menu and
+            **Windows** — `Kadam-Setup` installs it properly, with a Start menu and
             desktop shortcut, and never asks for an administrator password.
-            `Uni-Portable` is a single file that runs from anywhere, including a
+            `Kadam-Portable` is a single file that runs from anywhere, including a
             USB stick.
 
             The first time Windows opens it, a blue "Windows protected your PC"
@@ -131,7 +131,7 @@ jobs:
             certificate — click **More info**, then **Run anyway**. Once only.
 
             Signing in, syncing and sharing work exactly as they do on the
-            website. It is the same Uni, in its own window.
+            website. It is the same Kadam, in its own window.
       - name: What happened
         if: always()
         run: |

@@ -424,7 +424,7 @@ export default function Icon({ name, size = 20, className = '', strokeWidth = 1.
   const glyph = P[name];
   if (!glyph) {
     // A missing icon should be obvious in development, not a silent gap.
-    if (import.meta.env.DEV) console.warn(`[Uni] No icon named "${name}".`);
+    if (import.meta.env.DEV) console.warn(`[Kadam] No icon named "${name}".`);
     return null;
   }
 

@@ -33,12 +33,12 @@ function Redirect({ to }) {
 }
 
 /**
- * Has this person started Uni before?
+ * Has this person started Kadam before?
  *
  * The landing page is a pitch, and a pitch is for people who have not decided
  * yet. A signed-in account answers that on its own — but device-only mode has
  * no account to ask, so pressing "Let's go" is remembered here instead. Without
- * it, someone using Uni without an account would be sold it again every single
+ * it, someone using Kadam without an account would be sold it again every single
  * morning.
  *
  * localStorage rather than prefs: this is about the browser in front of them,

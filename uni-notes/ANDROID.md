@@ -1,4 +1,4 @@
-# Uni on Android
+# Kadam on Android
 
 Two ways, both free. The first takes about ten seconds and is what you actually
 want. The second produces a real `.apk` file, and is only worth the trouble if
@@ -10,7 +10,7 @@ Neither costs anything. Neither needs the Blaze plan.
 
 ## 1. Install it from the browser (recommended)
 
-Uni is a **PWA** — a web app the phone is allowed to treat as a real app. Once
+Kadam is a **PWA** — a web app the phone is allowed to treat as a real app. Once
 installed it gets a home-screen icon, opens full screen with no browser bar,
 appears in the app switcher, and **works with no signal**.
 
@@ -22,7 +22,7 @@ appears in the app switcher, and **works with no signal**.
    **Add to Home screen** / **Install app**.
 4. Or, once signed in: **Settings → Install on this device → Install**.
 
-That is it. The icon is the Uni mark, masked to whatever shape your launcher
+That is it. The icon is the Kadam mark, masked to whatever shape your launcher
 uses.
 
 **Long-press the icon** and you get shortcuts straight into Notes, Tasks and
@@ -44,7 +44,7 @@ So a phone in a lift or on a bus keeps working, and catches up on its own.
 
 New deploys are picked up automatically, but **never mid-session**. The app
 notices a new version, keeps using the one you are running, and shows a small
-*"A new version of Uni is ready — Reload"* banner. It swaps when you say so.
+*"A new version of Kadam is ready — Reload"* banner. It swaps when you say so.
 
 That is deliberate. Swapping a running app underneath someone means a page can
 ask for a file the new build renamed, and it breaks in front of them while they

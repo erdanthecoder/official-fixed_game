@@ -5,7 +5,7 @@
  * app is one or two letters away, alongside the apps themselves and the things
  * you can do. This is the piece the Workspace apps do not have: Docs searches
  * Docs, Sheets searches Sheets, and finding a spreadsheet from inside a
- * document means going back to Drive first. Uni holds all six kinds, so it can
+ * document means going back to Drive first. Kadam holds all six kinds, so it can
  * simply answer.
  *
  * Three decisions worth stating, because they are what separate a palette that

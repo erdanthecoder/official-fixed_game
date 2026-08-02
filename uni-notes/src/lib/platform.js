@@ -49,11 +49,15 @@ export const RELEASES = 'https://github.com/erdanthecoder/official-fixed_game/re
 const ASSET = `${RELEASES}/download/installers`;
 
 export const DOWNLOADS = {
-  android: { file: 'Uni.apk', url: `${ASSET}/Uni.apk`, size: '~2 MB' },
-  windowsSetup: { file: 'Uni-Setup-1.0.0.exe', url: `${ASSET}/Uni-Setup-1.0.0.exe`, size: '~80 MB' },
+  android: { file: 'Kadam.apk', url: `${ASSET}/Kadam.apk`, size: '~2 MB' },
+  windowsSetup: {
+    file: 'Kadam-Setup-1.0.0.exe',
+    url: `${ASSET}/Kadam-Setup-1.0.0.exe`,
+    size: '~80 MB',
+  },
   windowsPortable: {
-    file: 'Uni-Portable-1.0.0.exe',
-    url: `${ASSET}/Uni-Portable-1.0.0.exe`,
+    file: 'Kadam-Portable-1.0.0.exe',
+    url: `${ASSET}/Kadam-Portable-1.0.0.exe`,
     size: '~80 MB',
   },
 };

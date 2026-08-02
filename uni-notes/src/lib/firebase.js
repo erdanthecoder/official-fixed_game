@@ -53,7 +53,7 @@ if (isFirebaseConfigured) {
   functions = getFunctions(app, FUNCTIONS_REGION);
 } else {
   console.info(
-    '[Uni] Firebase is not configured — running in local-only mode. See .env.example.',
+    '[Kadam] Firebase is not configured — running in local-only mode. See .env.example.',
   );
 }
 

@@ -1,7 +1,7 @@
 /**
  * Service worker.
  *
- * Two jobs: make Uni installable on Android, and make it open when there is no
+ * Two jobs: make Kadam installable on Android, and make it open when there is no
  * signal. Firestore already keeps your *documents* offline in IndexedDB — what
  * it cannot do is fetch the app itself, so without this a phone in a lift shows
  * the dinosaur while holding a perfectly good copy of your essay.

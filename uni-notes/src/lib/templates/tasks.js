@@ -1,5 +1,5 @@
 /**
- * Plans for Uni Tasks.
+ * Plans for Kadam Tasks.
  *
  * A plan is `{ title, tasks: [...] }` and a task is:
  *
