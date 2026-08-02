@@ -2,38 +2,44 @@
  * The Kadam logo, as a system.
  *
  * ── The idea ──────────────────────────────────────────────────────────────
- * Motorsport logotypes: a heavy oblique letterform with the air still coming
- * off it. Speed, drawn rather than described.
+ * Kadam — кадам — is "step" in Kyrgyz, and a Kyrgyz word deserves a Kyrgyz
+ * mark rather than a borrowed one. This replaces an earlier mark drawn after
+ * motorsport logotypes: a sheared letter with speed bars behind it. That was a
+ * good mark for a different name. Left under this one it would have read as
+ * fancy dress.
  *
- * This is an original mark in that tradition — the letterforms, the slant, the
- * bar geometry and the colour are all ours. Borrowing a *genre* is what design
- * traditions are for; copying a specific famous mark would make Kadam look like a
- * knock-off of someone else's brand, which is the opposite of the point.
+ * So the mark is built the way a shyrdak is — the felt panel in every Kyrgyz
+ * house. A bordered field, flat appliqué colour, and the figure mirrored about
+ * a centre line:
+ *
+ *   · the field is felt cream, keylined in madder red — the panel edge
+ *   · above and below the letter, кочкор мүйүз, the ram's horn: two mirrored
+ *     spirals with a short bar between them. It is the commonest motif in
+ *     Kyrgyz ornament and the one that stands for increase and good fortune
+ *   · the K is black and upright. A leaning letter inside an ornament built on
+ *     symmetry fights the thing it is sitting in
+ *
+ * One horn is drawn once; every other piece is that path rotated or reflected,
+ * which is also how the real thing is cut out of felt.
+ *
+ * Nothing here reproduces a state emblem or anyone's protected design. The
+ * ram's horn is common inheritance, drawn fresh on this grid.
  *
  * ── The letterforms ───────────────────────────────────────────────────────
- * A bold geometric sans, drawn on a 64-unit cap height and then sheared 12°.
- * Sheared, not "italic": a true italic redraws the letters, an oblique leans
- * the ones you have, and a logotype is one drawn object rather than a font — so
- * the oblique is both honest and consistent.
+ * A bold geometric sans on a 64-unit cap height.
  *
- *   U   stems 14, outer bowl r23, inner r9 — 23 − 9 = 14, so the weight holds
- *       constant all the way round the turn
- *   n   stems 12, outer arch r20, inner r8 — same trick, same weight
- *   i   stem 12, and the dot is a parallelogram rather than a square, so it
- *       leans with everything else instead of sitting upright looking dropped
+ *   K   stem 14, arm and leg 14 across the diagonal, inside a 46-unit width.
+ *       The junctions sit high — y 25 and 39 — so the counter above the arm
+ *       stays open when the icon is sixteen pixels wide. Checked at 16px.
  *
- * ── The speed bars ────────────────────────────────────────────────────────
- * Three bars, thickest and longest at the top, each fading out to the left.
- * They live on the *mark* only, never on the mark and the wordmark at once:
- * repeated in a lockup they stop reading as motion and start reading as noise.
- *
- * Their size is set by the smallest place they appear. One pixel at favicon
- * size is four units on this grid, so the bars are 6 units thick — a pixel and
- * a half at 16px, which survives. Thinner and they turn to grey mush; the
- * three-thin-bars version was tried and did exactly that.
+ * ── Size ──────────────────────────────────────────────────────────────────
+ * The horns are stroked at 3.2 on this grid, about a pixel at 32px, which
+ * holds, and specks below it. Under forty pixels the mark drops the ornament
+ * and shows the letter alone: better nothing than ornament rendered badly.
+ * The 16 and 32 pixel favicons are rendered the same way.
  *
  * ── The lockups ───────────────────────────────────────────────────────────
- *   mark        the tile alone: favicons, avatars, tight chrome
+ *   mark        the panel alone: favicons, avatars, tight chrome
  *   horizontal  mark + wordmark on one line: headers, sidebars
  *   stacked     mark above a centred wordmark: covers, empty canvases
  *
@@ -41,19 +47,56 @@
  * tagline. That stays live text: it is the part that gets translated.
  *
  * ── Tones ─────────────────────────────────────────────────────────────────
- *   tile   full colour on the deep lake tile — the default, and the only
- *          version an app launcher should ever get
- *   light  no tile, white into amber — for dark or photographic surfaces
- *   ink    no tile, lake-blue into amber — for light surfaces, where a wash
- *          starting at white would begin by being invisible
+ *   tile   the full panel — the default, and the only version an app launcher
+ *          should ever get
+ *   ink    no panel, black letter — for light surfaces
+ *   light  no panel, cream letter — for dark or photographic surfaces
  *
  * public/icon.svg carries the same geometry for browsers and launchers, which
  * cannot read a React component. If you change a number here, change it there.
  */
 
-const SHEAR = 12;
+/*
+ * Felt colours, flat.
+ *
+ * Kadam is "step" in Kyrgyz, and the mark is built the way a shyrdak is: a
+ * bordered panel of felt, appliqué in madder red and ochre on cream. Felt has
+ * no gradients, so neither does this — the old mark's four-stop washes were
+ * borrowed from motorsport logotypes and would make this one look like a
+ * costume.
+ */
+const CREAM = '#F4E9D8';
+const RED = '#A8342A';
+const GOLD = '#C9922B';
+const BLACK = '#1A1714';
 
-/* Letterforms, unsheared, on a 64 cap height. */
+/*
+ * кочкор мүйүз — the ram's horn. Two mirrored spirals with a short bar between
+ * them: the commonest motif in Kyrgyz ornament, and the one that stands for
+ * increase and good fortune. One horn, drawn once, is the whole vocabulary
+ * here; every other piece is this path rotated or reflected, which is also how
+ * the real thing is cut.
+ */
+const HORN = 'M0 20 C0 9 6 2 13 2 C19 2 22 7 19 11 C16 14 11 12 12 8';
+
+function HornPair({ x, y, rotate = 0, scale = 0.38, colour = RED }) {
+  return (
+    <g
+      transform={`translate(${x} ${y}) rotate(${rotate}) scale(${scale}) translate(-24 -11)`}
+      fill="none"
+      stroke={colour}
+      strokeWidth="3.2"
+      strokeLinecap="round"
+    >
+      <path d={HORN} />
+      <path d={HORN} transform="translate(48 0) scale(-1 1)" />
+      <path d="M22 22 L26 22" />
+    </g>
+  );
+}
+
+
+/* Letterforms, upright, on a 64 cap height. */
 const GLYPH = {
   /*
    * K, on the same grid and at the same weight as the U it replaces: stem 14,
@@ -71,62 +114,21 @@ const GLYPH = {
   iDot: 'M2 4 L14 4 L10 16 L-2 16 Z',
 };
 
-/** x, y, width, height — tuned against 16px, see the note above. */
-const BARS = [
-  [8, 19, 16, 6],
-  [8, 29, 13, 6],
-  [8, 39, 10, 6],
-];
-
 let seq = 0;
 
-function Defs({ id, tone }) {
-  const onLight = tone === 'ink';
-  return (
-    <defs>
-      <linearGradient id={`${id}-tile`} x1="0.12" y1="0" x2="0.88" y2="1">
-        <stop offset="0%" stopColor="#17739B" />
-        <stop offset="52%" stopColor="#0B4265" />
-        <stop offset="100%" stopColor="#04203A" />
-      </linearGradient>
-
-      {/* The light raked across the letter, as before — it is the one thing
-          carried over from the previous mark, because it was the good part. */}
-      <linearGradient id={`${id}-ink`} x1="0.1" y1="0" x2="0.85" y2="1">
-        {onLight ? (
-          <>
-            <stop offset="0%" stopColor="#0B4265" />
-            <stop offset="48%" stopColor="#1B7FA8" />
-            <stop offset="100%" stopColor="#E4801A" />
-          </>
-        ) : (
-          <>
-            <stop offset="0%" stopColor="#FFFFFF" />
-            <stop offset="42%" stopColor="#FFF1D6" />
-            <stop offset="76%" stopColor="#FDBB5A" />
-            <stop offset="100%" stopColor="#E4801A" />
-          </>
-        )}
-      </linearGradient>
-
-      {/* Bars fade out backwards, so they read as air left behind rather than
-          as three stripes someone put there. */}
-      <linearGradient id={`${id}-speed`} x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stopColor="#FDBB5A" stopOpacity="0" />
-        <stop offset="100%" stopColor="#FDBB5A" />
-      </linearGradient>
-
-      <radialGradient id={`${id}-sheen`} cx="0.5" cy="0" r="0.9">
-        <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.16" />
-        <stop offset="62%" stopColor="#FFFFFF" stopOpacity="0" />
-      </radialGradient>
-    </defs>
-  );
-}
-
 export function LogoMark({ size = 40, tone = 'tile', className = '' }) {
-  const id = `kadam-mark-${(seq += 1)}`;
   const onTile = tone === 'tile';
+  // Off the panel, the letter takes the colour of the surface it sits on:
+  // black on light, cream on dark. The horns stay red either way — it is the
+  // one colour in the mark that is not doing contrast, it is doing meaning.
+  const letter = onTile || tone === 'ink' ? BLACK : CREAM;
+
+  /*
+   * Ornament needs room. The horns are drawn at stroke 3.2 on a 64 grid — about
+   * a pixel at 32px, which holds, and specks below it. Under forty pixels the
+   * mark drops them and shows the letter alone rather than showing them badly.
+   */
+  const ornate = size >= 40;
 
   return (
     <svg
@@ -137,31 +139,33 @@ export function LogoMark({ size = 40, tone = 'tile', className = '' }) {
       role="img"
       aria-label="Kadam"
     >
-      <Defs id={id} tone={tone} />
-
       {onTile ? (
         <>
-          <rect width="64" height="64" rx="14.5" fill={`url(#${id}-tile)`} />
-          <rect width="64" height="64" rx="14.5" fill={`url(#${id}-sheen)`} />
+          <rect width="64" height="64" rx="14.5" fill={CREAM} />
+          <rect
+            x="3.5"
+            y="3.5"
+            width="57"
+            height="57"
+            rx="11.5"
+            fill="none"
+            stroke={RED}
+            strokeWidth="1.5"
+          />
         </>
       ) : null}
 
-      {BARS.map(([x, y, w, h]) => (
-        <rect
-          key={y}
-          x={x}
-          y={y}
-          width={w}
-          height={h}
-          rx={h / 2}
-          fill={`url(#${id}-speed)`}
-        />
-      ))}
+      {ornate ? (
+        <>
+          <HornPair x={32} y={11.5} colour={RED} />
+          <HornPair x={32} y={52.5} rotate={180} colour={onTile ? GOLD : RED} />
+        </>
+      ) : null}
 
-      <g transform="translate(26 16) scale(0.53)">
-        <g transform={`skewX(-${SHEAR}) translate(6 0)`}>
-          <path d={GLYPH.K} fill={`url(#${id}-ink)`} />
-        </g>
+      {/* With the horns, the letter makes room for them. Without, it takes the
+          panel — a shrunken K floating in space would just look like a mistake. */}
+      <g transform={ornate ? 'translate(21 20) scale(0.40)' : 'translate(19 16) scale(0.53)'}>
+        <path d={GLYPH.K} fill={letter} />
       </g>
     </svg>
   );
@@ -171,9 +175,13 @@ export function LogoMark({ size = 40, tone = 'tile', className = '' }) {
  * "Kadam", set.
  *
  * The K is drawn, because it is the mark and it has to survive being sixteen
- * pixels wide. "adam" is type — Inter at its heaviest, sheared to the same
- * twelve degrees and filled with the same gradient, so it belongs to the K
- * without four more letterforms being invented by hand to sit beside it.
+ * pixels wide. "adam" is type — Inter at its heaviest, in the same colour, so
+ * it belongs to the K without four more letterforms being invented by hand to
+ * sit beside it.
+ *
+ * Upright, like the mark. The twelve-degree lean came from motorsport
+ * logotypes and does not belong on a name that now sits inside Kyrgyz
+ * ornament, where every line is mirrored about a centre.
  *
  * `textLength` is not decoration: without it the wordmark's width depends on
  * whether a webfont has finished loading, and the lockup would reflow as the
@@ -184,44 +192,38 @@ export function LogoMark({ size = 40, tone = 'tile', className = '' }) {
  * known size.
  */
 export function KadamWordmark({ size = 22, tone = 'ink', className = '' }) {
-  const id = `kadam-word-${(seq += 1)}`;
-  const fill = `url(#${id}-ink)`;
+  const fill = tone === 'light' ? CREAM : BLACK;
 
   return (
     <svg
-      // Bounds include the shear: at the baseline every glyph has moved left by
-      // 64·tan(12°) ≈ 13.6 units, so the box starts negative.
-      viewBox="-15 0 218 66"
+      viewBox="-2 0 202 66"
       height={size * (66 / 64)}
       className={`logo-lettering ${className}`}
       role="img"
       aria-label="Kadam"
     >
-      <Defs id={id} tone={tone} />
-      <g transform={`skewX(-${SHEAR})`}>
-        <path d={GLYPH.K} fill={fill} />
-        {/*
-          Stroked as well as filled. Inter at its heaviest still has stems
-          around nine units where the drawn K has fourteen, and a wordmark whose
-          first letter is visibly fatter than the rest looks like two logos
-          stuck together. Four units of stroke on each side closes the gap.
-        */}
-        <text
-          x="52"
-          y="64"
-          fontFamily="Inter, 'Segoe UI', Roboto, system-ui, sans-serif"
-          fontWeight="800"
-          fontSize="64"
-          textLength="144"
-          lengthAdjust="spacingAndGlyphs"
-          fill={fill}
-          stroke={fill}
-          strokeWidth="4"
-          strokeLinejoin="round"
-        >
-          adam
-        </text>
-      </g>
+      <path d={GLYPH.K} fill={fill} />
+      {/*
+        Stroked as well as filled. Inter at its heaviest still has stems around
+        nine units where the drawn K has fourteen, and a wordmark whose first
+        letter is visibly fatter than the rest looks like two logos stuck
+        together.
+      */}
+      <text
+        x="50"
+        y="64"
+        fontFamily="Inter, 'Segoe UI', Roboto, system-ui, sans-serif"
+        fontWeight="800"
+        fontSize="64"
+        textLength="144"
+        lengthAdjust="spacingAndGlyphs"
+        fill={fill}
+        stroke={fill}
+        strokeWidth="4"
+        strokeLinejoin="round"
+      >
+        adam
+      </text>
     </svg>
   );
 }
