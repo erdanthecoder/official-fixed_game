@@ -73,6 +73,61 @@ service cloud.firestore {
         && request.resource.data.get('joinExpiresAt', 0) == resource.data.get('joinExpiresAt', 0);
     }
 
+    // --- invitations by email ------------------------------------------------
+    //
+    // The obvious way to invite someone by address needs a server: an email is
+    // not an account id, and only the Admin SDK can turn one into the other.
+    // That means Cloud Functions, which means a billing plan, for a feature two
+    // cousins sharing an essay should not have to pay for.
+    //
+    // So the direction is reversed. The owner does not add the person; the
+    // owner leaves an invitation, and the person picks it up. What makes that
+    // safe is that Firebase has already checked the address: `token.email` on a
+    // signed-in account is verified by Google, not typed in by the holder, and
+    // `email_verified` is required below so that registering an address you do
+    // not own is not a way in.
+    //
+    // An invitation is one string, `role:email`, so the role cannot be
+    // separated from the person it was granted to. Claiming it consumes it.
+    function myEmail() {
+      return request.auth.token.get('email', '').lower();
+    }
+
+    function emailProven() {
+      return signedIn()
+        && myEmail() != ''
+        && request.auth.token.get('email_verified', false) == true;
+    }
+
+    // Enough to *see* the document you were invited to, at either role, which
+    // is what lets the app find it without being told where to look.
+    function isInvited() {
+      return emailProven()
+        && resource.data.get('invitedEmails', []).hasAny([
+             'editor:' + myEmail(),
+             'viewer:' + myEmail(),
+           ]);
+    }
+
+    function isAcceptingInvite() {
+      return emailProven()
+        && !(request.auth.uid in resource.data.memberUids)
+        // The role taken must be the role offered, to this address.
+        && resource.data.get('invitedEmails', []).hasAny(
+             [request.resource.data.roles[request.auth.uid] + ':' + myEmail()])
+        && request.resource.data.memberUids == resource.data.memberUids.concat([request.auth.uid])
+        && request.resource.data.roles.diff(resource.data.roles).affectedKeys()
+             == [request.auth.uid].toSet()
+        && request.resource.data.members.diff(resource.data.members).affectedKeys()
+             == [request.auth.uid].toSet()
+        // Used up, so the same invitation cannot be claimed twice or left
+        // lying around after the person has joined.
+        && request.resource.data.invitedEmails == resource.data.invitedEmails
+             .removeAll([request.resource.data.roles[request.auth.uid] + ':' + myEmail()])
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['memberUids', 'roles', 'members', 'invitedEmails', 'updatedAt']);
+    }
+
     // --- invite links --------------------------------------------------------
     //
     // Someone opening an invite link is, by definition, not yet a member: they
@@ -134,7 +189,7 @@ service cloud.firestore {
     }
 
     match /docs/{docId} {
-      allow read: if isMember();
+      allow read: if isMember() || isInvited();
 
       // A new document must be created owned by, and containing only, its author.
       allow create: if signedIn()
@@ -149,6 +204,7 @@ service cloud.firestore {
         || (isMember() && myRole() == 'editor' && membershipUnchanged())
         || (isMember() && isLeaving())
         || isJoiningWithCode()
+        || isAcceptingInvite()
       );
 
       allow delete: if isDocOwner();

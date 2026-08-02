@@ -1529,22 +1529,32 @@
 
 /* ------------------------------- share links ------------------------------ */
 
-.share-link {
-  margin: 4px 0 18px;
-  padding: 14px 16px;
+.share-card {
+  margin: 4px 0 14px;
+  padding: 15px 16px 16px;
   border: 1px solid rgba(var(--ink-rgb), 0.1);
   border-radius: 14px;
   background: var(--surface-alt);
 }
 
-.share-link .share-section {
+.share-card .share-section,
+.share-card .field span {
   margin-top: 0;
+}
+
+/* Inside a card the hint is the last line; it should not push the card open. */
+.share-card .share-hint:last-child {
+  margin-bottom: 0;
 }
 
 .share-link-row {
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+.share-link-row .share-role {
+  flex: none;
 }
 
 .share-link-row input {
@@ -1835,9 +1845,17 @@
 .share-members li {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 4px;
+  gap: 11px;
+  padding: 10px 8px;
+  border-radius: 10px;
   border-bottom: 1px solid rgba(var(--ink-rgb), 0.06);
+  transition: background var(--t-fast) var(--ease-standard);
+}
+
+@media (hover: hover) {
+  .share-members li:hover {
+    background: rgba(var(--ink-rgb), 0.035);
+  }
 }
 
 .share-members li:last-child {
@@ -1852,7 +1870,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--lake-700);
+  background: var(--face, var(--lake-700));
   color: #fff;
   font-size: 0.82rem;
   font-weight: 700;

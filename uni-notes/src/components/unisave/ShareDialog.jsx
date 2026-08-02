@@ -11,6 +11,7 @@ import {
 } from '../../lib/sharing.js';
 import { areLinksAvailable, createInviteLink, linkOn, revokeInviteLink } from '../../lib/inviteLinks.js';
 import { ROLE, titleOf } from '../../lib/model.js';
+import { assignColours } from '../../lib/presence.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useT } from '../../i18n/index.jsx';
 
@@ -61,23 +62,22 @@ export default function ShareDialog({ document: doc, onClose }) {
 
   const isOwner = doc.ownerUid === uid || !doc.ownerUid;
   const members = Object.entries(doc.members ?? {});
+  const colours = assignColours(members.map(([memberUid]) => memberUid));
 
-  // Pending invitations live server-side; fetch them when the dialog opens.
+  // Invitations live on the document itself now, so this re-reads rather than
+  // re-fetches, and stays correct when someone accepts while the dialog is open.
   useEffect(() => {
-    if (!isSharingAvailable || !isOwner) return;
+    if (!isSharingAvailable || !isOwner) return undefined;
     let live = true;
-    listInvites({ docId: doc.id })
+    listInvites({ document: doc })
       .then((result) => {
         if (live) setInvites(result.invites ?? []);
       })
-      .catch(() => {
-        // Not deployed yet, most likely. The invite form reports that clearly
-        // when it's actually used, so stay quiet here.
-      });
+      .catch(() => {});
     return () => {
       live = false;
     };
-  }, [doc.id, isOwner]);
+  }, [doc, isOwner]);
 
   const report = (error) => setErrorKey(ERROR_KEYS[error?.code] ?? 'share.errorFailed');
 
@@ -197,8 +197,40 @@ export default function ShareDialog({ document: doc, onClose }) {
         <p className="share-unavailable">{t('share.localOnly')}</p>
       ) : (
         <>
+          {isOwner ? (
+            <form className="share-invite share-card" onSubmit={invite}>
+              <label className="field">
+                <span>{t('share.inviteLabel')}</span>
+                <div className="share-invite-row">
+                  <input
+                    type="email"
+                    value={email}
+                    placeholder="classmate@example.com"
+                    inputMode="email"
+                    autoComplete="off"
+                    onChange={(event) => setEmail(event.target.value)}
+                  />
+                  <select
+                    className="share-role"
+                    value={role}
+                    onChange={(event) => setRole(event.target.value)}
+                  >
+                    <option value={ROLE.editor}>{t('share.roleEditor')}</option>
+                    <option value={ROLE.viewer}>{t('share.roleViewer')}</option>
+                  </select>
+                  <button type="submit" className="button primary" disabled={busy}>
+                    {busy ? t('share.sending') : t('share.send')}
+                  </button>
+                </div>
+              </label>
+              <p className="share-hint">{t('share.inviteHint')}</p>
+            </form>
+          ) : (
+            <p className="share-hint">{t('share.notOwnerHint')}</p>
+          )}
+
           {isOwner && areLinksAvailable ? (
-            <section className="share-link">
+            <section className="share-link share-card">
               <h3 className="share-section">{t('share.linkTitle')}</h3>
 
               {link && !link.expired ? (
@@ -241,7 +273,11 @@ export default function ShareDialog({ document: doc, onClose }) {
                 </>
               ) : (
                 <div className="share-link-row">
-                  <select value={linkRole} onChange={(event) => setLinkRole(event.target.value)}>
+                  <select
+                    className="share-role"
+                    value={linkRole}
+                    onChange={(event) => setLinkRole(event.target.value)}
+                  >
                     <option value={ROLE.editor}>{t('share.roleEditor')}</option>
                     <option value={ROLE.viewer}>{t('share.roleViewer')}</option>
                   </select>
@@ -259,35 +295,6 @@ export default function ShareDialog({ document: doc, onClose }) {
             </section>
           ) : null}
 
-          {isOwner ? (
-            <form className="share-invite" onSubmit={invite}>
-              <label className="field">
-                <span>{t('share.inviteLabel')}</span>
-                <div className="share-invite-row">
-                  <input
-                    type="email"
-                    value={email}
-                    placeholder="classmate@example.com"
-                    inputMode="email"
-                    autoComplete="off"
-                    onChange={(event) => setEmail(event.target.value)}
-                  />
-                  <select value={role} onChange={(event) => setRole(event.target.value)}>
-                    <option value={ROLE.editor}>{t('share.roleEditor')}</option>
-                    <option value={ROLE.viewer}>{t('share.roleViewer')}</option>
-                  </select>
-                  <button type="submit" className="button primary" disabled={busy}>
-                    {busy ? t('share.sending') : t('share.send')}
-                  </button>
-                </div>
-              </label>
-              <p className="share-hint">{t('share.inviteHint')}</p>
-              <p className="share-hint is-quiet">{t('share.inviteNeedsServer')}</p>
-            </form>
-          ) : (
-            <p className="share-hint">{t('share.notOwnerHint')}</p>
-          )}
-
           {errorKey ? (
             <p className="share-error" role="alert">
               {t(errorKey)}
@@ -302,7 +309,9 @@ export default function ShareDialog({ document: doc, onClose }) {
             ) : (
               members.map(([memberUid, member]) => (
                 <li key={memberUid}>
-                  <span className="share-avatar">{initialOf(member.name || member.email)}</span>
+                  <span className="share-avatar" style={{ '--face': colours.get(memberUid) }}>
+                    {initialOf(member.name || member.email)}
+                  </span>
                   <span className="share-who">
                     <strong>
                       {member.name || member.email}
@@ -346,6 +355,7 @@ export default function ShareDialog({ document: doc, onClose }) {
           {invites.length > 0 ? (
             <>
               <h3 className="share-section">{t('share.pending')}</h3>
+              <p className="share-hint">{t('share.pendingHint')}</p>
               <ul className="share-members">
                 {invites.map((item) => (
                   <li key={item.email}>
@@ -354,7 +364,6 @@ export default function ShareDialog({ document: doc, onClose }) {
                     </span>
                     <span className="share-who">
                       <strong>{item.email}</strong>
-                      <small>{t('share.pendingHint')}</small>
                     </span>
                     <span className="share-role-fixed">
                       {item.role === ROLE.viewer ? t('share.roleViewer') : t('share.roleEditor')}
