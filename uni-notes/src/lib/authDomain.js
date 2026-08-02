@@ -1,30 +1,30 @@
 /**
  * Which domain sign-in happens on.
  *
- * Its own file so it can be tested without pulling in the Firebase SDK, and
- * because getting it wrong does not fail loudly — it fails as an account that
- * appears to sign in and then has nothing in it.
+ * The answer is: the one Firebase was configured with, always. This file
+ * exists to record why, because the alternative looks obviously better and is
+ * not.
  *
- * Firebase points this at `<project>.firebaseapp.com` by default, so the app
- * signs in through a page on a domain that is not its own. Chrome tolerates
- * that. Safari does not: intelligent tracking prevention treats the auth
- * handler's storage as third-party and cuts it off, and the session never
- * survives — which looks, from the inside, exactly like an account with no
+ * Firebase signs in through `<project>.firebaseapp.com`, a different domain
+ * from the app. Safari's tracking prevention treats that domain's storage as
+ * third-party and cuts it off, so a sign-in can complete and leave no session
+ * behind — which looks, from the inside, exactly like an account with no
  * documents in it.
  *
- * Firebase Hosting serves `/__/auth/*` from every site in a project, so when
- * the app is served from one of those the handler is already on the same
- * origin. Using it makes sign-in first-party, which is what Safari needs, and
- * has a second benefit: a new hosting site no longer has to be added to the
- * authorized-domains list by hand before anyone can sign in on it.
+ * The tempting fix is to sign in on whatever Firebase Hosting site the app is
+ * being served from, since Hosting serves `/__/auth/*` from all of them. It
+ * was tried here and it breaks Google sign-in outright: Google checks the
+ * redirect against the OAuth client's authorised list, and Firebase only ever
+ * registers `<project>.firebaseapp.com` there. Every other site gets
+ * redirect_uri_mismatch — the whole sign-in refused, on every browser, rather
+ * than a session lost on one.
  *
- * Anywhere else — a dev server, a desktop build, some other host — the
- * configured domain is the only thing that can work, so that is what is used.
+ * Making a second site work is therefore a console job, not a code one:
+ * Google Cloud Console → APIs & Services → Credentials → the Web client
+ * → Authorised redirect URIs → add `https://<site>/__/auth/handler`. Until
+ * that exists for a domain, signing in has to go through the configured one.
  */
 
-const FIREBASE_HOSTING = /(^|\.)web\.app$|(^|\.)firebaseapp\.com$/;
-
-export function authDomainFor(configured, hostname) {
-  if (!hostname) return configured;
-  return FIREBASE_HOSTING.test(hostname) ? hostname : configured;
+export function authDomainFor(configured) {
+  return configured;
 }
