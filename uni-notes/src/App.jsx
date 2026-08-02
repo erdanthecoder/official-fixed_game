@@ -8,6 +8,7 @@ import LandingPage from './components/landing/LandingPage.jsx';
 import LanguagesModule from './components/languages/LanguagesModule.jsx';
 import NotesModule from './components/notes/NotesModule.jsx';
 import AppsPage from './components/apps/AppsPage.jsx';
+import HomePage from './components/home/HomePage.jsx';
 import CommandPalette from './components/CommandPalette.jsx';
 import ShortcutsDialog from './components/ShortcutsDialog.jsx';
 import SettingsPage from './components/SettingsPage.jsx';
@@ -133,7 +134,7 @@ export default function App() {
   const start = useCallback(() => {
     rememberStarted();
     if (status === AUTH_STATUS.signedIn || status === AUTH_STATUS.local) {
-      goToModule(prefs?.startModule ?? 'notes');
+      goToModule(prefs?.startModule ?? 'home');
     } else goToSignIn();
   }, [status, prefs?.startModule, goToModule, goToSignIn]);
 
@@ -158,7 +159,7 @@ export default function App() {
    * place" is telling them about the thing they are already using.
    */
   const goHome = useCallback(() => {
-    if (skipLanding) goToModule(prefs?.startModule ?? 'notes');
+    if (skipLanding) goToModule(prefs?.startModule ?? 'home');
     else goToLanding();
   }, [skipLanding, prefs?.startModule, goToModule, goToLanding]);
 
@@ -215,7 +216,7 @@ export default function App() {
     return status === AUTH_STATUS.signedOut ? (
       <AuthScreen onBack={goToLanding} />
     ) : (
-      <Redirect to={() => goToModule(prefs?.startModule ?? 'notes')} />
+      <Redirect to={() => goToModule(prefs?.startModule ?? 'home')} />
     );
   }
 
@@ -331,6 +332,12 @@ export default function App() {
             deckId={id}
             onOpen={(deckId) => goToItem('languages', deckId)}
             onBack={() => goToModule('languages')}
+          />
+        ) : module === 'home' ? (
+          <HomePage
+            onGo={goToModule}
+            onOpenItem={goToItem}
+            onCreate={(target) => goToModule(target)}
           />
         ) : module === 'apps' ? (
           <AppsPage />

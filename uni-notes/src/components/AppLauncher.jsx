@@ -22,6 +22,7 @@ import { useT } from '../i18n/index.jsx';
 
 /** Row-major, so index 0..8 maps to the dot in the same position. */
 export const LAUNCHER_APPS = [
+  'home',
   'notes',
   'sheets',
   'slides',
@@ -30,7 +31,6 @@ export const LAUNCHER_APPS = [
   'unisave',
   'languages',
   'apps',
-  'settings',
 ];
 
 const DOTS = [0, 1, 2].flatMap((row) => [0, 1, 2].map((column) => ({ row, column })));

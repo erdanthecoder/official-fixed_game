@@ -23,6 +23,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
 
 export const MODULES = [
+  'home',
   'notes',
   'sheets',
   'slides',

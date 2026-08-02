@@ -19,6 +19,7 @@ export const PRODUCTS = {
   tasks: { colour: '#C5372C', soft: '#FBE9E7', labelKey: 'nav.tasks', hintKey: 'nav.tasksHint' },
   unisave: { colour: '#0F7B6C', soft: '#DFF1EE', labelKey: 'nav.unisave', hintKey: 'nav.unisaveHint' },
   languages: { colour: '#C5372C', soft: '#FBE9E7', labelKey: 'nav.languages', hintKey: 'nav.languagesHint' },
+  home: { colour: '#1A73E8', soft: '#E8F0FE', labelKey: 'nav.home', hintKey: 'nav.homeHint' },
   settings: { colour: '#5F6368', soft: '#EEF0F2', labelKey: 'nav.settings', hintKey: null },
   apps: { colour: '#0F7B6C', soft: '#DFF1EE', labelKey: 'nav.apps', hintKey: 'nav.appsHint' },
 };
@@ -104,6 +105,22 @@ function Glyph({ product, colour }) {
             strokeLinejoin="round"
             opacity="0.8"
           />
+        </>
+      );
+
+    case 'home':
+      // A house. Nothing cleverer, because this tile has to be understood
+      // before it is read.
+      return (
+        <>
+          <path
+            d="M4.6 10.4 12 4.4l7.4 6v8a1.6 1.6 0 0 1-1.6 1.6H6.2a1.6 1.6 0 0 1-1.6-1.6Z"
+            fill="none"
+            stroke={colour}
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+          />
+          <path d="M9.8 20V13.4h4.4V20" fill="none" stroke={colour} strokeWidth="1.8" strokeLinejoin="round" />
         </>
       );
 

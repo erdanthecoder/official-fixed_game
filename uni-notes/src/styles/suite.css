@@ -2784,3 +2784,286 @@
     margin-top: 58px;
   }
 }
+
+/* =================================== Home ==================================
+ *
+ * The screen the app opens on. Three bands in the order the questions get
+ * asked: what is close, what was I doing, what shall I start.
+ */
+
+.home-page {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.home-banner {
+  min-height: 190px;
+}
+
+.home-banner .scenery-content {
+  /* The greeting is one column, not a row with actions on the right. */
+  display: block;
+}
+
+.home-banner-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  /* The banner is a fixed height and the greeting is the tallest thing in it;
+     without centring, a long name pushed the first line out of the top. */
+  min-height: 100%;
+  padding: 18px 0;
+}
+
+.home-banner-text h1 {
+  font-family: var(--display);
+  font-size: clamp(1.5rem, 3.6vw, 2.2rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+
+.home-banner-text p {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.9rem;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
+}
+
+.home-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 20px clamp(14px, 3vw, 24px) 64px;
+}
+
+.home-card {
+  padding: 16px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.home-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.home-card-head h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* --- deadlines ------------------------------------------------------------ */
+
+.due-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.due-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.due-row:hover {
+  background: var(--surface-alt);
+}
+
+/*
+ * The number is the point of this row. It is set large and tabular so a column
+ * of them can be read down in one movement rather than one at a time.
+ */
+.due-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 52px;
+  padding: 5px 0;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.due-count small {
+  margin-top: 3px;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.due-count.is-today {
+  background: var(--warn-soft);
+  color: var(--warn-ink);
+}
+
+.due-count.is-late {
+  background: var(--danger-soft);
+  color: var(--danger-ink);
+}
+
+.due-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.due-text strong {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.due-text small {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+/* --- recent --------------------------------------------------------------- */
+
+.recent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 8px;
+}
+
+.recent-tile {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.recent-tile:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-alt);
+}
+
+.recent-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.recent-text strong {
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-text small {
+  display: block;
+  margin-top: 1px;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+/* --- streak --------------------------------------------------------------- */
+
+.home-streak {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--warn-line);
+  border-radius: var(--radius);
+  background: var(--warn-soft);
+  color: var(--warn-ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.home-streak span {
+  flex: 1;
+  min-width: 0;
+}
+
+.home-streak strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.home-streak small {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+
+/* --- starters ------------------------------------------------------------- */
+
+.starter-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 8px;
+}
+
+.starter-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 16px 8px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: inherit;
+  cursor: pointer;
+}
+
+.starter-tile:hover {
+  border-color: var(--tile-accent, var(--accent));
+  background: var(--surface-alt);
+}
+
+.starter-tile strong {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+
