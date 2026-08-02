@@ -14,10 +14,15 @@ import {
   persistentMultipleTabManager,
 } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
+import { authDomainFor } from './authDomain.js';
 
 const config = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  // Follows the host when that host is a Firebase Hosting site; see authDomain.js.
+  authDomain: authDomainFor(
+    import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    typeof window === 'undefined' ? '' : window.location.hostname,
+  ),
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,

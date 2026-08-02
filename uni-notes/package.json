@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "test": "node test/authDomain.test.mjs",
     "test:rules": "firebase emulators:exec --only firestore --project uni-rules-test \"node test/rules.test.mjs && node test/join.test.mjs && node test/presence.test.mjs && node test/invites.test.mjs\"",
     "deploy": "npm run build && firebase deploy --only firestore:rules,hosting",
     "deploy:rules": "firebase deploy --only firestore:rules"

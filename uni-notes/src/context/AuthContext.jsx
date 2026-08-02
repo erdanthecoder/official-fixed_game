@@ -13,10 +13,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   createUserWithEmailAndPassword,
+  getRedirectResult,
   onAuthStateChanged,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   updateProfile,
 } from 'firebase/auth';
@@ -52,6 +54,22 @@ const MESSAGES = {
   'auth/unauthorized-domain': 'auth.errorDomain',
 };
 
+/*
+ * When a popup is not possible at all, as opposed to merely dismissed.
+ *
+ * A popup is the better experience — the app stays where it is and the page is
+ * never reloaded — and it is also the thing Safari is most likely to refuse: on
+ * iPad it can be blocked outright, and a home-screen app has no window to open
+ * one in. The refusal arrives as a code rather than a hang, so it can be
+ * answered with a redirect instead of a message telling someone to go and
+ * change a browser setting.
+ */
+const CANNOT_POPUP = new Set([
+  'auth/popup-blocked',
+  'auth/operation-not-supported-in-this-environment',
+  'auth/web-storage-unsupported',
+]);
+
 /** Popup dismissals are not errors worth showing anyone. */
 const SILENT = new Set([
   'auth/popup-closed-by-user',
@@ -67,6 +85,16 @@ export function AuthProvider({ children }) {
   const [errorKey, setErrorKey] = useState(null);
   const [noticeKey, setNoticeKey] = useState(null);
   const [busy, setBusy] = useState(false);
+
+  // Coming back from a redirect sign-in. The listener below reports the result
+  // either way; this is only here so a failure is not swallowed in silence.
+  useEffect(() => {
+    if (!isFirebaseConfigured) return;
+    getRedirectResult(auth).catch((error) => {
+      console.warn('[Uni] Sign-in did not complete.', error?.code ?? error);
+      setErrorKey(MESSAGES[error?.code] ?? 'auth.errorGeneric');
+    });
+  }, []);
 
   useEffect(() => {
     if (!isFirebaseConfigured) return undefined;
@@ -123,9 +151,9 @@ export function AuthProvider({ children }) {
         try {
           await claimInvites();
         } catch (error) {
-          // Sharing needs the Cloud Function deployed; not having it must not
-          // block sign-in.
-          console.info('[Uni] Skipped checking for shared documents.', error?.message ?? error);
+          // Whatever went wrong looking for invitations, it must not stand
+          // between someone and their own documents.
+          console.info('[Uni] Skipped checking for invitations.', error?.message ?? error);
         }
       },
       // Firebase can fail this listener outright rather than call it back.
@@ -165,7 +193,16 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signInWithGoogle = useCallback(
-    () => run(() => signInWithPopup(auth, googleProvider)),
+    () =>
+      run(async () => {
+        try {
+          await signInWithPopup(auth, googleProvider);
+        } catch (error) {
+          if (!CANNOT_POPUP.has(error?.code)) throw error;
+          // Leaves the page and comes back signed in; picked up below.
+          await signInWithRedirect(auth, googleProvider);
+        }
+      }),
     [run],
   );
 
