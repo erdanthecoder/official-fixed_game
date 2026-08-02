@@ -249,12 +249,20 @@
        * the fix for the whole class of problem and cannot make anything worse:
        * documents live in Firestore and IndexedDB, not in here.
        */
-      setTimeout(function () {
+      function offerWayOut() {
         var boot = document.getElementById('boot');
         if (!boot || boot.classList.contains('is-gone')) return;
         var stuck = document.getElementById('boot-stuck');
         if (stuck) stuck.hidden = false;
-      }, 12000);
+      }
+
+      // Eight seconds of nothing is already too long to sit and wonder.
+      setTimeout(offerWayOut, 8000);
+
+      // An uncaught error means the app is not going to start. There is no
+      // reason to make anyone wait out the timer to be told so.
+      window.addEventListener('error', offerWayOut);
+      window.addEventListener('unhandledrejection', offerWayOut);
 
       document.getElementById('boot-retry').addEventListener('click', function () {
         var done = function () {

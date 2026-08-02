@@ -28,7 +28,14 @@
  * Slower, and correct.
  */
 
-const VERSION = 'uni-v1';
+/*
+ * Bumping this deletes every cache from the previous version on activate. It
+ * has to move whenever a stale copy of the app could be the thing keeping
+ * someone stuck, which is exactly the failure this comment exists for: a bad
+ * cached build cannot offer its own replacement, because offering it requires
+ * the app to start.
+ */
+const VERSION = 'uni-v2';
 const SHELL = `${VERSION}-shell`;
 const ASSETS = `${VERSION}-assets`;
 
