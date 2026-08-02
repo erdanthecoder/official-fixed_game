@@ -21,6 +21,7 @@ import Icon from '../ui/Icon.jsx';
 import PromptDialog from '../ui/PromptDialog.jsx';
 import SaveIndicator from '../SaveIndicator.jsx';
 import ShareDialog from '../unisave/ShareDialog.jsx';
+import Facepile from '../collab/Facepile.jsx';
 import {
   BACKGROUNDS,
   BOARD_HEIGHT,
@@ -257,6 +258,7 @@ export default function BoardEditor({ boardId, onBack }) {
         </div>
 
         <div className="editor-header-actions">
+          <Facepile document={board} onShare={() => setSharing(true)} />
           <button type="button" className="button ghost" onClick={() => setSharing(true)}>
             <Icon name="share" size={16} />
             {t('unisave.share')}

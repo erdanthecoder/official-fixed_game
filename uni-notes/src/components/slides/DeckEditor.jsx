@@ -4,6 +4,8 @@ import ConfirmDialog from '../ui/ConfirmDialog.jsx';
 import PresentMode from './PresentMode.jsx';
 import SaveIndicator from '../SaveIndicator.jsx';
 import SlideView from './SlideView.jsx';
+import ShareDialog from '../unisave/ShareDialog.jsx';
+import Facepile from '../collab/Facepile.jsx';
 import { LAYOUTS, THEMES, makeSlide } from '../../lib/templates/slides.js';
 import { useData } from '../../context/DataContext.jsx';
 import { useT } from '../../i18n/index.jsx';
@@ -40,6 +42,7 @@ export default function DeckEditor({ deckId, onBack }) {
   const [index, setIndex] = useState(0);
   const [presenting, setPresenting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [sharing, setSharing] = useState(false);
 
   const current = slides[Math.min(index, Math.max(0, slides.length - 1))];
 
@@ -143,6 +146,11 @@ export default function DeckEditor({ deckId, onBack }) {
         </div>
 
         <div className="editor-header-actions">
+          <Facepile document={deck} onShare={() => setSharing(true)} />
+          <button type="button" className="button ghost" onClick={() => setSharing(true)}>
+            <Icon name="share" size={16} />
+            {t('common.share')}
+          </button>
           <button type="button" className="button primary" onClick={() => setPresenting(true)}>
             <Icon name="present" size={16} />
             {t('slides.present')}
@@ -293,6 +301,8 @@ export default function DeckEditor({ deckId, onBack }) {
           )}
         </div>
       </div>
+
+      {sharing ? <ShareDialog document={deck} onClose={() => setSharing(false)} /> : null}
 
       {confirmDelete ? (
         <ConfirmDialog

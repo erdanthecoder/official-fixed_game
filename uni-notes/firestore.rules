@@ -152,6 +152,35 @@ service cloud.firestore {
       );
 
       allow delete: if isDocOwner();
+
+      // --- who is looking at this document right now ------------------------
+      //
+      // One row per account, named by uid, holding a display name and the time
+      // of its last heartbeat. Anyone who can read the document can see who
+      // else is in it; nobody can write a row but their own, so presence
+      // cannot be faked for someone else.
+      //
+      // The membership test has to re-read the parent, because a subcollection
+      // does not inherit its parent's data. That is one extra document read per
+      // rule evaluation, which is the price of not putting a list of names
+      // inside the document itself where every editor could rewrite it.
+      match /presence/{personUid} {
+        function parentMember() {
+          return signedIn()
+            && request.auth.uid in
+                 get(/databases/$(database)/documents/docs/$(docId)).data.memberUids;
+        }
+
+        allow read: if parentMember();
+        allow write: if parentMember()
+          && request.auth.uid == personUid
+          && (request.method == 'delete' || (
+               request.resource.data.keys().hasOnly(['name', 'at'])
+               && request.resource.data.at is int
+               && request.resource.data.name is string
+               && request.resource.data.name.size() <= 120
+             ));
+      }
     }
 
     // --- personal data -------------------------------------------------------

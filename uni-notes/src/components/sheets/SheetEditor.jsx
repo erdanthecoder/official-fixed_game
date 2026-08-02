@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Icon from '../ui/Icon.jsx';
 import ConfirmDialog from '../ui/ConfirmDialog.jsx';
+import ShareDialog from '../unisave/ShareDialog.jsx';
+import Facepile from '../collab/Facepile.jsx';
 import SaveIndicator from '../SaveIndicator.jsx';
 import {
   FUNCTION_HELP,
@@ -37,6 +39,7 @@ export default function SheetEditor({ sheetId, onBack }) {
   // autoFocus input steals focus from the formula bar mid-word.
   const [editIn, setEditIn] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const gridRef = useRef(null);
 
@@ -279,6 +282,11 @@ export default function SheetEditor({ sheetId, onBack }) {
         </div>
 
         <div className="editor-header-actions">
+          <Facepile document={sheet} onShare={() => setSharing(true)} />
+          <button type="button" className="button ghost" onClick={() => setSharing(true)}>
+            <Icon name="share" size={16} />
+            {t('common.share')}
+          </button>
           <button type="button" className="button danger-ghost" onClick={() => setConfirmDelete(true)}>
             {t('common.delete')}
           </button>
@@ -500,6 +508,9 @@ export default function SheetEditor({ sheetId, onBack }) {
           </tbody>
         </table>
       </div>
+
+      {sharing ? <ShareDialog document={sheet} onClose={() => setSharing(false)} /> : null}
+
 
       {confirmDelete ? (
         <ConfirmDialog

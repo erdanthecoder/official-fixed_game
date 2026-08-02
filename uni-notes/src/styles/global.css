@@ -967,6 +967,120 @@ button {
   font-size: 0.8rem;
 }
 
+/* --- who is in this document ---------------------------------------------
+ *
+ * The faces overlap by a third, which is what makes a row of circles read as a
+ * group rather than a list. Each one is punched out of the header with a ring
+ * in the surface colour, so the overlap stays legible on any background — that
+ * ring is why the negative margin does not turn into mush.
+ */
+.facepile {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 8px 3px 4px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.76rem;
+  /* The ring that separates overlapping faces has to match whatever is behind
+   * them, or it reads as a white gap the moment the pill takes a background. */
+  --face-ring: var(--surface);
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease-standard),
+    border-color var(--t-fast) var(--ease-standard);
+}
+
+@media (hover: hover) {
+  .facepile:hover {
+    background: var(--surface-alt);
+    border-color: var(--border-soft);
+    --face-ring: var(--surface-alt);
+  }
+}
+
+.facepile-faces {
+  display: inline-flex;
+  align-items: center;
+}
+
+.face {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-left: -9px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--face-ring);
+  background: var(--track);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  /* Someone with access but not here: present in the group, not in the room. */
+  opacity: 0.55;
+  transition: opacity var(--t-base) var(--ease-standard),
+    transform var(--t-base) var(--spring-soft);
+}
+
+.face:first-child {
+  margin-left: 0;
+}
+
+.face.is-here {
+  background: var(--face);
+  color: #fff;
+  opacity: 1;
+}
+
+.face.is-more {
+  background: var(--surface-alt);
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+/* An arrival should be noticed without being a nuisance: one soft pulse of the
+ * ring as the face turns solid, then nothing. */
+.face.is-here {
+  animation: face-arrive var(--t-slow) var(--spring-soft);
+}
+
+@keyframes face-arrive {
+  from {
+    transform: scale(0.72);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.facepile-label {
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.facepile.has-others {
+  border-color: var(--accent-soft);
+  background: var(--accent-soft);
+  --face-ring: var(--accent-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .face.is-here {
+    animation: none;
+  }
+}
+
+/* On a phone the label is the first thing to go — the faces still say it. */
+@media (max-width: 640px) {
+  .facepile-label {
+    display: none;
+  }
+}
+
 .save-indicator {
   display: inline-flex;
   align-items: center;

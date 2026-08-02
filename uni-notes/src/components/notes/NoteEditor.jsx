@@ -2,6 +2,8 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { useMorphTarget } from '../../lib/morph.js';
 import Icon from '../ui/Icon.jsx';
 import ConfirmDialog from '../ui/ConfirmDialog.jsx';
+import ShareDialog from '../unisave/ShareDialog.jsx';
+import Facepile from '../collab/Facepile.jsx';
 import MoveDialog from '../ui/MoveDialog.jsx';
 import RichTextEditor from './editor/RichTextEditor.jsx';
 import SaveIndicator from '../SaveIndicator.jsx';
@@ -30,6 +32,7 @@ export default function NoteEditor({ noteId, onBack }) {
   useMorphTarget(paperRef);
   const [formatState, setFormatState] = useState(INITIAL_FORMAT_STATE);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const [moving, setMoving] = useState(false);
 
   const note = notes.find((item) => item.id === noteId);
@@ -110,6 +113,11 @@ export default function NoteEditor({ noteId, onBack }) {
         </div>
 
         <div className="editor-header-actions">
+          <Facepile document={note} onShare={() => setSharing(true)} />
+          <button type="button" className="button ghost" onClick={() => setSharing(true)}>
+            <Icon name="share" size={16} />
+            {t('common.share')}
+          </button>
           <button
             type="button"
             className="button ghost"
@@ -145,6 +153,9 @@ export default function NoteEditor({ noteId, onBack }) {
         </div>
         <p className="editor-footnote">{t('common.words', { count: wordCount(note.content) })}</p>
       </div>
+
+      {sharing ? <ShareDialog document={note} onClose={() => setSharing(false)} /> : null}
+
 
       {confirmDelete ? (
         <ConfirmDialog

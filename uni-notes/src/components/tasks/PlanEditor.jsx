@@ -12,6 +12,7 @@ import ConfirmDialog from '../ui/ConfirmDialog.jsx';
 import Icon from '../ui/Icon.jsx';
 import SaveIndicator from '../SaveIndicator.jsx';
 import ShareDialog from '../unisave/ShareDialog.jsx';
+import Facepile from '../collab/Facepile.jsx';
 import {
   PRIORITIES,
   daysUntil,
@@ -252,6 +253,7 @@ export default function PlanEditor({ planId, onBack }) {
         </div>
 
         <div className="editor-header-actions">
+          <Facepile document={plan} onShare={() => setSharing(true)} />
           <button type="button" className="button ghost" onClick={() => setSharing(true)}>
             <Icon name="share" size={16} />
             {t('unisave.share')}

@@ -18,7 +18,13 @@ export const LANGUAGES = [
 export const DEFAULT_LANGUAGE = 'en';
 
 const en = {
+  collab: {
+    hereNow: '{count} here now',
+    people: '{count} with access',
+    manageAccess: 'Share and manage access',
+  },
   common: {
+    share: 'Share',
     appName: 'Uni',
     tagline: 'Plan university, together',
     tip: 'Tip',
@@ -763,7 +769,13 @@ const en = {
 };
 
 const ru = {
+  collab: {
+    hereNow: 'Сейчас здесь: {count}',
+    people: 'С доступом: {count}',
+    manageAccess: 'Поделиться и настроить доступ',
+  },
   common: {
+    share: 'Поделиться',
     appName: 'Uni',
     tagline: 'Готовимся к университету вместе',
     tip: 'Совет',
@@ -1508,7 +1520,13 @@ const ru = {
 };
 
 const ky = {
+  collab: {
+    hereNow: 'Азыр бул жерде: {count}',
+    people: 'Кире алат: {count}',
+    manageAccess: 'Бөлүшүү жана уруксатты тескөө',
+  },
   common: {
+    share: 'Бөлүшүү',
     appName: 'Uni',
     tagline: 'Университетке бирге даярданабыз',
     tip: 'Кеңеш',
