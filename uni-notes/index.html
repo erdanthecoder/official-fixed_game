@@ -152,29 +152,7 @@
         border-radius: 16px;
         box-shadow: 0 12px 34px rgba(0, 0, 0, 0.42);
       }
-      /* --- the ride ------------------------------------------------------ */
-
-      #boot-scene {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-      }
-
-      /* A pool of the background colour under the words. Without it the rail
-         runs straight through the tip and neither is readable. */
-      #boot-veil {
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(
-          ellipse 46% 32% at 50% 46%,
-          rgba(8, 30, 46, 0.94) 0%,
-          rgba(8, 30, 46, 0.72) 45%,
-          rgba(8, 30, 46, 0) 100%
-        );
-        pointer-events: none;
-      }
+      /* --- the game ------------------------------------------------------ */
 
       #boot-stack {
         position: relative;
@@ -184,96 +162,32 @@
         gap: 18px;
       }
 
-      #boot-scene .rail {
-        fill: none;
-        stroke: rgba(226, 240, 250, 0.3);
-        stroke-width: 3;
-        stroke-linecap: round;
+      #boot-game-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        width: min(560px, calc(100vw - 40px));
       }
 
-      /* The near track is the one the eye follows, so it is the only one lit,
-         and it fades out at both edges instead of stopping at a hard end. */
-      #boot-scene .rail.lit {
-        stroke: url(#rail-fade);
-        stroke-width: 4;
+      #boot-game {
+        width: 100%;
+        height: auto;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.035);
+        box-shadow: inset 0 0 0 1px rgba(226, 240, 250, 0.09);
+        /* Pixels are the point; do not let the browser smooth them away when
+           the canvas is scaled up to fill the width. */
+        image-rendering: pixelated;
+        touch-action: manipulation;
+        cursor: pointer;
       }
 
-      /* Sleepers: the same curve, drawn as dashes underneath the rail. One
-         path doing two jobs, which is also why they can never drift apart. */
-      #boot-scene .sleepers {
-        fill: none;
-        stroke: rgba(226, 240, 250, 0.16);
-        stroke-width: 13;
-        stroke-dasharray: 2 20;
-      }
-
-      #boot-scene .layer {
-        transform-origin: center;
-        animation: rail-drift 26s ease-in-out infinite alternate;
-      }
-
-      /* Parallax. Further away means less movement, which is the whole of the
-         depth illusion. */
-      #boot-scene .far {
-        opacity: 0.4;
-        animation-duration: 42s;
-        --drift: 10px;
-      }
-      #boot-scene .mid {
-        opacity: 0.62;
-        animation-duration: 32s;
-        --drift: 18px;
-      }
-      #boot-scene .near {
-        animation-duration: 26s;
-        --drift: 28px;
-      }
-
-      @keyframes rail-drift {
-        from {
-          transform: translateX(calc(var(--drift) * -1));
-        }
-        to {
-          transform: translateX(var(--drift));
-        }
-      }
-
-      /*
-       * The car rides the path itself rather than a hand-written set of
-       * positions, so it banks into every hill and cannot come off the rail
-       * when the curve is edited. The timing is linear on purpose: the hills
-       * do the accelerating, exactly as they would in life.
-       */
-      /* The car: a short lit length of rail, chasing its own track. */
-      .rider-car,
-      .rider-glow {
-        fill: none;
-        stroke: #f0a44a;
-        stroke-linecap: round;
-        /* Three percent of the track lit, ninety-seven dark. */
-        stroke-dasharray: 3 97;
-        animation: ride 9s linear infinite;
-      }
-
-      .rider-car {
-        stroke-width: 9;
-      }
-
-      /* A wider, softer copy underneath, which is what makes it read as a
-         light rather than a smear of paint. */
-      .rider-glow {
-        stroke-width: 20;
-        opacity: 0.28;
-        filter: blur(6px);
-      }
-
-      @keyframes ride {
-        from {
-          stroke-dashoffset: 100;
-        }
-        to {
-          stroke-dashoffset: 0;
-        }
+      #boot-game-hint {
+        margin: 0;
+        color: rgba(226, 240, 250, 0.38);
+        font: 400 0.74rem 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+        letter-spacing: 0.02em;
       }
 
       #boot-tip {
@@ -344,9 +258,6 @@
           animation: none;
           width: 100%;
         }
-        #boot-scene .layer,
-        .rider-car,
-        .rider-glow,
         #boot-tip {
           animation: none;
         }
@@ -376,85 +287,27 @@
   <body>
     <div id="boot">
       <!--
-        The ride.
+        Something to do while it loads.
 
-        A loading screen is dead time; the only question is whether it is dead
-        time you mind. Three tracks at three depths, a car riding the nearest
-        one, and the hills doing the pacing — a coaster slows at the top of a
-        climb and runs away downhill all by itself, so the motion reads as
-        alive without a single hand-tuned keyframe.
+        A pixel runner, drawn on a canvas, playable with a tap or the space
+        bar. Ours rather than Chrome's: the idea of a dinosaur jumping cacti is
+        anyone's, the artwork is not, so every sprite below is a grid written by
+        hand in this file.
 
-        Drawn here rather than in the app because this is the screen that shows
-        before a single line of the app has loaded, which is exactly when there
-        is nothing else to look at. It costs no download: it is markup.
+        It has to live here, in the page itself, because this screen exists
+        precisely when none of the app has loaded. That rules out any library
+        and most cleverness — which is fine, because the whole thing is a few
+        rectangles and one number going up.
       -->
-      <svg id="boot-scene" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1200 620" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-        <defs>
-          <!-- The one path everything near rides on. -->
-          <path
-            id="rail-near"
-            pathLength="100"
-            d="M -60 470 C 110 470 150 210 300 210 S 470 470 620 470 S 780 270 930 270 S 1090 500 1280 500"
-          />
-          <path
-            id="rail-mid"
-            d="M -60 530 C 140 530 190 330 340 330 S 520 540 700 520 S 900 380 1280 420"
-          />
-          <path
-            id="rail-far"
-            d="M -60 575 C 200 575 260 455 460 470 S 760 560 1000 500 S 1180 470 1280 480"
-          />
-          <!-- The near rail fades out at both edges rather than stopping at a
-               hard end, so the track reads as continuing past the screen. -->
-          <linearGradient id="rail-fade" x1="0" x2="1">
-            <stop offset="0" stop-color="#cfe3f2" stop-opacity="0" />
-            <stop offset="0.16" stop-color="#cfe3f2" stop-opacity="0.62" />
-            <stop offset="0.84" stop-color="#cfe3f2" stop-opacity="0.62" />
-            <stop offset="1" stop-color="#cfe3f2" stop-opacity="0" />
-          </linearGradient>
-        </defs>
-
-        <!-- Depth: the further back, the fainter, the thinner, the slower. -->
-        <g class="layer far">
-          <use href="#rail-far" class="rail" />
-          <use href="#rail-far" class="sleepers" />
-        </g>
-        <g class="layer mid">
-          <use href="#rail-mid" class="rail" />
-          <use href="#rail-mid" class="sleepers" />
-        </g>
-        <g class="layer near">
-          <use href="#rail-near" class="rail lit" />
-          <use href="#rail-near" class="sleepers" />
-        </g>
-
-        <!--
-          The car is a bright segment of the rail itself, drawn as a dash and
-          walked along the path by its offset.
-
-          The obvious implementations both fail here, and it is worth saying
-          why. SVG's own animateMotion runs on the document timeline, which does
-          not start until the page has loaded — which is to say, never during
-          the one screen this is for. CSS offset-path does run, but measures its
-          path in the element's own pixels rather than the drawing's, and sent
-          the car off the side of the screen.
-
-          A dash cannot come off the rail, cannot disagree with it about where
-          the hills are, and needs no coordinates of its own. pathLength="100"
-          makes the numbers below percentages, so editing the curve changes
-          nothing here.
-        -->
-        <g class="rider">
-          <use href="#rail-near" class="rider-glow" />
-          <use href="#rail-near" class="rider-car" />
-        </g>
-      </svg>
-
-      <div id="boot-veil"></div>
-
       <div id="boot-stack">
         <img src="./icon.svg" alt="" width="68" height="68" />
         <div id="boot-bar"><i></i></div>
+
+        <div id="boot-game-wrap">
+          <canvas id="boot-game" width="600" height="170"></canvas>
+          <p id="boot-game-hint">Tap or press space to jump</p>
+        </div>
+
         <p id="boot-tip"></p>
         <div id="boot-stuck" hidden>
           <p>Uni is taking longer than it should.</p>
@@ -480,6 +333,232 @@
        * the fix for the whole class of problem and cannot make anything worse:
        * documents live in Firestore and IndexedDB, not in here.
        */
+      /*
+       * The runner.
+       *
+       * Sprites are grids of characters, which is the only way to draw pixel
+       * art that anyone can still edit a year later: the shape in the source
+       * is the shape on the screen. '#' is a filled pixel, anything else is
+       * empty.
+       */
+      var DINO = [
+        '.......#####',
+        '.......##.###',
+        '.......######',
+        '.......#####.',
+        '.......####..',
+        '#......###...',
+        '##.....#####.',
+        '###...#######',
+        '####.########',
+        '.###########.',
+        '..##########.',
+        '...########..',
+        '....######...',
+        '....##..##...',
+      ];
+      // Only the feet change while running, so only the feet are duplicated.
+      var FEET = [
+        ['....##..##...', '....##...#...'],
+        ['....##..##...', '....#...##...'],
+      ];
+      var CACTUS = [
+        '..#..',
+        '..#..',
+        '#.#..',
+        '#.#.#',
+        '###.#',
+        '..###',
+        '..#..',
+        '..#..',
+        '..#..',
+      ];
+      var CACTUS_BIG = [
+        '..#...',
+        '..#...',
+        '#.#..#',
+        '#.#..#',
+        '#.####',
+        '###..#',
+        '..#...',
+        '..#...',
+        '..#...',
+        '..#...',
+        '..#...',
+      ];
+
+      (function runner() {
+        var canvas = document.getElementById('boot-game');
+        if (!canvas || !canvas.getContext) return;
+        var ctx = canvas.getContext('2d');
+
+        var W = canvas.width;
+        var H = canvas.height;
+        var PX = 4; // one sprite pixel, in canvas pixels
+        var GROUND = H - 26;
+
+        var INK = '#e2eaf0';
+        var ACCENT = '#f0a44a';
+        var FAINT = 'rgba(226, 234, 240, 0.22)';
+
+        function draw(grid, x, y, colour) {
+          ctx.fillStyle = colour;
+          for (var row = 0; row < grid.length; row += 1) {
+            for (var col = 0; col < grid[row].length; col += 1) {
+              if (grid[row][col] === '#') {
+                ctx.fillRect(x + col * PX, y + row * PX, PX, PX);
+              }
+            }
+          }
+        }
+
+        var dino = { y: 0, vy: 0, jumping: false };
+        var obstacles = [];
+        var speed = 3.4;
+        var frame = 0;
+        var score = 0;
+        var best = 0;
+        var flash = 0;
+        var running = true;
+
+        var dinoH = DINO.length * PX;
+        var dinoW = 13 * PX;
+        var dinoX = 46;
+
+        function reset() {
+          obstacles = [];
+          speed = 3.4;
+          if (score > best) best = score;
+          score = 0;
+          dino.y = 0;
+          dino.vy = 0;
+          dino.jumping = false;
+        }
+
+        function jump() {
+          if (dino.jumping) return;
+          dino.jumping = true;
+          // Tuned against the canvas, not guessed: any harder and the top of
+          // the jump is clipped off the top edge.
+          dino.vy = -9.2;
+        }
+
+        function spawn() {
+          var last = obstacles[obstacles.length - 1];
+          var gap = 190 + Math.random() * 190;
+          if (last && W - last.x < gap) return;
+          if (!last || last.x < W - gap) {
+            var big = Math.random() < 0.35;
+            var grid = big ? CACTUS_BIG : CACTUS;
+            obstacles.push({
+              x: W + 10,
+              grid: grid,
+              w: grid[0].length * PX,
+              h: grid.length * PX,
+            });
+          }
+        }
+
+        function hits(o) {
+          // Forgiving boxes. A pixel-perfect hit on a sprite this small feels
+          // unfair, and this is a loading screen, not a competition.
+          var dx = dinoX + 6;
+          var dw = dinoW - 12;
+          var dy = GROUND - dinoH + dino.y + 4;
+          var dh = dinoH - 8;
+          var ox = o.x + 3;
+          var ow = o.w - 6;
+          var oy = GROUND - o.h;
+          return dx < ox + ow && dx + dw > ox && dy < oy + o.h && dy + dh > oy;
+        }
+
+        function scene() {
+          ctx.clearRect(0, 0, W, H);
+
+          // Ground: a line, and specks of grit moving with it.
+          ctx.fillStyle = FAINT;
+          ctx.fillRect(0, GROUND, W, 2);
+          for (var i = 0; i < 26; i += 1) {
+            var gx = (i * 61 - (frame * speed) / 2) % (W + 40);
+            if (gx < -10) gx += W + 40;
+            ctx.fillRect(gx, GROUND + 8 + ((i * 7) % 9), 3, 2);
+          }
+
+          for (var o = 0; o < obstacles.length; o += 1) {
+            draw(obstacles[o].grid, obstacles[o].x, GROUND - obstacles[o].h, INK);
+          }
+
+          // Legs alternate every eight frames, and stop while airborne.
+          var body = DINO.slice(0, DINO.length - 1);
+          var feet = dino.jumping ? FEET[0][0] : FEET[Math.floor(frame / 8) % 2][1];
+          draw(body, dinoX, GROUND - dinoH + dino.y, flash > 0 ? '#f28b82' : ACCENT);
+          draw([feet], dinoX, GROUND - PX + dino.y, flash > 0 ? '#f28b82' : ACCENT);
+
+          ctx.fillStyle = 'rgba(226, 234, 240, 0.5)';
+          ctx.font = '600 13px "SFMono-Regular", Consolas, monospace';
+          ctx.textAlign = 'right';
+          ctx.fillText((best ? 'HI ' + String(best) + '   ' : '') + String(score), W - 14, 24);
+        }
+
+        function tick() {
+          if (!running) return;
+          frame += 1;
+
+          if (document.visibilityState === 'visible') {
+            dino.vy += 0.55;
+            dino.y += dino.vy;
+            if (dino.y >= 0) {
+              dino.y = 0;
+              dino.vy = 0;
+              dino.jumping = false;
+            }
+
+            spawn();
+            for (var i = obstacles.length - 1; i >= 0; i -= 1) {
+              obstacles[i].x -= speed;
+              if (obstacles[i].x + obstacles[i].w < -10) obstacles.splice(i, 1);
+              else if (flash === 0 && hits(obstacles[i])) {
+                flash = 26;
+                reset();
+                break;
+              }
+            }
+
+            if (flash > 0) flash -= 1;
+            speed += 0.0009;
+            if (frame % 6 === 0) score += 1;
+            scene();
+          }
+
+          requestAnimationFrame(tick);
+        }
+
+        var still =
+          window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (still) {
+          // The drawing, without the running.
+          running = false;
+          obstacles.push({ x: 420, grid: CACTUS, w: CACTUS[0].length * PX, h: CACTUS.length * PX });
+          scene();
+        } else {
+          requestAnimationFrame(tick);
+        }
+
+        document.addEventListener('keydown', function (event) {
+          if (event.code === 'Space' || event.code === 'ArrowUp' || event.key === ' ') {
+            // Only while the loading screen is the thing on screen.
+            var boot = document.getElementById('boot');
+            if (!boot || boot.classList.contains('is-gone')) return;
+            event.preventDefault();
+            jump();
+          }
+        });
+        canvas.addEventListener('pointerdown', function (event) {
+          event.preventDefault();
+          jump();
+        });
+      })();
+
       /*
        * Tips while it loads.
        *
