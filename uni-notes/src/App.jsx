@@ -9,6 +9,7 @@ import LanguagesModule from './components/languages/LanguagesModule.jsx';
 import NotesModule from './components/notes/NotesModule.jsx';
 import AppsPage from './components/apps/AppsPage.jsx';
 import CommandPalette from './components/CommandPalette.jsx';
+import ShortcutsDialog from './components/ShortcutsDialog.jsx';
 import SettingsPage from './components/SettingsPage.jsx';
 import SheetsModule from './components/sheets/SheetsModule.jsx';
 import Sidebar from './components/Sidebar.jsx';
@@ -91,6 +92,7 @@ export default function App() {
   const { route, goToModule, goToItem, goToFolder, goToLanding, goToSignIn } = useHashRoute();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [recoveryDismissed, setRecoveryDismissed] = useState(false);
   const { updateReady, applyUpdate } = useAppUpdate();
   const standalone = useStandalone();
@@ -113,9 +115,14 @@ export default function App() {
    */
   useEffect(() => {
     const onKey = (event) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+      const mod = event.metaKey || event.ctrlKey;
+      if (mod && event.key.toLowerCase() === 'k') {
         event.preventDefault();
         setPaletteOpen((was) => !was);
+      } else if (mod && event.key === '/') {
+        // The same key Docs and Gmail use for this.
+        event.preventDefault();
+        setShortcutsOpen((was) => !was);
       }
     };
     window.addEventListener('keydown', onKey);
@@ -230,6 +237,8 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      <ShortcutsDialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+
       <CommandPalette
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}

@@ -92,10 +92,64 @@ export default function SheetEditor({ sheetId, onBack }) {
     [move, selectedRef, writeCell],
   );
 
+  /**
+   * Jump to the edge of the data, the way Ctrl+Arrow does in Excel.
+   *
+   * From a filled cell it runs to the last filled cell before a gap; from an
+   * empty one it runs to the next filled cell. That distinction is the whole
+   * behaviour — without it, Ctrl+Down from the top of a column full of data
+   * lands at row 200 instead of at the bottom of the data, and the shortcut is
+   * useless for exactly the job people use it for.
+   */
+  const jump = useCallback(
+    (rowDelta, colDelta) => {
+      setSelected((current) => {
+        const filled = (r, c) => {
+          const cell = cells?.[`${r}:${c}`];
+          return cell?.v !== undefined && cell?.v !== '';
+        };
+        let { row, col } = current;
+        const startFilled = filled(row, col);
+        for (;;) {
+          const nextRow = row + rowDelta;
+          const nextCol = col + colDelta;
+          if (nextRow < 0 || nextRow >= rows || nextCol < 0 || nextCol >= cols) break;
+          if (startFilled && !filled(nextRow, nextCol)) break;
+          row = nextRow;
+          col = nextCol;
+          if (!startFilled && filled(row, col)) break;
+        }
+        return { row, col };
+      });
+    },
+    [cells, rows, cols],
+  );
+
   const onGridKeyDown = (event) => {
     if (draft !== null) return; // the cell input handles its own keys
 
     const { key } = event;
+    const mod = event.ctrlKey || event.metaKey;
+
+    // Excel's grid navigation, checked before the plain arrows so the modified
+    // form wins.
+    if (mod && key.startsWith('Arrow')) {
+      event.preventDefault();
+      const by = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] }[key];
+      if (by) jump(by[0], by[1]);
+      return;
+    }
+    if (key === 'Home') {
+      event.preventDefault();
+      // Ctrl+Home is the top-left of the sheet; Home alone is the start of the row.
+      setSelected((current) => ({ row: mod ? 0 : current.row, col: 0 }));
+      return;
+    }
+    if (key === 'End') {
+      event.preventDefault();
+      jump(0, 1);
+      return;
+    }
 
     if (key === 'ArrowUp') {
       event.preventDefault();

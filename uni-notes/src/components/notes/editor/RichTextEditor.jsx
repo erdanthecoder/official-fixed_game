@@ -1,4 +1,5 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from 'react';
+import { findCommand } from '../../../lib/shortcuts.js';
 
 /**
  * The white canvas.
@@ -103,6 +104,33 @@ const RichTextEditor = forwardRef(function RichTextEditor(
     });
   }, [onSelectionChange]);
 
+  /**
+   * The shortcuts that Docs users already have in their hands.
+   *
+   * Read from the same list the help dialog prints, so a shortcut that is
+   * documented is a shortcut that runs. Ctrl+B/I/U are left to the browser —
+   * it already does them, and intercepting them only creates a second
+   * implementation that can disagree with the first.
+   */
+  const onKeyDown = useCallback(
+    (event) => {
+      const hit = findCommand(event);
+      if (!hit || ['bold', 'italic', 'underline'].includes(hit.command)) return;
+      event.preventDefault();
+      const [name, arg] = hit.command.split(':');
+      if (name === 'link') {
+        // The link tool owns the popover and the selection dance; asking for it
+        // by event keeps that logic in one place.
+        document.dispatchEvent(new CustomEvent('uni:link'));
+        return;
+      }
+      document.execCommand(name, false, arg ? `<${arg}>` : undefined);
+      reportSelection();
+      reportChange();
+    },
+    [reportSelection, reportChange],
+  );
+
   // Keep the toolbar in sync while the caret moves around.
   useEffect(() => {
     const onSelectionChangeEvent = () => {
@@ -193,6 +221,7 @@ const RichTextEditor = forwardRef(function RichTextEditor(
       aria-multiline="true"
       aria-label="Document content"
       onInput={reportChange}
+      onKeyDown={onKeyDown}
       onBlur={() => {
         rememberSelection();
         reportChange();

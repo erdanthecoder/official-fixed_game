@@ -25,6 +25,23 @@ export default function LinkButton({ label, onApply, onRemove }) {
   const wrapRef = useRef(null);
   const inputRef = useRef(null);
 
+  /*
+   * Ctrl+Shift+K from inside the editor. The editor cannot reach into this
+   * component, and threading a ref up through the toolbar for one shortcut
+   * would be a lot of wiring for a single message — so it announces, and this
+   * listens.
+   */
+  useEffect(() => {
+    const onAsk = () => {
+      const selection = window.getSelection();
+      savedRange.current =
+        selection && selection.rangeCount ? selection.getRangeAt(0).cloneRange() : null;
+      setOpen(true);
+    };
+    document.addEventListener('uni:link', onAsk);
+    return () => document.removeEventListener('uni:link', onAsk);
+  }, []);
+
   useEffect(() => {
     if (!open) return undefined;
     inputRef.current?.focus();
