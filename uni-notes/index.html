@@ -152,6 +152,151 @@
         border-radius: 16px;
         box-shadow: 0 12px 34px rgba(0, 0, 0, 0.42);
       }
+      /* --- the ride ------------------------------------------------------ */
+
+      #boot-scene {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+
+      /* A pool of the background colour under the words. Without it the rail
+         runs straight through the tip and neither is readable. */
+      #boot-veil {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          ellipse 46% 32% at 50% 46%,
+          rgba(8, 30, 46, 0.94) 0%,
+          rgba(8, 30, 46, 0.72) 45%,
+          rgba(8, 30, 46, 0) 100%
+        );
+        pointer-events: none;
+      }
+
+      #boot-stack {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+      }
+
+      #boot-scene .rail {
+        fill: none;
+        stroke: rgba(226, 240, 250, 0.3);
+        stroke-width: 3;
+        stroke-linecap: round;
+      }
+
+      /* The near track is the one the eye follows, so it is the only one lit,
+         and it fades out at both edges instead of stopping at a hard end. */
+      #boot-scene .rail.lit {
+        stroke: url(#rail-fade);
+        stroke-width: 4;
+      }
+
+      /* Sleepers: the same curve, drawn as dashes underneath the rail. One
+         path doing two jobs, which is also why they can never drift apart. */
+      #boot-scene .sleepers {
+        fill: none;
+        stroke: rgba(226, 240, 250, 0.16);
+        stroke-width: 13;
+        stroke-dasharray: 2 20;
+      }
+
+      #boot-scene .layer {
+        transform-origin: center;
+        animation: rail-drift 26s ease-in-out infinite alternate;
+      }
+
+      /* Parallax. Further away means less movement, which is the whole of the
+         depth illusion. */
+      #boot-scene .far {
+        opacity: 0.4;
+        animation-duration: 42s;
+        --drift: 10px;
+      }
+      #boot-scene .mid {
+        opacity: 0.62;
+        animation-duration: 32s;
+        --drift: 18px;
+      }
+      #boot-scene .near {
+        animation-duration: 26s;
+        --drift: 28px;
+      }
+
+      @keyframes rail-drift {
+        from {
+          transform: translateX(calc(var(--drift) * -1));
+        }
+        to {
+          transform: translateX(var(--drift));
+        }
+      }
+
+      /*
+       * The car rides the path itself rather than a hand-written set of
+       * positions, so it banks into every hill and cannot come off the rail
+       * when the curve is edited. The timing is linear on purpose: the hills
+       * do the accelerating, exactly as they would in life.
+       */
+      /* The car: a short lit length of rail, chasing its own track. */
+      .rider-car,
+      .rider-glow {
+        fill: none;
+        stroke: #f0a44a;
+        stroke-linecap: round;
+        /* Three percent of the track lit, ninety-seven dark. */
+        stroke-dasharray: 3 97;
+        animation: ride 9s linear infinite;
+      }
+
+      .rider-car {
+        stroke-width: 9;
+      }
+
+      /* A wider, softer copy underneath, which is what makes it read as a
+         light rather than a smear of paint. */
+      .rider-glow {
+        stroke-width: 20;
+        opacity: 0.28;
+        filter: blur(6px);
+      }
+
+      @keyframes ride {
+        from {
+          stroke-dashoffset: 100;
+        }
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+
+      #boot-tip {
+        max-width: 30rem;
+        margin: 0;
+        padding: 0 24px;
+        color: rgba(226, 240, 250, 0.72);
+        font: 400 0.92rem/1.55 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+        text-align: center;
+        animation: tip-in 520ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      @keyframes tip-in {
+        from {
+          transform: translateY(6px);
+          opacity: 0.001;
+        }
+        to {
+          transform: none;
+          opacity: 1;
+        }
+      }
+
       #boot-stuck {
         display: flex;
         flex-direction: column;
@@ -199,6 +344,12 @@
           animation: none;
           width: 100%;
         }
+        #boot-scene .layer,
+        .rider-car,
+        .rider-glow,
+        #boot-tip {
+          animation: none;
+        }
       }
     </style>
 
@@ -224,11 +375,91 @@
   </head>
   <body>
     <div id="boot">
-      <img src="./icon.svg" alt="" width="68" height="68" />
-      <div id="boot-bar"><i></i></div>
-      <div id="boot-stuck" hidden>
-        <p>Uni is taking longer than it should.</p>
-        <button type="button" id="boot-retry">Try again</button>
+      <!--
+        The ride.
+
+        A loading screen is dead time; the only question is whether it is dead
+        time you mind. Three tracks at three depths, a car riding the nearest
+        one, and the hills doing the pacing — a coaster slows at the top of a
+        climb and runs away downhill all by itself, so the motion reads as
+        alive without a single hand-tuned keyframe.
+
+        Drawn here rather than in the app because this is the screen that shows
+        before a single line of the app has loaded, which is exactly when there
+        is nothing else to look at. It costs no download: it is markup.
+      -->
+      <svg id="boot-scene" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1200 620" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <!-- The one path everything near rides on. -->
+          <path
+            id="rail-near"
+            pathLength="100"
+            d="M -60 470 C 110 470 150 210 300 210 S 470 470 620 470 S 780 270 930 270 S 1090 500 1280 500"
+          />
+          <path
+            id="rail-mid"
+            d="M -60 530 C 140 530 190 330 340 330 S 520 540 700 520 S 900 380 1280 420"
+          />
+          <path
+            id="rail-far"
+            d="M -60 575 C 200 575 260 455 460 470 S 760 560 1000 500 S 1180 470 1280 480"
+          />
+          <!-- The near rail fades out at both edges rather than stopping at a
+               hard end, so the track reads as continuing past the screen. -->
+          <linearGradient id="rail-fade" x1="0" x2="1">
+            <stop offset="0" stop-color="#cfe3f2" stop-opacity="0" />
+            <stop offset="0.16" stop-color="#cfe3f2" stop-opacity="0.62" />
+            <stop offset="0.84" stop-color="#cfe3f2" stop-opacity="0.62" />
+            <stop offset="1" stop-color="#cfe3f2" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+
+        <!-- Depth: the further back, the fainter, the thinner, the slower. -->
+        <g class="layer far">
+          <use href="#rail-far" class="rail" />
+          <use href="#rail-far" class="sleepers" />
+        </g>
+        <g class="layer mid">
+          <use href="#rail-mid" class="rail" />
+          <use href="#rail-mid" class="sleepers" />
+        </g>
+        <g class="layer near">
+          <use href="#rail-near" class="rail lit" />
+          <use href="#rail-near" class="sleepers" />
+        </g>
+
+        <!--
+          The car is a bright segment of the rail itself, drawn as a dash and
+          walked along the path by its offset.
+
+          The obvious implementations both fail here, and it is worth saying
+          why. SVG's own animateMotion runs on the document timeline, which does
+          not start until the page has loaded — which is to say, never during
+          the one screen this is for. CSS offset-path does run, but measures its
+          path in the element's own pixels rather than the drawing's, and sent
+          the car off the side of the screen.
+
+          A dash cannot come off the rail, cannot disagree with it about where
+          the hills are, and needs no coordinates of its own. pathLength="100"
+          makes the numbers below percentages, so editing the curve changes
+          nothing here.
+        -->
+        <g class="rider">
+          <use href="#rail-near" class="rider-glow" />
+          <use href="#rail-near" class="rider-car" />
+        </g>
+      </svg>
+
+      <div id="boot-veil"></div>
+
+      <div id="boot-stack">
+        <img src="./icon.svg" alt="" width="68" height="68" />
+        <div id="boot-bar"><i></i></div>
+        <p id="boot-tip"></p>
+        <div id="boot-stuck" hidden>
+          <p>Uni is taking longer than it should.</p>
+          <button type="button" id="boot-retry">Try again</button>
+        </div>
       </div>
     </div>
     <div id="root"></div>
@@ -249,6 +480,70 @@
        * the fix for the whole class of problem and cannot make anything worse:
        * documents live in Firestore and IndexedDB, not in here.
        */
+      /*
+       * Tips while it loads.
+       *
+       * Written out here rather than imported from the app's tip list, because
+       * this screen exists precisely when none of the app has loaded. Six short
+       * ones, kept deliberately separate from src/i18n/tips.js — trying to
+       * share them would mean shipping part of the app before the app, to save
+       * eighteen lines.
+       */
+      var BOOT_TIPS = {
+        en: [
+          'Everything saves itself. There is no save button to forget.',
+          'Ctrl+K finds any document, in any of the apps, from anywhere.',
+          'Share a note and you both edit the same one — no versions flying about.',
+          'In Sheets, start a cell with = to write a formula.',
+          'Uni works offline. What you type now syncs when the signal comes back.',
+          'Invite someone as a viewer when you want an opinion, not an editor.',
+        ],
+        ru: [
+          'Всё сохраняется само. Кнопки «сохранить» просто нет.',
+          'Ctrl+K находит любой документ в любом приложении.',
+          'Поделитесь заметкой — и вы редактируете одну и ту же.',
+          'В таблицах начните ячейку с =, чтобы написать формулу.',
+          'Uni работает без интернета. Всё синхронизируется, когда он вернётся.',
+          'Пригласите как читателя, если нужно мнение, а не правки.',
+        ],
+        ky: [
+          'Баары өзү сакталат. «Сактоо» баскычы жок.',
+          'Ctrl+K каалаган документти каалаган колдонмодон табат.',
+          'Жазууну бөлүшсөңүз, экөөңүз бир эле документти оңдойсуңар.',
+          'Таблицада уячаны = менен баштасаңыз, формула болот.',
+          'Uni интернетсиз да иштейт. Байланыш келгенде синхрондолот.',
+          'Пикир гана керек болсо, окурман катары чакырыңыз.',
+        ],
+      };
+
+      (function tips() {
+        var el = document.getElementById('boot-tip');
+        if (!el) return;
+
+        var language = 'en';
+        try {
+          var saved = JSON.parse(localStorage.getItem('uni:v3') || '{}');
+          if (saved.prefs && BOOT_TIPS[saved.prefs.language]) language = saved.prefs.language;
+        } catch (error) {
+          // No preferences yet, which is its own answer.
+        }
+
+        var list = BOOT_TIPS[language];
+        var at = Math.floor(Math.random() * list.length);
+
+        var show = function () {
+          el.textContent = list[at % list.length];
+          // Restart the entrance, which otherwise only plays once.
+          el.style.animation = 'none';
+          void el.offsetWidth;
+          el.style.animation = '';
+          at += 1;
+        };
+
+        show();
+        setInterval(show, 5200);
+      })();
+
       function offerWayOut() {
         var boot = document.getElementById('boot');
         if (!boot || boot.classList.contains('is-gone')) return;
