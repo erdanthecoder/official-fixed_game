@@ -114,12 +114,24 @@ jobs:
         working-directory: uni-notes
         run: |
           npm install -g firebase-tools
-          # Rules ship with the site, not separately. They are the half of a
-          # feature that lives on the server: presence, sharing and every
-          # document boundary are enforced here, so a build that ships new
-          # client code against last week's rules is a broken deploy that looks
-          # successful.
-          firebase deploy --only hosting,firestore:rules --project "$PROJECT_ID" --non-interactive
+          firebase deploy --only hosting --project "$PROJECT_ID" --non-interactive
+
+      # Rules are the half of a feature that lives on the server: presence,
+      # sharing and every document boundary are enforced here, so shipping new
+      # client code against last week's rules is a broken deploy that looks
+      # successful.
+      #
+      # Separate from hosting, and allowed to fail, because deploying rules
+      # asks serviceusage.googleapis.com whether Firestore is enabled — a call
+      # the plain Firebase Admin service account is not granted. If it has not
+      # been granted here, the site must still go live; the summary below says
+      # exactly what to click.
+      - name: Deploy the security rules
+        id: rules
+        if: steps.gate.outputs.ready == 'true'
+        working-directory: uni-notes
+        continue-on-error: true
+        run: firebase deploy --only firestore:rules --project "$PROJECT_ID" --non-interactive
 
       - name: What happened
         if: always()
@@ -136,6 +148,21 @@ jobs:
               echo
               echo "If sign-in opens and closes immediately, add \`unisave-e8483.web.app\`"
               echo "to Firebase Console -> Authentication -> Settings -> Authorized domains."
+              echo
+              if [ "${{ steps.rules.outcome }}" = "success" ]; then
+                echo "Security rules deployed."
+              else
+                echo "**The security rules were not deployed.** Everything already"
+                echo "working is unaffected, but anything that needs a new rule —"
+                echo "seeing who else is in a document, for one — will be refused"
+                echo "until they are."
+                echo
+                echo "One click, once: Google Cloud Console -> IAM, find the"
+                echo "\`firebase-adminsdk\` service account, and add the role"
+                echo "**Service Usage Consumer**. Then re-run this workflow."
+                echo
+                echo "Or from a laptop, in \`uni-notes/\`: \`npm run deploy:rules\`."
+              fi
             else
               echo "Nothing deployed — \`FIREBASE_SERVICE_ACCOUNT\` is not set."
               echo "The GitHub Pages site is unaffected and still live."
