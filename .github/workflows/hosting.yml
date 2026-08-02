@@ -126,6 +126,77 @@ jobs:
       # the plain Firebase Admin service account is not granted. If it has not
       # been granted here, the site must still go live; the summary below says
       # exactly what to click.
+      # A web address is the part of this that people actually type and read
+      # out to each other, and unisave-e8483.web.app is a project id, not a
+      # name — the digits are there because Firebase had to make it unique, not
+      # because they mean anything.
+      #
+      # A project may hold several hosting sites. This adds one with a name a
+      # person would choose, and serves exactly the same build from it. The old
+      # address keeps working, which matters: it is the one the installed
+      # Android app and its asset links point at, and breaking that would log
+      # everybody out of an app they already have.
+      #
+      # Names are global across Firebase, so the good ones go early. The list is
+      # tried in order and the first one free is kept; on every later run the
+      # site already exists and this step just finds it again.
+      - name: A friendlier address
+        id: nice
+        if: steps.gate.outputs.ready == 'true'
+        working-directory: uni-notes
+        continue-on-error: true
+        run: |
+          set -u
+          read_sites() {
+            firebase hosting:sites:list --project "$PROJECT_ID" --json 2>/dev/null \
+              | node -e '
+                  let raw = "";
+                  process.stdin.on("data", (d) => (raw += d));
+                  process.stdin.on("end", () => {
+                    try {
+                      const sites = JSON.parse(raw).result.sites ?? [];
+                      console.log(
+                        sites
+                          .map((s) => String(s.name).split("/").pop())
+                          .filter((id) => id !== process.env.PROJECT_ID)
+                          .join("\n"),
+                      );
+                    } catch { /* no sites, or not readable */ }
+                  });
+                '
+          }
+
+          SITE="$(read_sites | head -n1)"
+
+          if [ -z "$SITE" ]; then
+            for candidate in uni uniapp getuni uniplan unistudy unihq uni-suite planuni; do
+              if firebase hosting:sites:create "$candidate" --project "$PROJECT_ID" --non-interactive; then
+                SITE="$candidate"
+                break
+              fi
+              echo "$candidate is taken, trying the next one."
+            done
+          fi
+
+          if [ -z "$SITE" ]; then
+            echo "::warning::Could not claim a friendlier address; the project address still works."
+            exit 0
+          fi
+
+          echo "site=$SITE" >> "$GITHUB_OUTPUT"
+
+          # Same build, second address. firebase.json names the site to publish
+          # to, and the runner is thrown away afterwards, so editing it here
+          # changes nothing in the repository.
+          node -e '
+            const fs = require("fs");
+            const config = JSON.parse(fs.readFileSync("firebase.json", "utf8"));
+            config.hosting.site = process.argv[1];
+            fs.writeFileSync("firebase.json", JSON.stringify(config, null, 2));
+          ' "$SITE"
+
+          firebase deploy --only hosting --project "$PROJECT_ID" --non-interactive
+
       - name: Deploy the security rules
         id: rules
         if: steps.gate.outputs.ready == 'true'
@@ -146,8 +217,18 @@ jobs:
               echo "**Build Android APK** with that URL and the address bar goes away,"
               echo "because the asset links are now served from a domain root we own."
               echo
-              echo "If sign-in opens and closes immediately, add \`unisave-e8483.web.app\`"
-              echo "to Firebase Console -> Authentication -> Settings -> Authorized domains."
+              if [ -n "${{ steps.nice.outputs.site }}" ]; then
+                echo "Also live, and easier to say out loud, at"
+                echo "**https://${{ steps.nice.outputs.site }}.web.app**"
+                echo
+                echo "If sign-in opens and closes again on the new address, add"
+                echo "\`${{ steps.nice.outputs.site }}.web.app\` to Firebase Console ->"
+                echo "Authentication -> Settings -> Authorized domains. The old address is"
+                echo "unaffected either way, and the installed Android app still uses it."
+              else
+                echo "If sign-in opens and closes immediately, add \`unisave-e8483.web.app\`"
+                echo "to Firebase Console -> Authentication -> Settings -> Authorized domains."
+              fi
               echo
               if [ "${{ steps.rules.outcome }}" = "success" ]; then
                 echo "Security rules deployed."
