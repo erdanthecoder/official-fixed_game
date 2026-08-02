@@ -71,41 +71,77 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!isFirebaseConfigured) return undefined;
 
-    return onAuthStateChanged(auth, async (nextUser) => {
-      if (!nextUser) {
+    /*
+     * Never wait forever.
+     *
+     * The whole app is behind this one callback: until Firebase says who is
+     * signed in, the screen is the word "Loading". That is correct for the
+     * half-second it normally takes and indefensible after that — and it can
+     * genuinely never arrive. A tablet on hotel wifi, a network that accepts
+     * the connection and then drops it, a domain Firebase has not been told
+     * about: in each case the callback simply does not come, and the app is a
+     * spinner with no way out and nothing to read.
+     *
+     * After six seconds, stop waiting and show the sign-in screen. Nothing is
+     * lost by being wrong: if the answer arrives late, the listener below still
+     * fires and moves straight on to the workspace.
+     */
+    const giveUp = setTimeout(() => {
+      setStatus((current) => (current === AUTH_STATUS.loading ? AUTH_STATUS.signedOut : current));
+    }, 6000);
+
+    const stop = onAuthStateChanged(
+      auth,
+      async (nextUser) => {
+        clearTimeout(giveUp);
+        if (!nextUser) {
+          setUser(null);
+          setStatus(AUTH_STATUS.signedOut);
+          return;
+        }
+
+        setUser({
+          uid: nextUser.uid,
+          name: nextUser.displayName || nextUser.email?.split('@')[0] || 'You',
+          email: nextUser.email ?? '',
+          photoURL: nextUser.photoURL ?? '',
+        });
+        setStatus(AUTH_STATUS.signedIn);
+
+        // Both of these are safe to re-run on every sign-in and no-op when
+        // there's nothing to do, so neither needs its own guard.
+        try {
+          await migrateIntoAccount({
+            uid: nextUser.uid,
+            email: nextUser.email ?? '',
+            name: nextUser.displayName ?? '',
+          });
+        } catch (error) {
+          console.warn('[Uni] Could not move earlier work into the account.', error);
+        }
+
+        try {
+          await claimInvites();
+        } catch (error) {
+          // Sharing needs the Cloud Function deployed; not having it must not
+          // block sign-in.
+          console.info('[Uni] Skipped checking for shared documents.', error?.message ?? error);
+        }
+      },
+      // Firebase can fail this listener outright rather than call it back.
+      // Without this the failure is silent and the screen stays on "Loading".
+      (error) => {
+        clearTimeout(giveUp);
+        console.warn('[Uni] Could not check who is signed in.', error);
         setUser(null);
         setStatus(AUTH_STATUS.signedOut);
-        return;
-      }
+      },
+    );
 
-      setUser({
-        uid: nextUser.uid,
-        name: nextUser.displayName || nextUser.email?.split('@')[0] || 'You',
-        email: nextUser.email ?? '',
-        photoURL: nextUser.photoURL ?? '',
-      });
-      setStatus(AUTH_STATUS.signedIn);
-
-      // Both of these are safe to re-run on every sign-in and no-op when
-      // there's nothing to do, so neither needs its own guard.
-      try {
-        await migrateIntoAccount({
-          uid: nextUser.uid,
-          email: nextUser.email ?? '',
-          name: nextUser.displayName ?? '',
-        });
-      } catch (error) {
-        console.warn('[Uni] Could not move earlier work into the account.', error);
-      }
-
-      try {
-        await claimInvites();
-      } catch (error) {
-        // Sharing needs the Cloud Function deployed; not having it must not
-        // block sign-in.
-        console.info('[Uni] Skipped checking for shared documents.', error?.message ?? error);
-      }
-    });
+    return () => {
+      clearTimeout(giveUp);
+      stop();
+    };
   }, []);
 
   const run = useCallback(async (action) => {

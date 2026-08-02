@@ -152,6 +152,25 @@
         border-radius: 16px;
         box-shadow: 0 12px 34px rgba(0, 0, 0, 0.42);
       }
+      #boot-stuck {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+        margin-top: 26px;
+        color: rgba(255, 255, 255, 0.86);
+        font: 500 0.95rem/1.5 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+        text-align: center;
+      }
+      #boot-retry {
+        padding: 11px 22px;
+        border: 0;
+        border-radius: 999px;
+        background: #f0a44a;
+        color: #22160a;
+        font: 600 0.95rem 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+        cursor: pointer;
+      }
       #boot-bar {
         width: 132px;
         height: 3px;
@@ -207,8 +226,57 @@
     <div id="boot">
       <img src="./icon.svg" alt="" width="68" height="68" />
       <div id="boot-bar"><i></i></div>
+      <div id="boot-stuck" hidden>
+        <p>Uni is taking longer than it should.</p>
+        <button type="button" id="boot-retry">Try again</button>
+      </div>
     </div>
     <div id="root"></div>
+    <script>
+      /*
+       * The last resort.
+       *
+       * Everything below this line in the app has its own error handling; this
+       * is for the failures that stop the app existing at all — a chunk that
+       * never arrives, a service worker holding a build whose files have been
+       * replaced, a network that accepts the request and then goes quiet. In
+       * every one of those the person is left looking at a loading bar that
+       * will never finish, with nothing to press.
+       *
+       * Twelve seconds is long enough that a slow connection is not insulted
+       * and short enough that nobody has given up yet. The button throws away
+       * the cached copy of the app and starts again from the network, which is
+       * the fix for the whole class of problem and cannot make anything worse:
+       * documents live in Firestore and IndexedDB, not in here.
+       */
+      setTimeout(function () {
+        var boot = document.getElementById('boot');
+        if (!boot || boot.classList.contains('is-gone')) return;
+        var stuck = document.getElementById('boot-stuck');
+        if (stuck) stuck.hidden = false;
+      }, 12000);
+
+      document.getElementById('boot-retry').addEventListener('click', function () {
+        var done = function () {
+          location.reload();
+        };
+        var jobs = [];
+        if (window.caches && caches.keys) {
+          jobs.push(caches.keys().then(function (names) {
+            return Promise.all(names.map(function (name) { return caches.delete(name); }));
+          }));
+        }
+        if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+          jobs.push(navigator.serviceWorker.getRegistrations().then(function (regs) {
+            return Promise.all(regs.map(function (reg) { return reg.unregister(); }));
+          }));
+        }
+        // Reload regardless: a cleanup that hangs must not become a second
+        // thing that never finishes.
+        setTimeout(done, 2500);
+        Promise.all(jobs).then(done, done);
+      });
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
