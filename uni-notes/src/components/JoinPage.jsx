@@ -6,9 +6,11 @@
  * member, link revoked, link expired. It sits outside the app shell for that
  * reason — there is no sidebar to show someone who has no documents yet.
  *
- * The code is held in state across the sign-in round trip. Somebody who opens a
- * link while signed out gets sent to sign in, comes back, and joins without
- * having to find the link again — the hash still carries it.
+ * The code is put aside the moment this page opens, because signing in takes
+ * it away otherwise: the hash becomes #/signin, and on Safari the page reloads
+ * outright. Somebody who opens a link while signed out signs in, comes back
+ * here by themselves, and joins without ever having to find the link again.
+ * See lib/pendingJoin.js.
  */
 
 import { useEffect, useRef, useState } from 'react';
@@ -18,6 +20,7 @@ import Scenery from './Scenery.jsx';
 import TipLine from './TipLine.jsx';
 import { AUTH_STATUS, useAuth } from '../context/AuthContext.jsx';
 import { LINK_ERROR, areLinksAvailable, joinWithCode } from '../lib/inviteLinks.js';
+import { forgetJoin, rememberJoin } from '../lib/pendingJoin.js';
 import { useT } from '../i18n/index.jsx';
 
 const ERROR_KEYS = {
@@ -39,6 +42,11 @@ export default function JoinPage({ code, onOpenDocument, onGoHome, onSignIn }) {
 
   const signedIn = status === AUTH_STATUS.signedIn;
 
+  // Before anything else, and before anyone is asked to sign in.
+  useEffect(() => {
+    if (code) rememberJoin(code);
+  }, [code]);
+
   // Join once, automatically, as soon as there is an account to join as.
   // Guarded by the code rather than a boolean so that arriving back from
   // sign-in with a *different* link still runs.
@@ -49,16 +57,20 @@ export default function JoinPage({ code, onOpenDocument, onGoHome, onSignIn }) {
 
     joinWithCode({ code, user })
       .then((result) => {
+        forgetJoin();
         setPhase('done');
         // A beat on the confirmation, so it doesn't flash past unread.
         setTimeout(() => onOpenDocument(result.docId), 900);
       })
       .catch((error) => {
         if (error?.code === LINK_ERROR.alreadyMember && error.docId) {
+          forgetJoin();
           setPhase('done');
           setTimeout(() => onOpenDocument(error.docId), 900);
           return;
         }
+        // A link that failed is not worth carrying into the next sign-in.
+        forgetJoin();
         setErrorKey(ERROR_KEYS[error?.code] ?? 'join.errorFailed');
         setPhase('error');
       });

@@ -19,6 +19,7 @@ import TasksModule from './components/tasks/TasksModule.jsx';
 import TipLine from './components/TipLine.jsx';
 import UniSaveModule from './components/unisave/UniSaveModule.jsx';
 import { AUTH_STATUS, useAuth } from './context/AuthContext.jsx';
+import { takeJoin } from './lib/pendingJoin.js';
 import { JOIN, LANDING, SIGN_IN, useHashRoute } from './hooks/useHashRoute.js';
 import { useAppUpdate } from './hooks/useInstall.js';
 import { useStandalone } from './hooks/useStandalone.js';
@@ -90,7 +91,8 @@ export default function App() {
   const { status } = useAuth();
   const data = useData();
   const { ready, recovered, prefs } = data;
-  const { route, goToModule, goToItem, goToFolder, goToLanding, goToSignIn } = useHashRoute();
+  const { route, goToModule, goToItem, goToFolder, goToLanding, goToSignIn, goToJoin } =
+    useHashRoute();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
@@ -163,11 +165,21 @@ export default function App() {
     else goToLanding();
   }, [skipLanding, prefs?.startModule, goToModule, goToLanding]);
 
-  // Signing in from the sign-in screen should land you in the app, not back on
-  // a screen asking you to sign in.
+  /*
+   * Signing in from the sign-in screen should land you in the app, not back on
+   * a screen asking you to sign in.
+   *
+   * Unless there is an invitation waiting. Someone who arrived on a share link
+   * was sent here by a person, not by a menu, and the document they were sent
+   * is the only reason they signed in at all — so they go back to it rather
+   * than into a Notes folder that is still empty.
+   */
   useEffect(() => {
-    if (onSignIn && status === AUTH_STATUS.signedIn) goToModule('notes');
-  }, [onSignIn, status, goToModule]);
+    if (!onSignIn || status !== AUTH_STATUS.signedIn) return;
+    const pending = takeJoin();
+    if (pending) goToJoin(pending);
+    else goToModule('notes');
+  }, [onSignIn, status, goToModule, goToJoin]);
 
   // An app URL while signed out goes to sign-in, then on into the app. An
   // invite link is exempt: it is a URL a stranger was sent, and it explains
