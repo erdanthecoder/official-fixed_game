@@ -633,9 +633,27 @@
         setInterval(show, 5200);
       })();
 
+      var openedAt = Date.now();
+
+      /*
+       * Reveal the way out — but never early.
+       *
+       * There is a hard floor of six seconds from the moment the page opened,
+       * checked here rather than trusted to whoever scheduled the call. An
+       * error can arrive in the first hundred milliseconds of a launch that
+       * then goes on to work perfectly, and a recovery panel flashing up
+       * during a healthy start tells someone their app is broken when it is
+       * not. Six seconds is longer than a good launch and shorter than anyone
+       * can bear to stare at nothing.
+       */
       function offerWayOut() {
         var boot = document.getElementById('boot');
         if (!boot || boot.classList.contains('is-gone')) return;
+        var waited = Date.now() - openedAt;
+        if (waited < 6000) {
+          setTimeout(offerWayOut, 6000 - waited);
+          return;
+        }
         var stuck = document.getElementById('boot-stuck');
         if (stuck) stuck.hidden = false;
       }
@@ -643,10 +661,27 @@
       // Eight seconds of nothing is already too long to sit and wonder.
       setTimeout(offerWayOut, 8000);
 
-      // An uncaught error means the app is not going to start. There is no
-      // reason to make anyone wait out the timer to be told so.
-      window.addEventListener('error', offerWayOut);
-      window.addEventListener('unhandledrejection', offerWayOut);
+      /*
+       * An uncaught error usually means the app is not going to start, and
+       * there is no reason to make anyone wait out the timer to be told so.
+       *
+       * Usually. Not always: a single stray rejection from a background
+       * request is survivable, and this was firing on those — the recovery
+       * panel appeared within a second of a perfectly healthy launch, which
+       * makes a working app look broken every single time it opens. Caught
+       * while filming it, of all things.
+       *
+       * So an error only shortens the wait rather than ending it. If the app
+       * mounts in the meantime the panel never appears, because offerWayOut
+       * checks that first.
+       */
+      var hurryUp = function () {
+        // offerWayOut enforces the floor itself, so this only shortens the
+        // wait from eight seconds to six rather than skipping it.
+        setTimeout(offerWayOut, 2500);
+      };
+      window.addEventListener('error', hurryUp);
+      window.addEventListener('unhandledrejection', hurryUp);
 
       document.getElementById('boot-retry').addEventListener('click', function () {
         var done = function () {
