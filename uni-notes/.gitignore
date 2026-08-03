@@ -1,5 +1,10 @@
 node_modules/
 dist/
+# Throwaway builds: dist-local is the app with Firebase switched off for
+# browser testing, dist-demo is the copy the trailer was filmed against. Both
+# are output, both get rebuilt on demand, neither belongs in the history.
+dist-local/
+dist-demo/
 *.log
 .DS_Store
 
