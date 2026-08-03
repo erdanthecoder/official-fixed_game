@@ -14,7 +14,7 @@ const en = [
   'In Sheets, start a cell with = to write a formula. Try =SUM(B2:B8).',
   'Press F2 to edit a cell without wiping what is already in it.',
   'Reloading is safe. Anything you typed is written down before it can be lost.',
-  'Share a document from UniSave and the other person edits the same copy — no versions flying about.',
+  'Share a document and the other person edits the same copy — no versions flying about.',
   'Invite someone as a viewer when you want an opinion but not an editor.',
   'Canvas is quicker than Notes when the shape of the idea matters more than the words.',
   'Deadlines and tuition change every year. Check them on the university’s own site.',
@@ -33,9 +33,9 @@ const ru = [
   'В Таблицах начните ячейку с =, чтобы написать формулу. Попробуйте =SUM(B2:B8).',
   'Нажмите F2, чтобы изменить ячейку, не стирая её содержимое.',
   'Перезагружать безопасно. Всё, что вы напечатали, записывается заранее.',
-  'Поделитесь документом через UniSave — вы будете править одну и ту же копию.',
+  'Поделитесь документом — вы будете править одну и ту же копию.',
   'Приглашайте как «читателя», если нужен совет, но не соавтор.',
-  'Спрашивайте у ИИ, почему абзац слабый, а не «перепиши». Так вы научитесь большему.',
+  'Холст быстрее Заметок, когда важнее форма мысли, а не слова.',
   'Сроки и стоимость меняются каждый год. Проверяйте на сайте самого вуза.',
   'Карточки работают лучше короткими ежедневными подходами, чем одним вечером.',
   'В режиме показа: стрелки или пробел — вперёд, Esc — выйти.',
@@ -52,9 +52,9 @@ const ky = [
   'Таблицаларда уячаны = менен баштаңыз. =SUM(B2:B8) сынап көрүңүз.',
   'Уячанын ичиндегисин өчүрбөй өзгөртүү үчүн F2 басыңыз.',
   'Кайра жүктөө коопсуз. Жазганыңыз жоголордон мурун сакталат.',
-  'UniSave аркылуу документти бөлүшсөңүз, экөөңүз бир эле көчүрмөнү оңдойсуз.',
+  'Документти бөлүшсөңүз, экөөңүз бир эле көчүрмөнү оңдойсуз.',
   'Кеңеш керек, бирок кошумча автор керек болбосо — «окуучу» катары чакырыңыз.',
-  'ИИден абзац эмне үчүн начар экенин сураңыз, «кайра жаз» дебеңиз. Көбүрөөк үйрөнөсүз.',
+  'Ойдун формасы сөздөн маанилүү болсо, Жазуудан көрө Кенеп ыңгайлуу.',
   'Мөөнөт жана баа жыл сайын өзгөрөт. Вуздун өз сайтынан текшериңиз.',
   'Карточкалар күн сайын кыска убакытта жакшы иштейт, бир кечте эмес.',
   'Көрсөтүү режиминде: жебелер же боштук — алдыга, Esc — чыгуу.',
@@ -68,12 +68,36 @@ const ky = [
 
 const TIPS = { en, ru, ky };
 
-export function tipsFor(language) {
-  return TIPS[language] ?? TIPS.en;
+/*
+ * Tips that need a keyboard.
+ *
+ * Half of these teach a shortcut, which is useful on a laptop and quietly
+ * insulting on a tablet: telling someone with no keyboard to press Ctrl+B is
+ * teaching them a thing they cannot do, on the one screen they have to sit and
+ * read. This app is mostly used on a tablet.
+ *
+ * Detected from the text rather than marked by hand, so a tip added next year
+ * is filtered without anyone remembering to flag it — and so the three
+ * languages stay in step without depending on their lists lining up, which
+ * they do not.
+ */
+const NEEDS_KEYBOARD =
+  /ctrl|cmd|⌘|\bF2\b|\bEsc\b|\bTab\b|arrow keys|space to move|стрелк|клавиш|пробел|жебелер|боштук/i;
+
+/** Is this device driven by a finger? */
+export function isTouch() {
+  return typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches === true;
+}
+
+export function tipsFor(language, { touch = false } = {}) {
+  const list = TIPS[language] ?? TIPS.en;
+  const usable = touch ? list.filter((tip) => !NEEDS_KEYBOARD.test(tip)) : list;
+  // Never return nothing, however aggressive the filter turns out to be.
+  return usable.length ? usable : list;
 }
 
 /** A tip chosen from the list, wrapping round rather than repeating at random. */
-export function tipAt(language, index) {
-  const list = tipsFor(language);
+export function tipAt(language, index, options) {
+  const list = tipsFor(language, options);
   return list[((index % list.length) + list.length) % list.length];
 }

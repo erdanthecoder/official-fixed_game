@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { tipAt } from '../i18n/tips.js';
+import { isTouch, tipAt } from '../i18n/tips.js';
 import { useT } from '../i18n/index.jsx';
 
 /**
@@ -11,6 +11,9 @@ import { useT } from '../i18n/index.jsx';
  */
 export default function TipLine({ interval = 7000, className = '' }) {
   const { t, language } = useT();
+  // Read once: a device does not grow a keyboard mid-session, and re-checking
+  // on every render would be a media query per tip.
+  const [touch] = useState(isTouch);
   const [index, setIndex] = useState(() => Math.floor(Math.random() * 64));
 
   useEffect(() => {
@@ -25,7 +28,7 @@ export default function TipLine({ interval = 7000, className = '' }) {
     <p className={`tip-line ${className}`} aria-live="polite">
       <span className="tip-label">{t('common.tip')}</span>
       <span className="tip-text" key={index}>
-        {tipAt(language, index)}
+        {tipAt(language, index, { touch })}
       </span>
     </p>
   );
