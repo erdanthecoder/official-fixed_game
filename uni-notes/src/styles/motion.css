@@ -761,3 +761,104 @@ html {
     transform: translateY(-10px) scale(1.015);
   }
 }
+
+/* --------------------------- opening a document ---------------------------
+ *
+ * A document used to appear all at once, complete, as though it had been
+ * sitting there the whole time. It reads as a page load rather than as opening
+ * something. This gives it an order: the card you tapped grows into the
+ * surface (see lib/morph.js), the header settles down onto it, the title and
+ * the actions follow, and the toolbar fills in left to right.
+ *
+ * Nothing here animates opacity. A stalled animation with `both` fill would
+ * leave a document permanently invisible, which has happened here before; a
+ * stalled transform leaves it a few pixels out of place and readable. The
+ * whole sequence is under 400ms, because this is the moment somebody wants to
+ * start typing, not watch something.
+ */
+
+.editor-header {
+  animation: header-settle var(--t-base) var(--ease-enter) both;
+}
+
+@keyframes header-settle {
+  from {
+    transform: translateY(-8px);
+  }
+}
+
+.editor-title-block {
+  animation: rise-small var(--t-base) var(--ease-enter) 50ms both;
+}
+
+.editor-header-actions {
+  animation: rise-small var(--t-base) var(--ease-enter) 90ms both;
+}
+
+@keyframes rise-small {
+  from {
+    transform: translateY(5px);
+  }
+}
+
+/* The writing surface, whichever kind of document it turns out to be. */
+.editor-paper,
+.sheet-grid,
+.deck-main,
+.plan-body,
+.board-view {
+  animation: surface-rise var(--t-slow) var(--ease-enter) 40ms both;
+}
+
+@keyframes surface-rise {
+  from {
+    transform: translateY(12px) scale(0.994);
+  }
+}
+
+/*
+ * The toolbar fills in from the left, one group at a time. Groups rather than
+ * buttons: twelve buttons arriving one by one is a queue, four groups is a
+ * gesture.
+ */
+.toolbar .tool-group,
+.deck-toolbar > * {
+  animation: tool-in var(--t-base) var(--spring-soft) both;
+}
+
+.toolbar .tool-group:nth-child(1),
+.deck-toolbar > *:nth-child(1) { animation-delay: 90ms; }
+.toolbar .tool-group:nth-child(2),
+.deck-toolbar > *:nth-child(2) { animation-delay: 125ms; }
+.toolbar .tool-group:nth-child(3),
+.deck-toolbar > *:nth-child(3) { animation-delay: 160ms; }
+.toolbar .tool-group:nth-child(n + 4),
+.deck-toolbar > *:nth-child(n + 4) { animation-delay: 195ms; }
+
+@keyframes tool-in {
+  from {
+    transform: translateY(6px) scale(0.97);
+  }
+}
+
+/*
+ * Opening is worth animating. Typing in the thing you opened is not — a
+ * toolbar that re-runs its entrance every time React rerenders the editor
+ * would be unbearable. These all use `both` fill and no infinite repeat, so
+ * they play once per mount, and the editors mount once per document.
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  .editor-header,
+  .editor-title-block,
+  .editor-header-actions,
+  .editor-paper,
+  .sheet-grid,
+  .deck-main,
+  .plan-body,
+  .board-view,
+  .toolbar .tool-group,
+  .deck-toolbar > * {
+    animation: none;
+  }
+}

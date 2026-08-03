@@ -34,15 +34,21 @@
   </defs>
 
   <rect width="64" height="64" rx="14.5" fill="#F4E9D8" />
-  <rect x="3.5" y="3.5" width="57" height="57" rx="11.5" fill="none" stroke="#A8342A" stroke-width="1.5" />
+  <!--
+    Two keylines, not one. A shyrdak is bound at the edge: a fine line right at
+    the hem and a heavier band inside it. One line reads as a box drawn round a
+    letter; two read as a panel that was made.
+  -->
+  <rect x="2.6" y="2.6" width="58.8" height="58.8" rx="12.4" fill="none" stroke="#A8342A" stroke-width="1.1" />
+  <rect x="5.6" y="5.6" width="52.8" height="52.8" rx="10" fill="none" stroke="#A8342A" stroke-width="2.2" opacity="0.9" />
 
-  <g id="kadam-ornament" fill="none" stroke-linecap="round" stroke-width="3.2">
-    <g transform="translate(32 11.5) scale(0.38) translate(-24 -11)" stroke="#A8342A">
+  <g id="kadam-ornament" fill="none" stroke-linecap="round" stroke-width="3">
+    <g transform="translate(32 12.5) scale(0.34) translate(-24 -11)" stroke="#A8342A">
       <use href="#kadam-horn" />
       <use href="#kadam-horn" transform="translate(48 0) scale(-1 1)" />
       <path d="M22 22 L26 22" />
     </g>
-    <g transform="translate(32 52.5) rotate(180) scale(0.38) translate(-24 -11)" stroke="#C9922B">
+    <g transform="translate(32 51.5) rotate(180) scale(0.34) translate(-24 -11)" stroke="#C9922B">
       <use href="#kadam-horn" />
       <use href="#kadam-horn" transform="translate(48 0) scale(-1 1)" />
       <path d="M22 22 L26 22" />

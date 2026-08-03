@@ -7,7 +7,7 @@
  * enough to sit on the row itself.
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import ConfirmDialog from '../ui/ConfirmDialog.jsx';
 import Icon from '../ui/Icon.jsx';
 import SaveIndicator from '../SaveIndicator.jsx';
@@ -22,6 +22,7 @@ import {
   taskState,
 } from '../../lib/templates/tasks.js';
 import { useData } from '../../context/DataContext.jsx';
+import { useMorphTarget } from '../../lib/morph.js';
 import { useT } from '../../i18n/index.jsx';
 
 const FILTERS = [
@@ -171,6 +172,10 @@ export default function PlanEditor({ planId, onBack }) {
   const { t } = useT();
   const { plans, update, remove, mayEdit } = useData();
 
+  // The card the reader tapped grows into this page.
+  const bodyRef = useRef(null);
+  useMorphTarget(bodyRef);
+
   const plan = plans.find((item) => item.id === planId);
   const editable = mayEdit(plan);
 
@@ -266,7 +271,7 @@ export default function PlanEditor({ planId, onBack }) {
         </div>
       </header>
 
-      <div className="plan-body">
+      <div className="plan-body" ref={bodyRef}>
         <div className="plan-summary">
           <div className="plan-progress" role="img" aria-label={t('tasks.percentDone', { percent: stats.percent })}>
             <span style={{ width: `${stats.percent}%` }} />

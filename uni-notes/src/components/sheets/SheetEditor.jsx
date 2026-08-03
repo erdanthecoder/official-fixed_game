@@ -14,6 +14,7 @@ import {
 } from '../../lib/formula.js';
 import { DEFAULT_COLS, DEFAULT_ROWS } from '../../lib/templates/sheets.js';
 import { useData } from '../../context/DataContext.jsx';
+import { useMorphTarget } from '../../lib/morph.js';
 import { useT } from '../../i18n/index.jsx';
 
 const MAX_ROWS = 200;
@@ -32,6 +33,9 @@ export default function SheetEditor({ sheetId, onBack }) {
 
   const sheet = sheets.find((item) => item.id === sheetId);
 
+  // The card the reader tapped grows into this page.
+  const sheetRef = useRef(null);
+  useMorphTarget(sheetRef);
   const [selected, setSelected] = useState({ row: 0, col: 0 });
   const [draft, setDraft] = useState(null); // null = not editing
   // Where the in-progress edit is being typed: 'cell' or 'formula'. Both write
@@ -417,7 +421,7 @@ export default function SheetEditor({ sheetId, onBack }) {
         aria-label={sheet.title || t('common.untitled')}
         onKeyDown={onGridKeyDown}
       >
-        <table className="sheet-grid">
+        <table className="sheet-grid" ref={sheetRef}>
           <thead>
             <tr>
               <th className="sheet-corner" aria-hidden="true" />

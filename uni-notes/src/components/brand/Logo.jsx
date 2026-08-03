@@ -85,7 +85,7 @@ function HornPair({ x, y, rotate = 0, scale = 0.38, colour = RED }) {
       transform={`translate(${x} ${y}) rotate(${rotate}) scale(${scale}) translate(-24 -11)`}
       fill="none"
       stroke={colour}
-      strokeWidth="3.2"
+      strokeWidth="3"
       strokeLinecap="round"
     >
       <path d={HORN} />
@@ -142,23 +142,39 @@ export function LogoMark({ size = 40, tone = 'tile', className = '' }) {
       {onTile ? (
         <>
           <rect width="64" height="64" rx="14.5" fill={CREAM} />
+          {/*
+            Two keylines, not one. A shyrdak is bound at the edge — a fine line
+            right at the hem and a heavier band inside it. One line reads as a
+            box drawn round a letter; two read as a panel that was made.
+          */}
           <rect
-            x="3.5"
-            y="3.5"
-            width="57"
-            height="57"
-            rx="11.5"
+            x="2.6"
+            y="2.6"
+            width="58.8"
+            height="58.8"
+            rx="12.4"
             fill="none"
             stroke={RED}
-            strokeWidth="1.5"
+            strokeWidth="1.1"
+          />
+          <rect
+            x="5.6"
+            y="5.6"
+            width="52.8"
+            height="52.8"
+            rx="10"
+            fill="none"
+            stroke={RED}
+            strokeWidth="2.2"
+            opacity="0.9"
           />
         </>
       ) : null}
 
       {ornate ? (
         <>
-          <HornPair x={32} y={11.5} colour={RED} />
-          <HornPair x={32} y={52.5} rotate={180} colour={onTile ? GOLD : RED} />
+          <HornPair x={32} y={12.5} scale={0.34} colour={RED} />
+          <HornPair x={32} y={51.5} rotate={180} scale={0.34} colour={onTile ? GOLD : RED} />
         </>
       ) : null}
 

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import Icon from '../ui/Icon.jsx';
 import ConfirmDialog from '../ui/ConfirmDialog.jsx';
 import PresentMode from './PresentMode.jsx';
@@ -8,6 +8,7 @@ import ShareDialog from '../unisave/ShareDialog.jsx';
 import Facepile from '../collab/Facepile.jsx';
 import { LAYOUTS, THEMES, makeSlide } from '../../lib/templates/slides.js';
 import { useData } from '../../context/DataContext.jsx';
+import { useMorphTarget } from '../../lib/morph.js';
 import { useT } from '../../i18n/index.jsx';
 
 /** Which text fields each layout actually shows, so the editor matches the slide. */
@@ -39,6 +40,9 @@ export default function DeckEditor({ deckId, onBack }) {
   const deck = presentations.find((item) => item.id === deckId);
   const slides = deck?.slides ?? [];
 
+  // The card the reader tapped grows into this page.
+  const stageRef = useRef(null);
+  useMorphTarget(stageRef);
   const [index, setIndex] = useState(0);
   const [presenting, setPresenting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -185,7 +189,7 @@ export default function DeckEditor({ deckId, onBack }) {
           </button>
         </aside>
 
-        <div className="deck-main">
+        <div className="deck-main" ref={stageRef}>
           <div className="deck-toolbar" role="toolbar" aria-label={t('slides.layout')}>
             <label className="select-field">
               <span className="sr-only">{t('slides.layout')}</span>
