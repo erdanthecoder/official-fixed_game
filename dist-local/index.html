@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Learning Islands — 3D Adventure World</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./js/vendor/three.module.js"
+    }
+  }
+  </script>
+  <script type="module" crossorigin src="/assets/index-DMZiIqsM.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-B8SbaPIc.css">
+</head>
+<body>
+  <!-- ================= LOADING ================= -->
+  <div id="loading" class="screen">
+    <div class="loader-box">
+      <div class="spinner"></div>
+      <div id="loadingText">Loading the islands…</div>
+    </div>
+  </div>
+
+  <!-- ================= LANGUAGE MENU ================= -->
+  <div id="languageMenu" class="screen hidden">
+    <div class="panel center">
+      <h1 class="title">🌍 Learning Islands</h1>
+      <p class="subtitle">Choose your language · Выбери язык</p>
+      <div class="lang-buttons">
+        <button class="big-btn" data-lang="en">🇬🇧 English</button>
+        <button class="big-btn" data-lang="ru">🇷🇺 Русский</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ROLE / LOGIN MENU ================= -->
+  <div id="roleMenu" class="screen hidden">
+    <div class="panel center">
+      <h1 class="title" data-i18n="whoAreYou">Who are you?</h1>
+      <input id="playerName" class="text-input" maxlength="16" data-i18n-ph="enterName" placeholder="Enter your name" />
+      <div class="role-buttons">
+        <button class="big-btn" id="roleStudent" data-i18n="iAmStudent">🎒 I am a Student</button>
+        <button class="big-btn teacher" id="roleTeacher" data-i18n="iAmTeacher">🍎 I am a Teacher</button>
+      </div>
+      <div id="teacherCode" class="hidden">
+        <input id="teacherPass" class="text-input" type="password" data-i18n-ph="teacherCode" placeholder="Teacher code" />
+        <small class="hint" data-i18n="teacherHint">Hint: the code is teach123</small>
+      </div>
+      <button class="big-btn start" id="startGame" data-i18n="enterWorld">▶ Enter the World</button>
+      <button class="link-btn" id="backToLang" data-i18n="changeLang">↩ Change language</button>
+    </div>
+  </div>
+
+  <!-- ================= GAME CANVAS ================= -->
+  <canvas id="game"></canvas>
+
+  <!-- ================= HUD ================= -->
+  <div id="hud" class="hidden">
+    <div id="topbar">
+      <div class="pill" id="playerPill">🎒 <span id="hudName">Player</span></div>
+      <div class="pill" id="starPill">⭐ <span id="hudStars">0</span> <span class="muted" data-i18n="stars">stars</span></div>
+      <div class="pill" id="pointPill">🏆 <span id="hudPoints">0</span> <span class="muted" data-i18n="points">points</span></div>
+      <div class="pill clickable" id="mapBtn">🗺 <span data-i18n="map">Map</span></div>
+      <div class="pill clickable teacher-only hidden" id="teacherBtn">🍎 <span data-i18n="teacherPanel">Teacher</span></div>
+      <div class="pill clickable" id="menuBtn">☰</div>
+    </div>
+    <div id="hint-banner" class="hidden"></div>
+    <div id="interact-prompt" class="hidden"></div>
+  </div>
+
+  <!-- On-screen touch controls -->
+  <div id="touch-controls" class="hidden">
+    <div id="joystick"><div id="stick"></div></div>
+    <button id="jumpBtn" class="touch-btn">⤒</button>
+  </div>
+
+  <!-- Announcement banner -->
+  <div id="announcement" class="hidden"></div>
+
+  <!-- ================= MODAL HOST ================= -->
+  <div id="modal" class="screen hidden">
+    <div class="panel" id="modalPanel"></div>
+  </div>
+
+  <!-- ================= MAP OVERLAY ================= -->
+  <div id="mapOverlay" class="screen hidden">
+    <div class="panel">
+      <h2 data-i18n="worldMap">World Map — Fast Travel</h2>
+      <div id="mapList" class="map-grid"></div>
+      <button class="big-btn" id="closeMap" data-i18n="close">Close</button>
+    </div>
+  </div>
+
+</body>
+</html>

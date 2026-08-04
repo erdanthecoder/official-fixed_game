@@ -5,6 +5,7 @@ import CanvasModule from './components/canvas/CanvasModule.jsx';
 import JoinPage from './components/JoinPage.jsx';
 import Skeleton from './components/shared/Skeleton.jsx';
 import LandingPage from './components/landing/LandingPage.jsx';
+import CalendarModule from './components/calendar/CalendarModule.jsx';
 import LanguagesModule from './components/languages/LanguagesModule.jsx';
 import NotesModule from './components/notes/NotesModule.jsx';
 import AppsPage from './components/apps/AppsPage.jsx';
@@ -337,6 +338,8 @@ export default function App() {
             onOpen={(planId) => goToItem('tasks', planId)}
             onBack={() => goToModule('tasks')}
           />
+        ) : module === 'calendar' ? (
+          <CalendarModule onOpenPlan={(planId) => goToItem('tasks', planId)} />
         ) : module === 'unisave' ? (
           <UniSaveModule onOpen={(target, itemId) => goToItem(target, itemId)} />
         ) : module === 'languages' ? (

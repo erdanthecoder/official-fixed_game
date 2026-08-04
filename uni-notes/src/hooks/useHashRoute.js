@@ -29,6 +29,7 @@ export const MODULES = [
   'slides',
   'canvas',
   'tasks',
+  'calendar',
   'unisave',
   'languages',
   'apps',

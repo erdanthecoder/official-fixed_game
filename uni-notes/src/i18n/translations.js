@@ -23,6 +23,14 @@ const en = {
     people: '{count} with access',
     manageAccess: 'Share and manage access',
   },
+  calendar: {
+    subtitle: '{count} still to do',
+    previous: 'Previous month',
+    next: 'Next month',
+    today: 'Today',
+    more: '+{count} more',
+    empty: 'No deadlines yet. Add dates to your tasks and they will appear here.',
+  },
   common: {
     share: 'Share',
     appName: 'Kadam',
@@ -110,6 +118,8 @@ const en = {
     streakHint: 'Keep it going — a few words is enough',
   },
   nav: {
+    calendar: 'Calendar',
+    calendarHint: 'Every deadline, on a month',
     unisave: 'All files',
     unisaveHint: 'Everything you have made',
     switcher: 'Kadam apps',
@@ -773,6 +783,14 @@ const ru = {
     people: 'С доступом: {count}',
     manageAccess: 'Поделиться и настроить доступ',
   },
+  calendar: {
+    subtitle: 'Осталось: {count}',
+    previous: 'Предыдущий месяц',
+    next: 'Следующий месяц',
+    today: 'Сегодня',
+    more: 'ещё {count}',
+    empty: 'Сроков пока нет. Поставьте даты в задачах — они появятся здесь.',
+  },
   common: {
     share: 'Поделиться',
     appName: 'Кадам',
@@ -860,6 +878,8 @@ const ru = {
     streakHint: 'Не останавливайтесь — хватит нескольких слов',
   },
   nav: {
+    calendar: 'Календарь',
+    calendarHint: 'Все сроки на одном месяце',
     unisave: 'Все файлы',
     unisaveHint: 'Всё, что вы создали',
     switcher: 'Приложения Кадам',
@@ -1523,6 +1543,14 @@ const ky = {
     people: 'Кире алат: {count}',
     manageAccess: 'Бөлүшүү жана уруксатты тескөө',
   },
+  calendar: {
+    subtitle: 'Калганы: {count}',
+    previous: 'Мурунку ай',
+    next: 'Кийинки ай',
+    today: 'Бүгүн',
+    more: 'дагы {count}',
+    empty: 'Мөөнөттөр жок. Тапшырмаларга күн койсоңуз, ушул жерде чыгат.',
+  },
   common: {
     share: 'Бөлүшүү',
     appName: 'Кадам',
@@ -1610,6 +1638,8 @@ const ky = {
     streakHint: 'Токтобоңуз — бир нече сөз жетиштүү',
   },
   nav: {
+    calendar: 'Календарь',
+    calendarHint: 'Бардык мөөнөттөр бир айда',
     unisave: 'Бардык файлдар',
     unisaveHint: 'Сиз түзгөн нерселердин баары',
     switcher: 'Кадам колдонмолору',
