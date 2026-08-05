@@ -100,10 +100,14 @@ export default function CalendarModule({ onOpenPlan }) {
 
   // Weekday initials straight from the browser's own locale data, so Russian
   // and Kyrgyz get theirs without a table to maintain.
-  const weekdays = useMemo(() => Array.from({ length: 7 }, (_, i) =>
-      new Date(2024, 0, 1 + i).toLocaleDateString(language, { weekday: 'short' }),
-    ).map((label) => label.replace('.', ''));
-  }, [language]);
+  const weekdays = useMemo(
+    () =>
+      // 1 January 2024 was a Monday, which is where the week starts here.
+      Array.from({ length: 7 }, (_, i) =>
+        new Date(2024, 0, 1 + i).toLocaleDateString(language, { weekday: 'short' }),
+      ).map((label) => label.replace('.', '')),
+    [language],
+  );
 
   const step = (months) =>
     setCursor((c) => new Date(c.getFullYear(), c.getMonth() + months, 1));
