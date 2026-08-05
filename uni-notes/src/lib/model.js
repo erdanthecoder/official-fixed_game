@@ -16,6 +16,7 @@ export const SHARED_KINDS = {
   decks: 'vocab',
   boards: 'board',
   plans: 'plan',
+  shortlists: 'shortlist',
 };
 
 /** Reverse of the above, for splitting one query result into per-module lists. */

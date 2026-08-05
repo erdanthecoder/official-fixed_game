@@ -427,6 +427,7 @@ export function DataProvider({ children }) {
       vocabDecks: merged.decks ?? [],
       boards: merged.boards ?? [],
       plans: merged.plans ?? [],
+      shortlists: merged.shortlists ?? [],
       prefs,
       ready,
       saveStatus,

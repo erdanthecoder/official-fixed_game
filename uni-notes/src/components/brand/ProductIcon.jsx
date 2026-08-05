@@ -18,6 +18,7 @@ export const PRODUCTS = {
   canvas: { colour: '#0F7B6C', soft: '#DFF1EE', labelKey: 'nav.canvas', hintKey: 'nav.canvasHint' },
   tasks: { colour: '#C5372C', soft: '#FBE9E7', labelKey: 'nav.tasks', hintKey: 'nav.tasksHint' },
   calendar: { colour: '#8430CE', soft: '#F3E8FD', labelKey: 'nav.calendar', hintKey: 'nav.calendarHint' },
+  shortlist: { colour: '#0B7285', soft: '#DEF0F4', labelKey: 'nav.shortlist', hintKey: 'nav.shortlistHint' },
   unisave: { colour: '#0F7B6C', soft: '#DFF1EE', labelKey: 'nav.unisave', hintKey: 'nav.unisaveHint' },
   languages: { colour: '#C5372C', soft: '#FBE9E7', labelKey: 'nav.languages', hintKey: 'nav.languagesHint' },
   home: { colour: '#1A73E8', soft: '#E8F0FE', labelKey: 'nav.home', hintKey: 'nav.homeHint' },
@@ -39,6 +40,18 @@ function Glyph({ product, colour }) {
           <rect x="4" y="4.5" width="16" height="15" rx="2" fill="none" stroke={colour} strokeWidth="1.8" />
           <path d="M4 9.5h16" stroke={colour} strokeWidth="1.8" />
           <path d="M4 14.5h16M9.7 9.5v10M14.3 9.5v10" stroke={colour} strokeWidth="1.3" opacity="0.75" />
+        </>
+      );
+
+    case 'shortlist':
+      // A ranked list: three bars, the top one starred.
+      return (
+        <>
+          <path d="M4.6 7.5h9M4.6 12h12M4.6 16.5h7" stroke={colour} strokeWidth="1.8" strokeLinecap="round" />
+          <path
+            d="M18 4.4l1.05 2.13 2.35.34-1.7 1.66.4 2.34L18 9.8l-2.1 1.06.4-2.34-1.7-1.66 2.35-.34z"
+            fill={colour}
+          />
         </>
       );
 

@@ -30,6 +30,7 @@ export const MODULES = [
   'canvas',
   'tasks',
   'calendar',
+  'shortlist',
   'unisave',
   'languages',
   'apps',

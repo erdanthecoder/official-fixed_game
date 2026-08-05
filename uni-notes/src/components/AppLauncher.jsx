@@ -30,6 +30,7 @@ export const LAUNCHER_APPS = [
   'canvas',
   'tasks',
   'calendar',
+  'shortlist',
   'unisave',
   'languages',
   'apps',
