@@ -168,6 +168,20 @@ export const SHORTCUTS = [
 
 export const GROUPS = ['general', 'writing', 'paragraph', 'sheet'];
 
+/**
+ * The printed key for a command, for putting on the button that runs it.
+ *
+ * Nobody reads a shortcuts dialog before using an app, so a shortcut only gets
+ * discovered where the button already is. Deriving the hint from this list
+ * rather than typing it into each label means it is right on a Mac without a
+ * second set of strings, and cannot drift when a binding changes — the undo
+ * button used to say "(Ctrl+Z)" in hand-written text, on every platform.
+ */
+export function hintFor(command) {
+  const found = SHORTCUTS.find((item) => item.command === command);
+  return found ? label(found.keys[0]) : null;
+}
+
 /** The one that matches, or nothing. Used by the editor's key handler. */
 export function findCommand(event) {
   return SHORTCUTS.find(

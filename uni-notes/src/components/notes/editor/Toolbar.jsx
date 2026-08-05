@@ -1,6 +1,7 @@
 import ColorMenu from './ColorMenu.jsx';
 import LinkButton from './LinkButton.jsx';
 import Icon from '../../ui/Icon.jsx';
+import { hintFor } from '../../../lib/shortcuts.js';
 import TemplateMenu from './TemplateMenu.jsx';
 import { useT } from '../../../i18n/index.jsx';
 
@@ -46,13 +47,22 @@ export default function Toolbar({ editorRef, formatState, onInsertTemplate }) {
     editorRef.current?.exec(command, value);
   };
 
-  const toolButton = (key, label, glyph, command, { isActive = false, className = '' } = {}) => (
+  /*
+   * Every button that has a keyboard shortcut says so, taken from the same list
+   * the handler reads. A shortcut nobody can find is a shortcut nobody uses,
+   * and the only place anyone looks is the button itself.
+   */
+  const toolButton = (key, label, glyph, command, { isActive = false, className = '' } = {}) => {
+    const hint = hintFor(command);
+    const full = hint ? `${label} (${hint})` : label;
+
+    return (
     <button
       key={key}
       type="button"
       className={`tool-button ${isActive ? 'is-active' : ''} ${className}`}
-      title={label}
-      aria-label={label}
+      title={full}
+      aria-label={full}
       aria-pressed={isActive}
       onMouseDown={(event) => {
         event.preventDefault();
@@ -61,13 +71,14 @@ export default function Toolbar({ editorRef, formatState, onInsertTemplate }) {
     >
       <span aria-hidden="true">{glyph}</span>
     </button>
-  );
+    );
+  };
 
   return (
     <div className="toolbar" role="toolbar" aria-label={t('notes.textStyle')}>
       <div className="tool-group">
-        {toolButton('undo', `${t('notes.undo')} (Ctrl+Z)`, <Icon name="undo" size={17} />, 'undo')}
-        {toolButton('redo', `${t('notes.redo')} (Ctrl+Shift+Z)`, <Icon name="redo" size={17} />, 'redo')}
+        {toolButton('undo', t('notes.undo'), <Icon name="undo" size={17} />, 'undo')}
+        {toolButton('redo', t('notes.redo'), <Icon name="redo" size={17} />, 'redo')}
       </div>
 
       <div className="tool-group">
@@ -87,15 +98,15 @@ export default function Toolbar({ editorRef, formatState, onInsertTemplate }) {
       </div>
 
       <div className="tool-group">
-        {toolButton('bold', `${t('notes.bold')} (Ctrl+B)`, <Icon name="bold" size={17} />, 'bold', {
+        {toolButton('bold', t('notes.bold'), <Icon name="bold" size={17} />, 'bold', {
           isActive: formatState.bold,
         })}
-        {toolButton('italic', `${t('notes.italic')} (Ctrl+I)`, <Icon name="italic" size={17} />, 'italic', {
+        {toolButton('italic', t('notes.italic'), <Icon name="italic" size={17} />, 'italic', {
           isActive: formatState.italic,
         })}
         {toolButton(
           'underline',
-          `${t('notes.underline')} (Ctrl+U)`,
+          t('notes.underline'),
           <Icon name="underline" size={17} />,
           'underline',
           { isActive: formatState.underline },
