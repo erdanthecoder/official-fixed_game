@@ -862,3 +862,34 @@ html {
     animation: none;
   }
 }
+
+/* ------------------------------ arriving days -----------------------------
+ *
+ * The month builds itself rather than appearing complete. Six rows of seven
+ * arriving at once is a flash; arriving in a diagonal sweep reads as the month
+ * being laid out, and takes barely longer.
+ *
+ * The delay is driven by --i, set per cell in the component, so the sweep runs
+ * from the first of the month rather than from the top-left of the grid.
+ * Transform only, as everywhere else — a stalled fade would leave a month
+ * permanently blank.
+ */
+.calendar-day {
+  animation: day-in 380ms var(--ease-enter) both;
+  animation-delay: calc(var(--i, 0) * 9ms);
+}
+
+@keyframes day-in {
+  from {
+    transform: translateY(7px) scale(0.985);
+  }
+}
+
+/* Paging is a new month, not a redraw: the grid is keyed on the month in the
+   component, so React remounts the cells and the sweep plays again. */
+
+@media (prefers-reduced-motion: reduce) {
+  .calendar-day {
+    animation: none;
+  }
+}

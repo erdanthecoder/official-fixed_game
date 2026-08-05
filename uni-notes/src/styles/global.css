@@ -2556,19 +2556,26 @@ body {
   margin-left: auto;
 }
 
+/*
+ * Gaps, not hairlines.
+ *
+ * The first version drew the grid the way a spreadsheet does: one-pixel rules
+ * between flush cells, which is the cheapest thing to build and reads as
+ * something engineered rather than designed. Separating the days with real
+ * space and rounding each one turns the same information into a set of cards.
+ */
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 1px;
-  background: var(--border-soft);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius);
-  overflow: hidden;
+  gap: 6px;
+  padding: 6px;
+  background: var(--surface-alt);
+  border-radius: 18px;
 }
 
 .calendar-weekday {
-  padding: 9px 8px;
-  background: var(--surface-alt);
+  padding: 4px 8px 8px;
+  background: transparent;
   color: var(--text-muted);
   font-size: 0.72rem;
   font-weight: 700;
@@ -2587,15 +2594,30 @@ body {
      what "+2 more" is for. */
   height: 104px;
   overflow: hidden;
-  padding: 6px 6px 8px;
+  padding: 7px 7px 9px;
+  border-radius: 12px;
   background: var(--surface);
+  box-shadow: 0 1px 2px rgba(var(--shadow-rgb), 0.05);
+  transition: box-shadow var(--t-base) var(--ease-standard),
+    transform var(--t-base) var(--spring-soft);
+}
+
+@media (hover: hover) {
+  .calendar-day:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(var(--shadow-rgb), 0.1);
+  }
 }
 
 /* Days from the months either side stay visible — a week that runs across the
    boundary is still a week — but they recede. */
+/* Days from the months either side stay visible — a week that runs across the
+   boundary is still a week — but they recede into the tray rather than sitting
+   on it as cards of their own. */
 .calendar-day.is-outside {
-  background: var(--surface-alt);
-  opacity: 0.55;
+  background: transparent;
+  box-shadow: none;
+  opacity: 0.45;
 }
 
 .calendar-date {
@@ -2614,9 +2636,14 @@ body {
   color: var(--on-accent);
 }
 
+/* A day with something due is worth spotting from across the grid — but as a
+   lift out of the page, not a bar stuck across the top of it. */
 .calendar-day.has-due {
-  /* A day with something due is worth spotting from across the grid. */
-  box-shadow: inset 0 2px 0 var(--purple-ink);
+  box-shadow: 0 2px 6px rgba(var(--shadow-rgb), 0.08), inset 0 0 0 1px var(--accent-line);
+}
+
+.calendar-day.is-today {
+  box-shadow: 0 4px 16px rgba(var(--shadow-rgb), 0.12), inset 0 0 0 2px var(--accent);
 }
 
 .calendar-items {
@@ -2681,6 +2708,12 @@ body {
   .calendar-day {
     height: 58px;
     padding: 4px 3px;
+    border-radius: 9px;
+  }
+
+  .calendar-grid {
+    gap: 3px;
+    padding: 3px;
   }
 
   .calendar-item {

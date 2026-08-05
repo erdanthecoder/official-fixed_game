@@ -156,14 +156,24 @@ export default function CalendarModule({ onOpenPlan }) {
           </button>
         </header>
 
-        <div className="calendar-grid" role="grid" aria-label={monthName}>
+        {/*
+          Keyed on the month so React rebuilds the cells when you page, which
+          is what replays the sweep. Without the key the same 42 nodes are
+          reused and the animation never runs again.
+        */}
+        <div
+          className="calendar-grid"
+          role="grid"
+          aria-label={monthName}
+          key={`${cursor.getFullYear()}-${cursor.getMonth()}`}
+        >
           {weekdays.map((day) => (
             <div key={day} className="calendar-weekday" role="columnheader">
               {day}
             </div>
           ))}
 
-          {cells.map((cell) => {
+          {cells.map((cell, index) => {
             const due = byDay.get(cell.key) ?? [];
             const open = due.filter((item) => !item.done);
             const isToday = cell.key === todayKey;
@@ -172,6 +182,7 @@ export default function CalendarModule({ onOpenPlan }) {
               <div
                 key={cell.key}
                 role="gridcell"
+                style={{ '--i': index }}
                 className={[
                   'calendar-day',
                   cell.inMonth ? '' : 'is-outside',
