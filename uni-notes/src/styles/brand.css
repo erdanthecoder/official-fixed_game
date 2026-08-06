@@ -20,7 +20,7 @@
   --lake-500: #1b7fa8;
   --sun-500: #ee9134;
   --sun-300: #ffc978;
-  --page: #f7f8fa;
+  --page: #faf7f2;
 }
 
 /* --------------------------------- product -------------------------------- */
@@ -716,13 +716,13 @@
 }
 
 .preview-avatar.a {
-  background: #1a73e8;
+  background: var(--accent);
 }
 .preview-avatar.b {
   background: var(--danger-ink);
 }
 .preview-avatar.c {
-  background: #5f6368;
+  background: var(--text-muted);
 }
 
 .preview-avatar-label {
@@ -807,7 +807,7 @@
   color: var(--success-ink);
 }
 .preview-grades .g-easy {
-  color: #1a73e8;
+  color: var(--accent);
 }
 
 /* trust */

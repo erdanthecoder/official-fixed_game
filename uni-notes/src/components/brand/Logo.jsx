@@ -208,7 +208,16 @@ export function LogoMark({ size = 40, tone = 'tile', className = '' }) {
  * known size.
  */
 export function KadamWordmark({ size = 22, tone = 'ink', className = '' }) {
-  const fill = tone === 'light' ? CREAM : BLACK;
+  /*
+   * The ink tone follows the text around it rather than being the brand black.
+   *
+   * Hardcoding #1A1714 painted the name in near-black wherever it appeared,
+   * which in the dark theme is a black wordmark on a black rail — the logo was
+   * simply missing, and the sidebar looked like it had failed to load. The
+   * mark on its cream tile still uses the true black; that tile is always
+   * cream, so it always can.
+   */
+  const fill = tone === 'light' ? CREAM : 'currentColor';
 
   return (
     <svg
