@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMorphTarget } from '../../lib/morph.js';
 import Icon from '../ui/Icon.jsx';
 import ConfirmDialog from '../ui/ConfirmDialog.jsx';
@@ -8,6 +8,7 @@ import MoveDialog from '../ui/MoveDialog.jsx';
 import RichTextEditor from './editor/RichTextEditor.jsx';
 import SaveIndicator from '../SaveIndicator.jsx';
 import Toolbar from './editor/Toolbar.jsx';
+import FindReplace from './editor/FindReplace.jsx';
 import { formatRelativeDate, wordCount } from '../../lib/text.js';
 import { useData } from '../../context/DataContext.jsx';
 import { useT } from '../../i18n/index.jsx';
@@ -33,6 +34,33 @@ export default function NoteEditor({ noteId, onBack }) {
   const [formatState, setFormatState] = useState(INITIAL_FORMAT_STATE);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [finding, setFinding] = useState(false);
+
+  /*
+   * Ctrl+F opens ours instead of the browser's.
+   *
+   * Overriding a browser shortcut needs a reason, and this is the one case
+   * where it is clearly right: the browser's Find searches the whole page —
+   * sidebar, toolbar, category names — and cannot change a word once it has
+   * found it. Escape closes ours, and the browser's is still one click away in
+   * the menu.
+   */
+  useEffect(() => {
+    const onKey = (event) => {
+      const mod = event.metaKey || event.ctrlKey;
+      if (!mod) return;
+      const key = event.key.toLowerCase();
+      if (key === 'f' || key === 'h') {
+        event.preventDefault();
+        setFinding(true);
+      } else if (key === 'p') {
+        event.preventDefault();
+        window.print();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
   const [moving, setMoving] = useState(false);
 
   const note = notes.find((item) => item.id === noteId);
@@ -120,6 +148,29 @@ export default function NoteEditor({ noteId, onBack }) {
           </button>
           <button
             type="button"
+            className="icon-button"
+            onClick={() => setFinding((was) => !was)}
+            title={`${t('notes.find')} (Ctrl + F)`}
+            aria-label={t('notes.find')}
+            aria-pressed={finding}
+          >
+            <Icon name="search" size={17} />
+          </button>
+          {/* Print is also Export as PDF: every browser's print dialog offers
+              "Save as PDF", and the print stylesheet already reduces the screen
+              to the page. Building a second PDF path would ship a rendering
+              engine to duplicate one that is installed. */}
+          <button
+            type="button"
+            className="icon-button"
+            onClick={() => window.print()}
+            title={`${t('notes.print')} (Ctrl + P)`}
+            aria-label={t('notes.print')}
+          >
+            <Icon name="download" size={17} />
+          </button>
+          <button
+            type="button"
             className="button ghost"
             onClick={() => duplicate('notes', noteId)}
           >
@@ -140,6 +191,8 @@ export default function NoteEditor({ noteId, onBack }) {
         formatState={formatState}
         onInsertTemplate={handleInsertTemplate}
       />
+
+      {finding ? <FindReplace editorRef={editorRef} onClose={() => setFinding(false)} /> : null}
 
       <div className="editor-scroll">
         <div className="editor-paper" ref={paperRef}>

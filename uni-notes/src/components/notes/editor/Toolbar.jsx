@@ -3,6 +3,7 @@ import LinkButton from './LinkButton.jsx';
 import Icon from '../../ui/Icon.jsx';
 import { hintFor } from '../../../lib/shortcuts.js';
 import TemplateMenu from './TemplateMenu.jsx';
+import TypeControls from './TypeControls.jsx';
 import { useT } from '../../../i18n/index.jsx';
 
 const TEXT_COLORS = [
@@ -97,6 +98,8 @@ export default function Toolbar({ editorRef, formatState, onInsertTemplate }) {
         </label>
       </div>
 
+      <TypeControls editorRef={editorRef} formatState={formatState} />
+
       <div className="tool-group">
         {toolButton('bold', t('notes.bold'), <Icon name="bold" size={17} />, 'bold', {
           isActive: formatState.bold,
@@ -144,6 +147,18 @@ export default function Toolbar({ editorRef, formatState, onInsertTemplate }) {
         {toolButton('ol', t('notes.numberList'), <Icon name="listNumber" size={17} />, 'insertOrderedList', {
           isActive: formatState.orderedList,
         })}
+        <button
+          type="button"
+          className="tool-button"
+          title={t('notes.checklist')}
+          aria-label={t('notes.checklist')}
+          onMouseDown={(event) => {
+            event.preventDefault();
+            editorRef.current?.insertChecklist();
+          }}
+        >
+          <Icon name="checklist" size={17} />
+        </button>
       </div>
 
       <div className="tool-group">

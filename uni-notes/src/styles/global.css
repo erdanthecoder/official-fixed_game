@@ -386,6 +386,20 @@ button {
   box-shadow: var(--ring);
 }
 
+/*
+ * The page you are writing in is the one thing that must not show a focus
+ * ring. The caret is the indicator; a 2px accent rectangle drawn around the
+ * whole sheet the moment you click into it makes the document look selected
+ * rather than ready, and it is on screen the entire time you type.
+ */
+.editor-canvas:focus,
+.editor-canvas:focus-visible,
+.board-surface:focus,
+.board-surface:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
 /* Inputs keep an outline as well — inside a scrolling list a shadow can be
    clipped by the row above, and a field you cannot see the focus on is worse
    than a slightly doubled ring. */
@@ -1614,7 +1628,11 @@ select:focus-visible {
   gap: 4px;
   margin: 10px clamp(8px, 2vw, 16px) 0;
   padding: 5px 8px;
-  border-radius: var(--radius-pill);
+  row-gap: 2px;
+  /* Not a pill. With font and size on it the toolbar wraps to two rows on a
+     laptop, and a fully-rounded two-row box is a lozenge. This radius reads
+     correctly at one row and at three. */
+  border-radius: 22px;
   background: var(--surface);
   border: 1px solid var(--border-soft);
   box-shadow: var(--shadow-sm);
@@ -3453,5 +3471,196 @@ body {
   .shortlist-field input,
   .shortlist-field select {
     min-width: 6.5rem;
+  }
+}
+
+/* --------------------------- font and size ------------------------------- */
+
+.font-select select {
+  min-width: 92px;
+}
+
+.size-group {
+  gap: 0;
+}
+
+/* A number field, not a menu. See TypeControls for why. It is deliberately
+   narrow — three digits is 96px of text, and anything wider reads as an input
+   waiting for a sentence. */
+.size-field {
+  width: 40px;
+  height: 30px;
+  padding: 0 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text);
+}
+
+.size-field:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* ------------------------------ find bar --------------------------------- */
+
+.find-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px clamp(8px, 2vw, 16px) 0;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  animation: find-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Transform only — an opacity entrance with `both` fill hides the bar forever
+   if the animation never starts. */
+@keyframes find-in {
+  from {
+    transform: translateY(-8px);
+  }
+}
+
+.find-field {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  flex: 1 1 190px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-alt);
+  color: var(--text-muted);
+}
+
+.find-field:focus-within {
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.find-field input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  outline: none;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.find-count {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.find-case {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .find-case {
+    display: none;
+  }
+}
+
+/* ================================ printing ================================ *
+ *
+ * There was no print stylesheet at all, so Ctrl+P printed the sidebar, the
+ * toolbar, the share buttons and the save indicator around a squeezed page.
+ * This is also the PDF export: every browser's print dialog offers "Save as
+ * PDF", so a document that prints correctly exports correctly, and the app does
+ * not have to carry a PDF engine to duplicate the one already installed.
+ */
+@media print {
+  /* Everything that is chrome. The paper is the only thing being printed. */
+  .sidebar,
+  .drawer-toggle,
+  .toolbar,
+  .find-bar,
+  .editor-header,
+  .module-header,
+  .editor-footnote,
+  .tip-line,
+  .facepile,
+  .save-indicator,
+  .scenery,
+  .sidebar-scrim {
+    display: none !important;
+  }
+
+  html,
+  body,
+  #root,
+  .app-shell,
+  .app-main,
+  .editor-page,
+  .editor-scroll {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  /* The page loses its shadow, its border and its screen margins: on paper the
+     sheet IS the page, and a drop shadow around it prints as a grey smear. */
+  .editor-paper {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+  }
+
+  .editor-canvas {
+    color: #000 !important;
+  }
+
+  /* Never break a heading off the paragraph it introduces, and never leave one
+     line of a paragraph alone at the top or bottom of a page. */
+  .editor-canvas h1,
+  .editor-canvas h2,
+  .editor-canvas h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .editor-canvas p,
+  .editor-canvas li,
+  .editor-canvas blockquote {
+    orphans: 2;
+    widows: 2;
+  }
+
+  /* A link's destination is invisible on paper. Print it once, in brackets,
+     but only for real URLs — an in-document anchor prints as noise. */
+  .editor-canvas a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.85em;
+    word-break: break-all;
+  }
+
+  @page {
+    margin: 18mm 16mm;
   }
 }
