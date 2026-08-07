@@ -71,7 +71,7 @@ export default function ShortlistModule() {
 
   return (
     <div className="shortlist-page">
-      <Scenery slot="tasks" className="module-banner">
+      <Scenery slot="shortlist" className="module-banner">
         <div className="home-banner-text">
           <h1>{t('nav.shortlist')}</h1>
           <p>

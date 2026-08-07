@@ -225,6 +225,75 @@
   color-scheme: dark;
 }
 
+/* ============================ one colour per app ==========================
+ *
+ * Ten apps were drawn in one colour, so every screen looked like every other
+ * screen and the whole suite read as a single blue wash. Now the shell is
+ * labelled with the app you are in and the accent changes with it — Notes is
+ * madder red, Sheets is the green of a summer pasture, Tasks is terracotta.
+ * You can tell which app you are in from across the room, with the tab bar
+ * covered up.
+ *
+ * The colours are the shyrdak dye range: madder, walnut, saffron, indigo-free.
+ * Every one of them is a dye you can actually make from something that grows
+ * in Kyrgyzstan, which is the point — the palette is the same one as the mark.
+ *
+ * Only --accent is set per app. Everything derived from it — the tint behind a
+ * selected row, its border, the darker ink for text on that tint, the hover
+ * state, the focus halo — is mixed from the accent below, so adding an app is
+ * one line rather than six.
+ */
+
+[data-app] {
+  --accent-hover: color-mix(in srgb, var(--accent) 84%, #000);
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  --accent-line: color-mix(in srgb, var(--accent) 36%, var(--surface));
+  --accent-ink: color-mix(in srgb, var(--accent) 78%, #000);
+  --ring: 0 0 0 2px var(--surface), 0 0 0 4px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+[data-app='home'] { --accent: #b0801b; }
+[data-app='notes'] { --accent: #a8342a; }
+[data-app='sheets'] { --accent: #2f6b4a; }
+[data-app='slides'] { --accent: #74385c; }
+[data-app='canvas'] { --accent: #12707c; }
+[data-app='tasks'] { --accent: #b4562e; }
+[data-app='calendar'] { --accent: #8c2f3e; }
+[data-app='shortlist'] { --accent: #5c6b2b; }
+[data-app='languages'] { --accent: #a63a64; }
+[data-app='unisave'] { --accent: #8a5f14; }
+[data-app='settings'] { --accent: #55504a; }
+
+/*
+ * Dark needs its own set, not a filter over the light one.
+ *
+ * Every colour above is chosen to pass on white and every one of them fails on
+ * near-black — that is what "deep" means. These are the same ten hues carried
+ * up in lightness until they read, which is the identical problem the base
+ * accent has and the identical fix.
+ */
+:root[data-theme='dark'] [data-app='home'] { --accent: #e6b657; }
+:root[data-theme='dark'] [data-app='notes'] { --accent: #ed8272; }
+:root[data-theme='dark'] [data-app='sheets'] { --accent: #7ec89b; }
+:root[data-theme='dark'] [data-app='slides'] { --accent: #d494ba; }
+:root[data-theme='dark'] [data-app='canvas'] { --accent: #6fc7d2; }
+:root[data-theme='dark'] [data-app='tasks'] { --accent: #f0996b; }
+:root[data-theme='dark'] [data-app='calendar'] { --accent: #ed8494; }
+:root[data-theme='dark'] [data-app='shortlist'] { --accent: #b9c977; }
+:root[data-theme='dark'] [data-app='languages'] { --accent: #ef8ab2; }
+:root[data-theme='dark'] [data-app='unisave'] { --accent: #dfb75f; }
+:root[data-theme='dark'] [data-app='settings'] { --accent: #bdb5aa; }
+
+/* Mixing towards black is right on a light page and wrong on a dark one: it
+   drives the tint and its text together until neither can be seen. On dark,
+   the tint mixes towards the page and the ink towards the text. */
+:root[data-theme='dark'] [data-app] {
+  --accent-hover: color-mix(in srgb, var(--accent) 82%, #fff);
+  --accent-soft: color-mix(in srgb, var(--accent) 18%, var(--surface));
+  --accent-line: color-mix(in srgb, var(--accent) 34%, var(--surface));
+  --accent-ink: color-mix(in srgb, var(--accent) 84%, #fff);
+}
+
 /*
  * The one exception to the theme: paper.
  *

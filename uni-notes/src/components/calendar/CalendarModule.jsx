@@ -116,7 +116,7 @@ export default function CalendarModule({ onOpenPlan }) {
 
   return (
     <div className="calendar-page">
-      <Scenery slot="tasks" className="module-banner">
+      <Scenery slot="calendar" className="module-banner">
         <div className="home-banner-text">
           <h1>{t('nav.calendar')}</h1>
           <p>{t('calendar.subtitle', { count: openCount })}</p>

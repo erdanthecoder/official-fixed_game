@@ -12,47 +12,79 @@
 
 import { useState } from 'react';
 
+/*
+ * One hour of the day per app.
+ *
+ * These used to be seven variations on midday, which meant seven blue banners
+ * — and since the banner is the biggest block of colour on any screen, the
+ * whole suite looked like one app in one colour no matter which one you opened.
+ * The water in particular was the same lake blue in all of them, including the
+ * ones whose sky was deliberately warm.
+ *
+ * Now each app gets an hour: Notes at sunset, Sheets in the green of a summer
+ * jailoo, Tasks in late autumn, Calendar at last light, Languages at dusk.
+ * They share a shape and a range of dyes — madder, saffron, walnut, pasture —
+ * so they are visibly a family, but no two are the same colour, and each one
+ * is in the same family as its app's accent.
+ *
+ * Every `water` here is now the colour that hour would actually put on a lake,
+ * which is mostly not blue.
+ */
 export const SLOTS = {
   signIn: {
     file: 'sunrise.jpg',
-    // Dawn over the lake: warm sky, snow peaks catching first light.
-    sky: ['#0b2a4a', '#2e5f8a', '#e8a35c', '#f6d3a1'],
-    peaks: ['#173355', '#22496e'],
+    // First light: the sky still holds the night, the peaks are already lit.
+    sky: ['#2a1a22', '#6b3630', '#c9662f', '#f0b268'],
+    peaks: ['#3a231f', '#54332a'],
     snow: '#f7e3c8',
-    water: ['#123a5c', '#0d2c48'],
-    sun: '#ffd9a0',
+    water: ['#5d3128', '#39201c'],
+    sun: '#ffd79a',
     stars: true,
+  },
+  home: {
+    file: 'morning.jpg',
+    // Mid-morning, saffron. The screen you open first should look like the
+    // start of the day rather than the end of one.
+    sky: ['#e8b23c', '#f3d385', '#faeccb'],
+    peaks: ['#9a7a2c', '#b89a48'],
+    snow: '#fffaeb',
+    water: ['#c99a2b', '#966c14'],
+    sun: '#fffdf2',
   },
   notes: {
     file: 'shore.jpg',
-    // Midday: the colour the lake is actually famous for.
-    sky: ['#7fc4e8', '#bfe3f4'],
-    peaks: ['#5b7f9c', '#7ea3bd'],
-    snow: '#ffffff',
-    water: ['#1d8fc4', '#0f6d9e'],
-    sun: '#fffbe8',
+    // Sunset, madder red — the same dye as the mark.
+    sky: ['#a8342a', '#dd7a45', '#f6c98a'],
+    peaks: ['#6d2c24', '#8f4231'],
+    snow: '#f9e6cd',
+    water: ['#b04530', '#7c2620'],
+    sun: '#ffe1ae',
   },
   sheets: {
     file: 'valley.jpg',
-    sky: ['#a8d8ea', '#d6ecf5'],
-    peaks: ['#6a8f7a', '#89aa8e'],
-    snow: '#f4f9f7',
-    water: ['#2f9bb5', '#1b7a97'],
+    // Midsummer on the jailoo: grass all the way to the snowline.
+    sky: ['#cfe0a8', '#eef3d6'],
+    peaks: ['#4f7a52', '#6f9a68'],
+    snow: '#f6faee',
+    water: ['#3f8a5c', '#276a44'],
     sun: '#ffffff',
   },
   slides: {
     file: 'peaks.jpg',
-    sky: ['#12325a', '#3d6a93'],
-    peaks: ['#20406a', '#2c5480'],
-    snow: '#eaf2fb',
-    water: ['#153f63', '#0e2c48'],
-    sun: '#cfe4ff',
+    // Late dusk, plum. Dark enough that white type sits on it cleanly, which
+    // is what a deck screen needs.
+    sky: ['#2b1626', '#5e2f4c', '#8e4a66'],
+    peaks: ['#331b2b', '#4a2a3f'],
+    snow: '#f0e2ea',
+    water: ['#6b3350', '#3f1e30'],
+    sun: '#f3c9de',
     stars: true,
   },
   canvas: {
     file: 'bay.jpg',
-    // Flat light off the water — a quiet backdrop for a page full of drawing.
-    sky: ['#bfe0ea', '#e2f1f5'],
+    // Flat light off the water — the one place the lake is allowed to be the
+    // lake, because Canvas is where you draw and the backdrop should be quiet.
+    sky: ['#cfe6e3', '#eaf4f2'],
     peaks: ['#5f8b8c', '#7fa6a4'],
     snow: '#f2fafa',
     water: ['#2a9d8f', '#17786f'],
@@ -61,19 +93,49 @@ export const SLOTS = {
   tasks: {
     file: 'autumn.jpg',
     // Late in the season, which is what a deadline feels like.
-    sky: ['#e8b98a', '#f6dcc0'],
-    peaks: ['#9a6a55', '#b58a6f'],
+    sky: ['#e8a86a', '#f6dcc0'],
+    peaks: ['#8f5b40', '#b07a55'],
     snow: '#fff1e2',
-    water: ['#3f8fa8', '#286f88'],
+    water: ['#b4562e', '#8a3d1f'],
     sun: '#ffe3bd',
+  },
+  calendar: {
+    file: 'lastlight.jpg',
+    // The last twenty minutes of the day, burgundy — a month at a time is the
+    // view you take when the light is going.
+    sky: ['#7a2536', '#c2585c', '#f0a878'],
+    peaks: ['#4d1d28', '#6b2c36'],
+    snow: '#f7dfd6',
+    water: ['#8c2f3e', '#571d28'],
+    sun: '#ffd0a4',
+  },
+  shortlist: {
+    file: 'steppe.jpg',
+    // Dry olive steppe, the colour of the grass in August when you are
+    // deciding where to go.
+    sky: ['#d8d69a', '#f1eecb'],
+    peaks: ['#6b6b2b', '#8b8a45'],
+    snow: '#f8f6e4',
+    water: ['#5c6b2b', '#3f4a1c'],
+    sun: '#fffce8',
   },
   languages: {
     file: 'meadow.jpg',
-    sky: ['#f3c48a', '#f8e0c0'],
-    peaks: ['#8a6f5c', '#a5866d'],
-    snow: '#fff4e4',
-    water: ['#4aa3b8', '#2d7f97'],
-    sun: '#ffeccb',
+    // Dusk over the meadow, berry.
+    sky: ['#a63a64', '#e08aa4', '#f6d0c4'],
+    peaks: ['#6a2440', '#8b3a58'],
+    snow: '#f9e2e8',
+    water: ['#9c3a5e', '#66223c'],
+    sun: '#ffd9e6',
+  },
+  unisave: {
+    file: 'bronze.jpg',
+    // Everything you have made, in bronze: the warmest, quietest hour.
+    sky: ['#c78f2c', '#e9c47c', '#f6e4bd'],
+    peaks: ['#7a5314', '#9c6f24'],
+    snow: '#fdf1d8',
+    water: ['#8a5f14', '#5d3f0c'],
+    sun: '#fff3d2',
   },
 };
 

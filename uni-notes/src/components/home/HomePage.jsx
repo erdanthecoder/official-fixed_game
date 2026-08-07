@@ -102,7 +102,7 @@ export default function HomePage({ onGo, onOpenItem, onCreate }) {
 
   return (
     <div className="home-page">
-      <Scenery slot="notes" className="module-banner home-banner">
+      <Scenery slot="home" className="module-banner home-banner">
         <div className="home-banner-text">
           <h1>{firstName ? t(greetingKey(hour), { name: firstName }) : t('home.welcome')}</h1>
           <p>{t('home.today', { date: new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }) })}</p>
