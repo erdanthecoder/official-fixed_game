@@ -609,9 +609,31 @@
 
 /* --------------------------------- sheets --------------------------------- */
 
+/*
+ * A page is a column: header, then body.
+ *
+ * This rule existed and was destroyed by an edit. Removing the AI module took
+ * out `.ai-page { … }` — and with it the closing brace of the block these three
+ * shared — which fused the page selectors onto the toolbar rule below. Sheets
+ * and Slides have been laying themselves out as toolbars ever since: `display:
+ * flex` with the default row direction and `flex-wrap`, so the editor header,
+ * the slide strip and the editing panel were three items wrapping across the
+ * screen, vertically centred, with the whole left half empty.
+ *
+ * It is worth naming the lesson. The bug was invisible to every check in the
+ * repository — the build passed, the tests passed, nothing threw — because a
+ * CSS block that loses its brace is still valid CSS. Only opening the app
+ * shows it, which is why the fix came from opening the app.
+ */
 .sheet-page,
 .deck-page,
-.deck-workspace,
+.deck-workspace {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
 .sheet-toolbar {
   position: relative;
   display: flex;
