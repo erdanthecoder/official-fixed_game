@@ -66,7 +66,21 @@ export default function SettingsPage() {
     setTimeout(() => window.location.reload(), 700);
   };
 
-  const startModules = ['notes', 'sheets', 'slides', 'canvas', 'tasks', 'unisave', 'languages'];
+  /* The same nine offered on the first-run screen, plus Home — someone who
+     chose an app there must be able to change their mind to any of them here,
+     and Calendar and Shortlist were missing from this list entirely. */
+  const startModules = [
+    'home',
+    'notes',
+    'sheets',
+    'slides',
+    'canvas',
+    'tasks',
+    'calendar',
+    'shortlist',
+    'languages',
+    'unisave',
+  ];
 
   return (
     <div className="settings-page">

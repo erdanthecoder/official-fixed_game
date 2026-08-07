@@ -141,6 +141,12 @@ const en = {
     streak: '{count} day streak',
     streakHint: 'Keep it going — a few words is enough',
   },
+  welcome: {
+    title: 'Where do you want to start?',
+    body: 'Pick the app you will open most. Kadam will go straight there every time — you can change it later in Settings.',
+    later: 'Just take me in',
+    change: 'Settings → Start page changes this whenever you like.',
+  },
   nav: {
     shortlist: 'Shortlist',
     shortlistHint: 'The places you are choosing between',
@@ -927,6 +933,12 @@ const ru = {
     streak: '{count} дней подряд',
     streakHint: 'Не останавливайтесь — хватит нескольких слов',
   },
+  welcome: {
+    title: 'С чего начнём?',
+    body: 'Выберите приложение, которое будете открывать чаще всего. Kadam будет сразу открывать его — это можно изменить в настройках.',
+    later: 'Просто открыть Kadam',
+    change: 'Настройки → Стартовая страница — изменить в любой момент.',
+  },
   nav: {
     shortlist: 'Шортлист',
     shortlistHint: 'Вузы, между которыми вы выбираете',
@@ -1712,6 +1724,12 @@ const ky = {
     start: 'Баштоо',
     streak: '{count} күн катары менен',
     streakHint: 'Токтобоңуз — бир нече сөз жетиштүү',
+  },
+  welcome: {
+    title: 'Кайдан баштайбыз?',
+    body: 'Көбүнчө ачкан колдонмоңузду тандаңыз. Kadam ар дайым ошону ачат — кийин Жөндөөлөрдөн өзгөртсөңүз болот.',
+    later: 'Жөн эле Kadam ачылсын',
+    change: 'Жөндөөлөр → Баштапкы бет каалаган убакта өзгөртөт.',
   },
   nav: {
     shortlist: 'Тандалма',

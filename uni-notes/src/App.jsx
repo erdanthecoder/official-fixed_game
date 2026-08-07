@@ -5,6 +5,7 @@ import CanvasModule from './components/canvas/CanvasModule.jsx';
 import JoinPage from './components/JoinPage.jsx';
 import Skeleton from './components/shared/Skeleton.jsx';
 import LandingPage from './components/landing/LandingPage.jsx';
+import ChooseStart from './components/welcome/ChooseStart.jsx';
 import CalendarModule from './components/calendar/CalendarModule.jsx';
 import ShortlistModule from './components/shortlist/ShortlistModule.jsx';
 import LanguagesModule from './components/languages/LanguagesModule.jsx';
@@ -241,6 +242,34 @@ export default function App() {
         onOpenDocument={openJoined}
         onGoHome={goHome}
         onSignIn={goToSignIn}
+      />
+    );
+  }
+
+  /*
+   * The first morning: ask where they want to start.
+   *
+   * Only once, and only when there is no answer on file — picking anything,
+   * including "take me Home", writes `startModule` and the screen never comes
+   * back. It waits for `ready` because prefs arrive with the rest of the data,
+   * and asking before they load would ask people who already answered.
+   *
+   * An invite link is exempt. Someone who followed a share link was sent to a
+   * particular document by a particular person; a questionnaire in front of it
+   * is the app talking about itself at the worst possible moment.
+   */
+  if (
+    ready &&
+    !onJoin &&
+    !prefs?.startModule &&
+    (status === AUTH_STATUS.signedIn || status === AUTH_STATUS.local)
+  ) {
+    return (
+      <ChooseStart
+        onChoose={(id) => {
+          data.setPrefs({ startModule: id });
+          goToModule(id);
+        }}
       />
     );
   }
