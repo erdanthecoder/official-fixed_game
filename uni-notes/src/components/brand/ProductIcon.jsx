@@ -11,19 +11,31 @@
  *   solid — white glyph on a full-colour tile, for the app switcher
  */
 
+/*
+ * These were Google's colours — #1A73E8, #0F9D58, #E8A020 — and three modules
+ * shared a colour with another because there were only so many to borrow. They
+ * are now the same ten the stylesheet gives each app, so the icon in the app
+ * switcher, the mark at the top of the module and everything the module tints
+ * are all one colour, and no two apps are the same one.
+ *
+ * The values are duplicated here rather than read from the stylesheet on
+ * purpose: these are drawn into SVG fills, and a custom property resolved at
+ * paint time cannot be handed to a `fill` attribute without the icon flashing
+ * black on first render.
+ */
 export const PRODUCTS = {
-  notes: { colour: '#1A73E8', soft: '#E8F0FE', labelKey: 'nav.notes', hintKey: 'nav.notesHint' },
-  sheets: { colour: '#0F9D58', soft: '#E4F5EC', labelKey: 'nav.sheets', hintKey: 'nav.sheetsHint' },
-  slides: { colour: '#E8A020', soft: '#FDF2DC', labelKey: 'nav.slides', hintKey: 'nav.slidesHint' },
-  canvas: { colour: '#0F7B6C', soft: '#DFF1EE', labelKey: 'nav.canvas', hintKey: 'nav.canvasHint' },
-  tasks: { colour: '#C5372C', soft: '#FBE9E7', labelKey: 'nav.tasks', hintKey: 'nav.tasksHint' },
-  calendar: { colour: '#8430CE', soft: '#F3E8FD', labelKey: 'nav.calendar', hintKey: 'nav.calendarHint' },
-  shortlist: { colour: '#0B7285', soft: '#DEF0F4', labelKey: 'nav.shortlist', hintKey: 'nav.shortlistHint' },
-  unisave: { colour: '#0F7B6C', soft: '#DFF1EE', labelKey: 'nav.unisave', hintKey: 'nav.unisaveHint' },
-  languages: { colour: '#C5372C', soft: '#FBE9E7', labelKey: 'nav.languages', hintKey: 'nav.languagesHint' },
-  home: { colour: '#1A73E8', soft: '#E8F0FE', labelKey: 'nav.home', hintKey: 'nav.homeHint' },
-  settings: { colour: '#5F6368', soft: '#EEF0F2', labelKey: 'nav.settings', hintKey: null },
-  apps: { colour: '#0F7B6C', soft: '#DFF1EE', labelKey: 'nav.apps', hintKey: 'nav.appsHint' },
+  notes: { colour: '#A8342A', soft: '#F6E5E2', labelKey: 'nav.notes', hintKey: 'nav.notesHint' },
+  sheets: { colour: '#2F6B4A', soft: '#E2EFE7', labelKey: 'nav.sheets', hintKey: 'nav.sheetsHint' },
+  slides: { colour: '#74385C', soft: '#F1E6ED', labelKey: 'nav.slides', hintKey: 'nav.slidesHint' },
+  canvas: { colour: '#12707C', soft: '#DDEEF0', labelKey: 'nav.canvas', hintKey: 'nav.canvasHint' },
+  tasks: { colour: '#B4562E', soft: '#F8E8E0', labelKey: 'nav.tasks', hintKey: 'nav.tasksHint' },
+  calendar: { colour: '#8C2F3E', soft: '#F5E3E6', labelKey: 'nav.calendar', hintKey: 'nav.calendarHint' },
+  shortlist: { colour: '#5C6B2B', soft: '#EAEEDD', labelKey: 'nav.shortlist', hintKey: 'nav.shortlistHint' },
+  unisave: { colour: '#8A5F14', soft: '#F5EBD8', labelKey: 'nav.unisave', hintKey: 'nav.unisaveHint' },
+  languages: { colour: '#A63A64', soft: '#F7E5EC', labelKey: 'nav.languages', hintKey: 'nav.languagesHint' },
+  home: { colour: '#B0801B', soft: '#F8EFD9', labelKey: 'nav.home', hintKey: 'nav.homeHint' },
+  settings: { colour: '#55504A', soft: '#EDEAE5', labelKey: 'nav.settings', hintKey: null },
+  apps: { colour: '#8A5F14', soft: '#F5EBD8', labelKey: 'nav.apps', hintKey: 'nav.appsHint' },
 };
 
 export function productColour(product) {

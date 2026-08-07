@@ -129,6 +129,7 @@ function scholarshipTracker() {
 export const NOTE_TEMPLATES = [
   {
     id: 'comparison-table',
+    shape: 'table',
     labelKey: 'templates.comparisonTable',
     hintKey: 'templates.comparisonTableHint',
     icon: 'school',
@@ -136,6 +137,7 @@ export const NOTE_TEMPLATES = [
   },
   {
     id: 'application-checklist',
+    shape: 'list',
     labelKey: 'templates.applicationChecklist',
     hintKey: 'templates.applicationChecklistHint',
     icon: 'checklist',
@@ -143,6 +145,7 @@ export const NOTE_TEMPLATES = [
   },
   {
     id: 'essay-outline',
+    shape: 'doc',
     labelKey: 'templates.essayOutline',
     hintKey: 'templates.essayOutlineHint',
     icon: 'essay',
@@ -150,6 +153,7 @@ export const NOTE_TEMPLATES = [
   },
   {
     id: 'scholarship-tracker',
+    shape: 'table',
     labelKey: 'templates.scholarshipTracker',
     hintKey: 'templates.scholarshipTrackerHint',
     icon: 'money',

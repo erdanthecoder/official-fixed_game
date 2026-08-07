@@ -100,6 +100,9 @@ const en = {
     newest: 'Newest',
     titleAZ: 'Title A–Z',
     sortBy: 'Sort by',
+    view: 'View',
+    viewList: 'List view',
+    viewGrid: 'Grid view',
   },
   palette: {
     title: 'Search everything',
@@ -883,6 +886,9 @@ const ru = {
     newest: 'Сначала новые',
     titleAZ: 'По названию А–Я',
     sortBy: 'Сортировка',
+    view: 'Вид',
+    viewList: 'Списком',
+    viewGrid: 'Плиткой',
   },
   palette: {
     title: 'Искать везде',
@@ -1666,6 +1672,9 @@ const ky = {
     newest: 'Жаңылары',
     titleAZ: 'Аталышы А–Я',
     sortBy: 'Иреттөө',
+    view: 'Көрүнүш',
+    viewList: 'Тизме менен',
+    viewGrid: 'Плитка менен',
   },
   palette: {
     title: 'Баарын издөө',

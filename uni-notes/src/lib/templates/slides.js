@@ -144,6 +144,7 @@ function researchDeck() {
 export const SLIDE_TEMPLATES = [
   {
     id: 'why-this-school',
+    shape: 'deck',
     labelKey: 'templates.whyThisSchool',
     hintKey: 'templates.whyThisSchoolHint',
     icon: 'school',
@@ -151,6 +152,7 @@ export const SLIDE_TEMPLATES = [
   },
   {
     id: 'about-me',
+    shape: 'deck',
     labelKey: 'templates.myselfDeck',
     hintKey: 'templates.myselfDeckHint',
     icon: 'person',
@@ -158,6 +160,7 @@ export const SLIDE_TEMPLATES = [
   },
   {
     id: 'research',
+    shape: 'deck',
     labelKey: 'templates.researchDeck',
     hintKey: 'templates.researchDeckHint',
     icon: 'research',

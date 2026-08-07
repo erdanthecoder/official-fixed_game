@@ -932,12 +932,24 @@ select:focus-visible {
 
 /* template strip */
 
+/*
+ * The tiles are pages, and the name is underneath.
+ *
+ * A template used to be a bordered box with an icon and two lines of prose in
+ * it — six of those in a row is a paragraph you have to read before you can
+ * pick anything. Showing the shape of the document instead means you recognise
+ * a table or a checklist without reading, which is exactly what Docs and
+ * Slides do and exactly why their strip works.
+ *
+ * The label sits outside the paper, in small muted text, because it is a
+ * caption for a picture rather than the content of a card.
+ */
 .template-strip {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: minmax(178px, 1fr);
-  gap: 12px;
-  margin-bottom: 30px;
+  grid-auto-columns: 128px;
+  gap: 16px;
+  margin-bottom: 26px;
   padding-bottom: 6px;
   overflow-x: auto;
   scrollbar-width: thin;
@@ -946,43 +958,257 @@ select:focus-visible {
 .template-tile {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 14px;
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius);
-  background: var(--surface);
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
   text-align: left;
   cursor: pointer;
+}
+
+/* The page itself: 4:5, the proportion of a sheet seen at a glance. */
+.tpl-paper {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  aspect-ratio: 4 / 5;
+  padding: 12px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
   transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease,
-    transform 0.15s ease;
+    border-color 200ms ease,
+    box-shadow 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 320ms cubic-bezier(0.22, 1.12, 0.36, 1);
 }
 
-.template-tile:hover {
+.template-tile:hover .tpl-paper {
   border-color: var(--accent);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
 }
 
-.template-tile.blank {
+.template-tile:active .tpl-paper {
+  transform: translateY(-1px) scale(0.99);
+  transition-duration: 90ms;
+}
+
+.tpl-paper.is-blank {
+  align-items: center;
+  justify-content: center;
   border-style: dashed;
   background: var(--surface-alt);
+  color: var(--accent);
 }
 
-.template-icon {
-  font-size: 1.4rem;
+/* The marks on the page. Two weights of bar and nothing else — anything more
+   detailed stops reading as "a document" and starts reading as a broken one. */
+.tpl-head {
+  height: 7px;
+  border-radius: 2px;
+  background: var(--accent);
+  opacity: 0.75;
+}
+
+.tpl-line {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--track);
+}
+
+.tpl-rule {
+  height: 1px;
+  margin: 2px 0;
+  background: var(--border);
+}
+
+.tpl-title {
+  height: 14px;
+  border-radius: 3px;
+  background: var(--accent);
+  opacity: 0.62;
+}
+
+.tpl-cells {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+}
+
+.tpl-cell {
+  height: 7px;
+  border-radius: 1.5px;
+  background: var(--track);
+}
+
+.tpl-check {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.tpl-box {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border: 1.2px solid var(--accent);
+  border-radius: 2px;
+  opacity: 0.8;
+}
+
+.tpl-pair,
+.tpl-split {
+  display: flex;
+  gap: 6px;
+}
+
+.tpl-pair .tpl-line {
+  height: 5px;
+}
+
+.tpl-col {
+  flex: 1;
+  height: 18px;
+  border-radius: 3px;
+  background: var(--track);
 }
 
 .template-label {
-  font-size: 0.9rem;
-  font-weight: 600;
+  padding: 0 2px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.35;
 }
 
-.template-hint {
+.template-tile:hover .template-label {
+  color: var(--text);
+}
+
+/* -------------------------------- the list -------------------------------- *
+ *
+ * Rows, not short cards. Everything lines up down the screen — name, category,
+ * when it was touched — so eighty documents can be scanned instead of read.
+ * No shadow and no border per row: a hairline between them and a wash on hover
+ * is all a list needs, and it is what makes a list feel light next to a grid.
+ */
+.doc-rows {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.doc-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-top: 1px solid var(--border-soft);
+  transition: background 140ms ease;
+}
+
+.doc-row:first-child {
+  border-top: 0;
+}
+
+.doc-row:hover {
+  background: var(--surface-alt);
+}
+
+.doc-row-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+  padding: 11px 8px 11px 16px;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.doc-row-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+}
+
+.doc-row-name {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.doc-row-name strong {
+  /* A name column with a width, not a name that shrinks to nothing. Left to
+     flex freely, "Schools I actually want to visit" became "Schools I …" so
+     that a preview snippet could have room — which is backwards: the snippet
+     is context and the name is what you are scanning for. */
+  flex: 0 1 auto;
+  min-width: 210px;
+  max-width: 46%;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The snippet is the first thing to go when the row narrows: it is context,
+   and the name is the thing you are looking for. */
+.doc-row-preview {
+  flex: 1 1 auto;
+  min-width: 0;
   color: var(--text-muted);
-  font-size: 0.75rem;
-  line-height: 1.4;
+  font-size: 0.82rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.doc-row-tag {
+  flex: 0 0 auto;
+  width: 150px;
+}
+
+.doc-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  width: 190px;
+  justify-content: flex-end;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.doc-row .doc-card-menu {
+  position: static;
+  padding-right: 8px;
+}
+
+@media (max-width: 900px) {
+  .doc-row-tag {
+    display: none;
+  }
+  .doc-row-preview {
+    display: none;
+  }
+  .doc-row-meta {
+    width: auto;
+  }
 }
 
 /* document cards */
@@ -2817,6 +3043,14 @@ body {
   flex: 1;
   min-height: 0;
   overflow: auto;
+}
+
+/* These two pages are not `.dashboard`, so they carry their own gutter. The
+   header used to be a full-bleed banner that needed none. */
+.calendar-page > .module-header,
+.shortlist-page > .module-header {
+  padding: 26px clamp(16px, 3vw, 32px) 0;
+  margin-bottom: 4px;
 }
 
 .calendar-body {

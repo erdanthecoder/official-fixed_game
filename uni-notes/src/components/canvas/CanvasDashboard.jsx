@@ -10,9 +10,11 @@ import TemplateStrip from '../shared/TemplateStrip.jsx';
 import { BOARD_TEMPLATES, blankBoard } from '../../lib/templates/canvas.js';
 import { useData } from '../../context/DataContext.jsx';
 import { useT } from '../../i18n/index.jsx';
+import { useView } from '../../hooks/useView.js';
 
 export default function CanvasDashboard({ onOpen }) {
   const { t } = useT();
+  const [view, setView] = useView();
   const { boards, create, update, remove, duplicate } = useData();
 
   const [query, setQuery] = useState('');
@@ -44,7 +46,7 @@ export default function CanvasDashboard({ onOpen }) {
   return (
     <div className="dashboard">
       <ModuleHeader
-        slot="canvas"
+        product="canvas"
         title={t('canvas.title')}
         subtitle={t('canvas.subtitle')}
         count={`${visible.length} · ${t('canvas.title')}`}
@@ -52,9 +54,11 @@ export default function CanvasDashboard({ onOpen }) {
         onQueryChange={setQuery}
         sort={sort}
         onSortChange={setSort}
+        view={view}
+        onViewChange={setView}
         searchPlaceholder={t('canvas.searchPlaceholder')}
         actions={
-          <button type="button" className="button primary on-scenery" onClick={startBlank}>
+          <button type="button" className="button primary" onClick={startBlank}>
             <Icon name="plus" size={17} />
             {t('canvas.newBoard')}
           </button>
@@ -84,9 +88,11 @@ export default function CanvasDashboard({ onOpen }) {
           }
         />
       ) : (
-        <div className="doc-grid">
+        <div className={view === 'list' ? 'doc-rows' : 'doc-grid'}>
           {visible.map((board) => (
             <ItemCard
+              view={view}
+              product="canvas"
               key={board.id}
               title={board.title || t('common.untitled')}
               accent="#0f7b6c"

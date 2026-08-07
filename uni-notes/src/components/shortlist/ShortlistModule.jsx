@@ -16,7 +16,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Icon from '../ui/Icon.jsx';
-import Scenery from '../Scenery.jsx';
+import ProductIcon from '../brand/ProductIcon.jsx';
 import Facepile from '../collab/Facepile.jsx';
 import ShareDialog from '../unisave/ShareDialog.jsx';
 import { STAGES, makeEntry, makeShortlist, shortlistStats, sortEntries } from '../../lib/templates/shortlist.js';
@@ -71,20 +71,25 @@ export default function ShortlistModule() {
 
   return (
     <div className="shortlist-page">
-      <Scenery slot="shortlist" className="module-banner">
-        <div className="home-banner-text">
-          <h1>{t('nav.shortlist')}</h1>
-          <p>
-            {list
-              ? t('shortlist.summary', {
-                  total: stats.total,
-                  applied: stats.applied,
-                  offers: stats.offers,
-                })
-              : t('nav.shortlistHint')}
-          </p>
+      <div className="module-header">
+        <div className="module-title-row">
+          <span className="module-title-mark" aria-hidden="true">
+            <ProductIcon product="shortlist" size={42} variant="plain" />
+          </span>
+          <div className="module-title-text">
+            <h1>{t('nav.shortlist')}</h1>
+            <p>
+              {list
+                ? t('shortlist.summary', {
+                    total: stats.total,
+                    applied: stats.applied,
+                    offers: stats.offers,
+                  })
+                : t('nav.shortlistHint')}
+            </p>
+          </div>
         </div>
-      </Scenery>
+      </div>
 
       <div className="shortlist-body">
         {!list ? (

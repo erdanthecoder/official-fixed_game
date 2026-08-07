@@ -21,7 +21,7 @@
 
 import { useMemo, useState } from 'react';
 import Icon from '../ui/Icon.jsx';
-import Scenery from '../Scenery.jsx';
+import ProductIcon from '../brand/ProductIcon.jsx';
 import { daysUntil } from '../../lib/templates/tasks.js';
 import { titleOf } from '../../lib/model.js';
 import { useData } from '../../context/DataContext.jsx';
@@ -116,12 +116,20 @@ export default function CalendarModule({ onOpenPlan }) {
 
   return (
     <div className="calendar-page">
-      <Scenery slot="calendar" className="module-banner">
-        <div className="home-banner-text">
-          <h1>{t('nav.calendar')}</h1>
-          <p>{t('calendar.subtitle', { count: openCount })}</p>
+      {/* The same compact header as every other module — see ModuleHeader.
+          Calendar and Shortlist kept their hero banner after the others lost
+          theirs, which made them look like screens from a different app. */}
+      <div className="module-header">
+        <div className="module-title-row">
+          <span className="module-title-mark" aria-hidden="true">
+            <ProductIcon product="calendar" size={42} variant="plain" />
+          </span>
+          <div className="module-title-text">
+            <h1>{t('nav.calendar')}</h1>
+            <p>{t('calendar.subtitle', { count: openCount })}</p>
+          </div>
         </div>
-      </Scenery>
+      </div>
 
       <div className="calendar-body">
         <header className="calendar-head">

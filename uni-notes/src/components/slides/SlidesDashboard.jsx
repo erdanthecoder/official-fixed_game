@@ -10,9 +10,11 @@ import TemplateStrip from '../shared/TemplateStrip.jsx';
 import { SLIDE_TEMPLATES, blankDeck } from '../../lib/templates/slides.js';
 import { useData } from '../../context/DataContext.jsx';
 import { useT } from '../../i18n/index.jsx';
+import { useView } from '../../hooks/useView.js';
 
 export default function SlidesDashboard({ onOpen }) {
   const { t } = useT();
+  const [view, setView] = useView();
   const { presentations, create, update, remove, duplicate } = useData();
 
   const [query, setQuery] = useState('');
@@ -54,7 +56,7 @@ export default function SlidesDashboard({ onOpen }) {
   return (
     <div className="dashboard">
       <ModuleHeader
-        slot="slides"
+        product="slides"
         title={t('slides.title')}
         subtitle={t('slides.subtitle')}
         count={`${visible.length} · ${t('slides.title')}`}
@@ -62,9 +64,11 @@ export default function SlidesDashboard({ onOpen }) {
         onQueryChange={setQuery}
         sort={sort}
         onSortChange={setSort}
+        view={view}
+        onViewChange={setView}
         searchPlaceholder={t('slides.searchPlaceholder')}
         actions={
-          <button type="button" className="button primary on-scenery" onClick={startBlank}>
+          <button type="button" className="button primary" onClick={startBlank}>
             <Icon name="plus" size={17} />
             {t('slides.newDeck')}
           </button>
@@ -94,9 +98,11 @@ export default function SlidesDashboard({ onOpen }) {
           }
         />
       ) : (
-        <div className="doc-grid">
+        <div className={view === 'list' ? 'doc-rows' : 'doc-grid'}>
           {visible.map((deck) => (
             <ItemCard
+              view={view}
+              product="slides"
               key={deck.id}
               title={deck.title || t('common.untitled')}
               accent="#8430ce"

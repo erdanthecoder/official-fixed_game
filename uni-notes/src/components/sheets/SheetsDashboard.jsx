@@ -10,6 +10,7 @@ import { SHEET_TEMPLATES, blankSheet } from '../../lib/templates/sheets.js';
 import { cellRef, displayValue } from '../../lib/formula.js';
 import { useData } from '../../context/DataContext.jsx';
 import { useT } from '../../i18n/index.jsx';
+import { useView } from '../../hooks/useView.js';
 
 /** A 3×3 peek at the top-left of the sheet, so cards are distinguishable. */
 function SheetThumb({ sheet }) {
@@ -35,6 +36,7 @@ function SheetThumb({ sheet }) {
 
 export default function SheetsDashboard({ onOpen }) {
   const { t } = useT();
+  const [view, setView] = useView();
   const { sheets, create, update, remove, duplicate } = useData();
 
   const [query, setQuery] = useState('');
@@ -66,7 +68,7 @@ export default function SheetsDashboard({ onOpen }) {
   return (
     <div className="dashboard">
       <ModuleHeader
-        slot="sheets"
+        product="sheets"
         title={t('sheets.title')}
         subtitle={t('sheets.subtitle')}
         count={`${visible.length} · ${t('sheets.title')}`}
@@ -74,9 +76,11 @@ export default function SheetsDashboard({ onOpen }) {
         onQueryChange={setQuery}
         sort={sort}
         onSortChange={setSort}
+        view={view}
+        onViewChange={setView}
         searchPlaceholder={t('sheets.searchPlaceholder')}
         actions={
-          <button type="button" className="button primary on-scenery" onClick={startBlank}>
+          <button type="button" className="button primary" onClick={startBlank}>
             <Icon name="plus" size={17} />
             {t('sheets.newSheet')}
           </button>
@@ -106,9 +110,11 @@ export default function SheetsDashboard({ onOpen }) {
           }
         />
       ) : (
-        <div className="doc-grid">
+        <div className={view === 'list' ? 'doc-rows' : 'doc-grid'}>
           {visible.map((sheet) => (
             <ItemCard
+              view={view}
+              product="sheets"
               key={sheet.id}
               title={sheet.title || t('common.untitled')}
               accent="#188038"

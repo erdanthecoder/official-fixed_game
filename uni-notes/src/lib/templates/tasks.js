@@ -173,6 +173,7 @@ function testPrep() {
 export const PLAN_TEMPLATES = [
   {
     id: 'one-application',
+    shape: 'list',
     labelKey: 'templates.applicationPlan',
     hintKey: 'templates.applicationPlanHint',
     icon: 'checklist',
@@ -180,6 +181,7 @@ export const PLAN_TEMPLATES = [
   },
   {
     id: 'scholarship-round',
+    shape: 'list',
     labelKey: 'templates.scholarshipPlan',
     hintKey: 'templates.scholarshipPlanHint',
     icon: 'money',
@@ -187,6 +189,7 @@ export const PLAN_TEMPLATES = [
   },
   {
     id: 'test-prep',
+    shape: 'list',
     labelKey: 'templates.testPlan',
     hintKey: 'templates.testPlanHint',
     icon: 'target',

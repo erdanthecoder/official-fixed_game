@@ -109,6 +109,7 @@ function buildDeck(rows) {
 export const VOCAB_TEMPLATES = [
   {
     id: 'academic-english',
+    shape: 'cards',
     labelKey: 'templates.academicWords',
     hintKey: 'templates.academicWordsHint',
     icon: 'book',
@@ -116,6 +117,7 @@ export const VOCAB_TEMPLATES = [
   },
   {
     id: 'application-vocabulary',
+    shape: 'cards',
     labelKey: 'templates.applicationWords',
     hintKey: 'templates.applicationWordsHint',
     icon: 'tabs',

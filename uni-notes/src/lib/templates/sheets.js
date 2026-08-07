@@ -145,6 +145,7 @@ function gradeTracker() {
 export const SHEET_TEMPLATES = [
   {
     id: 'tuition-compare',
+    shape: 'table',
     labelKey: 'templates.tuitionCompare',
     hintKey: 'templates.tuitionCompareHint',
     icon: 'school',
@@ -152,6 +153,7 @@ export const SHEET_TEMPLATES = [
   },
   {
     id: 'budget-planner',
+    shape: 'table',
     labelKey: 'templates.budgetPlanner',
     hintKey: 'templates.budgetPlannerHint',
     icon: 'money',
@@ -159,6 +161,7 @@ export const SHEET_TEMPLATES = [
   },
   {
     id: 'deadline-tracker',
+    shape: 'table',
     labelKey: 'templates.deadlineTracker',
     hintKey: 'templates.deadlineTrackerHint',
     icon: 'calendar',
@@ -166,6 +169,7 @@ export const SHEET_TEMPLATES = [
   },
   {
     id: 'grade-tracker',
+    shape: 'table',
     labelKey: 'templates.gradeTracker',
     hintKey: 'templates.gradeTrackerHint',
     icon: 'target',

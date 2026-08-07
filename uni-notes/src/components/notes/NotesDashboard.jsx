@@ -11,6 +11,7 @@ import { NOTE_TEMPLATES, templateAsDocument } from '../../lib/templates/notes.js
 import { previewSnippet, wordCount } from '../../lib/text.js';
 import { useData } from '../../context/DataContext.jsx';
 import { useT } from '../../i18n/index.jsx';
+import { useView } from '../../hooks/useView.js';
 
 function DocThumb() {
   return (
@@ -25,6 +26,7 @@ function DocThumb() {
 
 export default function NotesDashboard({ folderId, onOpen }) {
   const { t } = useT();
+  const [view, setView] = useView();
   const { notes, folders, create, update, remove, duplicate } = useData();
 
   const [query, setQuery] = useState('');
@@ -88,7 +90,7 @@ export default function NotesDashboard({ folderId, onOpen }) {
   return (
     <div className="dashboard">
       <ModuleHeader
-        slot="notes"
+        product="notes"
         title={
           <>
             {folder ? <Icon name={folder.icon ?? 'folder'} size={20} className="heading-icon" /> : null}
@@ -101,9 +103,11 @@ export default function NotesDashboard({ folderId, onOpen }) {
         onQueryChange={setQuery}
         sort={sort}
         onSortChange={setSort}
+        view={view}
+        onViewChange={setView}
         searchPlaceholder={t('notes.searchPlaceholder')}
         actions={
-          <button type="button" className="button primary on-scenery" onClick={startBlank}>
+          <button type="button" className="button primary" onClick={startBlank}>
             <Icon name="plus" size={17} />
             {t('notes.newDoc')}
           </button>
@@ -132,11 +136,13 @@ export default function NotesDashboard({ folderId, onOpen }) {
           }
         />
       ) : (
-        <div className="doc-grid">
+        <div className={view === 'list' ? 'doc-rows' : 'doc-grid'}>
           {visible.map((note) => {
             const noteFolder = folders.find((item) => item.id === note.folderId);
             return (
               <ItemCard
+                view={view}
+                product="notes"
                 key={note.id}
                 title={note.title || t('common.untitled')}
                 thumb={<DocThumb />}

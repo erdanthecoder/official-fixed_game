@@ -9,6 +9,7 @@ import TemplateStrip from '../shared/TemplateStrip.jsx';
 import { PLAN_TEMPLATES, blankPlan, planStats, sortTasks, taskState } from '../../lib/templates/tasks.js';
 import { useData } from '../../context/DataContext.jsx';
 import { useT } from '../../i18n/index.jsx';
+import { useView } from '../../hooks/useView.js';
 
 /** The three soonest unfinished deadlines — the reason to open the card. */
 function NextUp({ plan }) {
@@ -30,6 +31,7 @@ function NextUp({ plan }) {
 
 export default function TasksDashboard({ onOpen }) {
   const { t } = useT();
+  const [view, setView] = useView();
   const { plans, create, update, remove, duplicate } = useData();
 
   const [query, setQuery] = useState('');
@@ -62,7 +64,7 @@ export default function TasksDashboard({ onOpen }) {
   return (
     <div className="dashboard">
       <ModuleHeader
-        slot="tasks"
+        product="tasks"
         title={t('tasks.title')}
         subtitle={t('tasks.subtitle')}
         count={`${visible.length} · ${t('tasks.title')}`}
@@ -70,9 +72,11 @@ export default function TasksDashboard({ onOpen }) {
         onQueryChange={setQuery}
         sort={sort}
         onSortChange={setSort}
+        view={view}
+        onViewChange={setView}
         searchPlaceholder={t('tasks.searchPlaceholder')}
         actions={
-          <button type="button" className="button primary on-scenery" onClick={startBlank}>
+          <button type="button" className="button primary" onClick={startBlank}>
             <Icon name="plus" size={17} />
             {t('tasks.newPlan')}
           </button>
@@ -102,11 +106,13 @@ export default function TasksDashboard({ onOpen }) {
           }
         />
       ) : (
-        <div className="doc-grid">
+        <div className={view === 'list' ? 'doc-rows' : 'doc-grid'}>
           {visible.map((plan) => {
             const stats = planStats(plan);
             return (
               <ItemCard
+                view={view}
+                product="tasks"
                 key={plan.id}
                 title={plan.title || t('common.untitled')}
                 accent="#c5372c"

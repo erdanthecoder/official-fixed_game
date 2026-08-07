@@ -139,7 +139,7 @@ export default function UniSaveModule({ onOpen }) {
   return (
     <div className="dashboard unisave">
       <ModuleHeader
-        slot="sheets"
+        product="unisave"
         title={t('unisave.title')}
         subtitle={t('unisave.subtitle')}
         count={t('unisave.count', { count: visible.length })}

@@ -9,6 +9,7 @@ import TemplateStrip from '../shared/TemplateStrip.jsx';
 import { VOCAB_TEMPLATES, deckStats } from '../../lib/templates/vocab.js';
 import { useData } from '../../context/DataContext.jsx';
 import { useT } from '../../i18n/index.jsx';
+import { useView } from '../../hooks/useView.js';
 
 /** Progress bar showing new / learning / known proportions. */
 function DeckProgress({ stats }) {
@@ -33,6 +34,7 @@ function DeckProgress({ stats }) {
 
 export default function DecksDashboard({ onOpen }) {
   const { t } = useT();
+  const [view, setView] = useView();
   const { vocabDecks, create, update, remove, duplicate } = useData();
 
   const [query, setQuery] = useState('');
@@ -65,7 +67,7 @@ export default function DecksDashboard({ onOpen }) {
   return (
     <div className="dashboard">
       <ModuleHeader
-        slot="languages"
+        product="languages"
         title={t('languages.title')}
         subtitle={t('languages.subtitle')}
         count={`${visible.length} · ${t('languages.title')}`}
@@ -73,11 +75,13 @@ export default function DecksDashboard({ onOpen }) {
         onQueryChange={setQuery}
         sort={sort}
         onSortChange={setSort}
+        view={view}
+        onViewChange={setView}
         searchPlaceholder={t('languages.searchPlaceholder')}
         actions={
           <button
             type="button"
-            className="button primary on-scenery"
+            className="button primary"
             onClick={() => setCreating(true)}
           >
             <Icon name="plus" size={17} />
@@ -109,11 +113,13 @@ export default function DecksDashboard({ onOpen }) {
           }
         />
       ) : (
-        <div className="doc-grid">
+        <div className={view === 'list' ? 'doc-rows' : 'doc-grid'}>
           {visible.map((deck) => {
             const stats = deckStats(deck);
             return (
               <ItemCard
+                view={view}
+                product="languages"
                 key={deck.id}
                 title={deck.name || t('common.untitled')}
                 accent="#e8710a"

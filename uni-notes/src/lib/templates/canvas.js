@@ -280,6 +280,7 @@ function essayMap() {
 export const BOARD_TEMPLATES = [
   {
     id: 'compare-schools',
+    shape: 'split',
     labelKey: 'templates.compareBoard',
     hintKey: 'templates.compareBoardHint',
     icon: 'tabs',
@@ -287,6 +288,7 @@ export const BOARD_TEMPLATES = [
   },
   {
     id: 'timeline',
+    shape: 'split',
     labelKey: 'templates.timelineBoard',
     hintKey: 'templates.timelineBoardHint',
     icon: 'calendar',
@@ -294,6 +296,7 @@ export const BOARD_TEMPLATES = [
   },
   {
     id: 'essay-map',
+    shape: 'split',
     labelKey: 'templates.essayBoard',
     hintKey: 'templates.essayBoardHint',
     icon: 'essay',
