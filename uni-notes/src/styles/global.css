@@ -3488,9 +3488,11 @@ body {
    narrow — three digits is 96px of text, and anything wider reads as an input
    waiting for a sentence. */
 .size-field {
-  width: 40px;
+  /* Wide enough for two digits plus the caret. At 40px "16" was clipped to
+     something that read as "1€" — measured on screen, not guessed. */
+  width: 48px;
   height: 30px;
-  padding: 0 4px;
+  padding: 0 2px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface);
@@ -3663,4 +3665,93 @@ body {
   @page {
     margin: 18mm 16mm;
   }
+}
+
+/* ============================== typography =============================== *
+ *
+ * The app had one typeface doing every job.
+ *
+ * brand.css has carried a display serif since the beginning, and its own
+ * comment says why: "setting a serif against a system sans is what stops a web
+ * app looking like a template". It was then used only on the landing page and
+ * the sign-in screen — so the marketing had a voice and the product people
+ * actually spend their evenings in was set entirely in Inter at three weights.
+ * That is the difference between a designed application and a wireframe with
+ * colours, and it is what "very basic" means.
+ *
+ * The rule is simple and it is worth stating so it stays true: things that are
+ * *named* — the app you are in, the document you opened, the heading on an
+ * empty screen, the question a dialog asks — are set in the serif. Things that
+ * are *operated* — buttons, fields, labels, file rows, numbers — stay in the
+ * sans, because that is what a UI face is for.
+ */
+
+.module-title-text h1,
+.empty-state h2,
+.modal-header h2,
+.editor-title-input,
+.settings-section > h2,
+.home-greeting h1 {
+  font-family: var(--display);
+  font-weight: 600;
+  /* A serif at display size needs its tracking pulled in; the same value at
+     body size would make it illegible, which is why this is not a global. */
+  letter-spacing: -0.015em;
+}
+
+.module-title-text h1 {
+  font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+  line-height: 1.15;
+}
+
+.empty-state h2 {
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+}
+
+.modal-header h2 {
+  font-size: 1.15rem;
+}
+
+/* The document's own name, in the same face the document deserves. It is the
+   one piece of text in the header that belongs to the writer rather than to
+   the app. */
+.editor-title-input {
+  font-size: 1.12rem;
+}
+
+/*
+ * Numbers that sit in a column line up.
+ *
+ * Inter's default figures are proportional, so "11 words" and "93 words" are
+ * different widths and a list of them looks ragged down the right edge. Every
+ * place a number is read against another number gets tabular figures.
+ */
+.doc-row-meta,
+.module-count,
+.calendar-date,
+.shortlist-days,
+.find-count,
+.sidebar .folder-count,
+.filter-count {
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * The small capitalised labels — CATEGORIES, and the section headings in
+ * Settings and on Home — get the treatment small caps actually need: more
+ * letter-spacing, and a weight that survives being shrunk. Uppercase text at
+ * 0.7rem with normal tracking is a smudge.
+ */
+.sidebar-heading,
+.home-card-head h2 {
+  letter-spacing: 0.09em;
+}
+
+/* Body copy in the sans, one notch more open. 1.5 is the browser's habit;
+   1.6 is what a paragraph of explanation wants at this size. */
+.empty-state p,
+.module-title-text p,
+.modal-message {
+  line-height: 1.62;
 }
