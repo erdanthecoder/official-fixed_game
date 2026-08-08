@@ -1223,6 +1223,21 @@ select:focus-visible {
   .doc-row-meta {
     width: auto;
   }
+  /*
+   * The name column's 210px floor is a desktop rule and it has to go here.
+   *
+   * On a 390px screen the floor beat the 46% cap, so the name kept its full
+   * width and was painted straight over the date and word count — measured at
+   * 109px of overlap, text on text, on every row. A minimum width only makes
+   * sense while there is width to spare.
+   */
+  .doc-row-name strong {
+    min-width: 0;
+    max-width: none;
+  }
+  .doc-row-name {
+    min-width: 0;
+  }
 }
 
 /* document cards */
