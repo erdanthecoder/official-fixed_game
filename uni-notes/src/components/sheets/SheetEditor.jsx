@@ -4,6 +4,9 @@ import ConfirmDialog from '../ui/ConfirmDialog.jsx';
 import ShareDialog from '../unisave/ShareDialog.jsx';
 import Facepile from '../collab/Facepile.jsx';
 import SaveIndicator from '../SaveIndicator.jsx';
+import DownloadMenu from '../ui/DownloadMenu.jsx';
+import { toCsv } from '../../lib/export/formats.js';
+import { safeName, saveFile } from '../../lib/export/download.js';
 import {
   FUNCTION_HELP,
   cellRef,
@@ -287,6 +290,55 @@ export default function SheetEditor({ sheetId, onBack }) {
 
         <div className="editor-header-actions">
           <Facepile document={sheet} onShare={() => setSharing(true)} />
+          <DownloadMenu
+            formats={[
+              {
+                id: 'csv',
+                ext: 'CSV',
+                label: t('export.csv'),
+                /*
+                 * Calculated values, not formulas. A spreadsheet exported with
+                 * "=B2+C2" in it is a file whose numbers depend on a program
+                 * the recipient may not be running; the point of a CSV is that
+                 * it opens anywhere and says the same thing.
+                 */
+                run: () => {
+                  const grid = Array.from({ length: rows }, (_, row) =>
+                    Array.from({ length: cols }, (_, col) =>
+                      displayValue(cellRef(row, col), cells),
+                    ),
+                  );
+                  // Trailing empty rows and columns are the grid's padding, not
+                  // the person's data.
+                  while (grid.length && grid[grid.length - 1].every((cell) => !cell)) grid.pop();
+                  let width = 0;
+                  for (const row of grid) {
+                    for (let i = row.length - 1; i >= 0; i -= 1) {
+                      if (row[i]) {
+                        width = Math.max(width, i + 1);
+                        break;
+                      }
+                    }
+                  }
+                  const trimmed = grid.map((row) => row.slice(0, width));
+                  saveFile(
+                    // The byte-order mark is not decoration: without it Excel
+                    // on Windows reads a UTF-8 CSV as Latin-1, and every
+                    // Cyrillic or accented name arrives as mojibake.
+                    '\ufeff' + toCsv(trimmed),
+                    safeName(sheet.title, 'csv'),
+                    'text/csv;charset=utf-8',
+                  );
+                },
+              },
+              {
+                id: 'pdf',
+                ext: 'PDF',
+                label: t('export.pdf'),
+                run: () => window.print(),
+              },
+            ]}
+          />
           <button type="button" className="button ghost" onClick={() => setSharing(true)}>
             <Icon name="share" size={16} />
             {t('common.share')}

@@ -1442,7 +1442,23 @@ select:focus-visible {
   background: var(--bg);
 }
 
+/*
+ * The header owns a layer, and it has to be above the toolbar.
+ *
+ * Its entrance animation leaves a transform on it, and a transformed element
+ * becomes a stacking context — which traps every z-index inside it, including
+ * the one on a menu opened from a header button. The toolbar sits after the
+ * header in the document and neither had a z-index, so the toolbar painted on
+ * top and swallowed the clicks: the Download menu opened, looked correct, and
+ * none of its items could be pressed.
+ *
+ * This is the second time a transformed ancestor has caused this class of bug
+ * in this app. The rule to remember: if an element animates a transform, give
+ * it an explicit z-index, because it has quietly become a layer.
+ */
 .editor-header {
+  position: relative;
+  z-index: 3;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1637,6 +1653,8 @@ select:focus-visible {
 /* The toolbar floats over the page rather than being a stripe cut into it: a
    white pill on the warm page, lifted by its own shadow. */
 .toolbar {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -3769,4 +3787,63 @@ body {
 .module-title-text p,
 .modal-message {
   line-height: 1.62;
+}
+
+/* ------------------------------ download menu ---------------------------- */
+
+.download-menu {
+  position: relative;
+}
+
+.download-popover {
+  min-width: 236px;
+}
+
+.menu-heading {
+  padding: 4px 12px 8px;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.download-popover button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* The extension as a small tag, so the list is scannable by format rather
+   than by reading nine similar sentences. */
+.download-ext {
+  flex: 0 0 auto;
+  min-width: 46px;
+  padding: 3px 0;
+  border-radius: 5px;
+  background: var(--surface-alt);
+  color: var(--text-muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+.download-popover button:hover .download-ext {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.download-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.download-busy {
+  color: var(--text-muted);
+}
+
+.download-popover button:disabled {
+  opacity: 0.55;
+  cursor: default;
 }

@@ -9,6 +9,9 @@ import RichTextEditor from './editor/RichTextEditor.jsx';
 import SaveIndicator from '../SaveIndicator.jsx';
 import Toolbar from './editor/Toolbar.jsx';
 import FindReplace from './editor/FindReplace.jsx';
+import DownloadMenu from '../ui/DownloadMenu.jsx';
+import { toDocx, toHtml, toMarkdown, toText } from '../../lib/export/formats.js';
+import { safeName, saveFile } from '../../lib/export/download.js';
 import { formatRelativeDate, wordCount } from '../../lib/text.js';
 import { useData } from '../../context/DataContext.jsx';
 import { useT } from '../../i18n/index.jsx';
@@ -156,19 +159,60 @@ export default function NoteEditor({ noteId, onBack }) {
           >
             <Icon name="search" size={17} />
           </button>
-          {/* Print is also Export as PDF: every browser's print dialog offers
-              "Save as PDF", and the print stylesheet already reduces the screen
-              to the page. Building a second PDF path would ship a rendering
-              engine to duplicate one that is installed. */}
-          <button
-            type="button"
-            className="icon-button"
-            onClick={() => window.print()}
-            title={`${t('notes.print')} (Ctrl + P)`}
-            aria-label={t('notes.print')}
-          >
-            <Icon name="download" size={17} />
-          </button>
+          <DownloadMenu
+            formats={[
+              {
+                id: 'docx',
+                ext: 'DOCX',
+                label: t('export.word'),
+                run: () =>
+                  saveFile(
+                    toDocx(note.content, note.title),
+                    safeName(note.title, 'docx'),
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                  ),
+              },
+              {
+                id: 'pdf',
+                ext: 'PDF',
+                label: t('export.pdf'),
+                run: () => window.print(),
+              },
+              {
+                id: 'md',
+                ext: 'MD',
+                label: t('export.markdown'),
+                run: () =>
+                  saveFile(
+                    toMarkdown(note.content, note.title),
+                    safeName(note.title, 'md'),
+                    'text/markdown;charset=utf-8',
+                  ),
+              },
+              {
+                id: 'html',
+                ext: 'HTML',
+                label: t('export.html'),
+                run: () =>
+                  saveFile(
+                    toHtml(note.content, note.title),
+                    safeName(note.title, 'html'),
+                    'text/html;charset=utf-8',
+                  ),
+              },
+              {
+                id: 'txt',
+                ext: 'TXT',
+                label: t('export.text'),
+                run: () =>
+                  saveFile(
+                    toText(note.content),
+                    safeName(note.title, 'txt'),
+                    'text/plain;charset=utf-8',
+                  ),
+              },
+            ]}
+          />
           <button
             type="button"
             className="button ghost"

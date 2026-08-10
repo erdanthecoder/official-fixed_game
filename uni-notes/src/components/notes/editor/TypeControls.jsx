@@ -18,11 +18,51 @@ import { useEffect, useState } from 'react';
 import Icon from '../../ui/Icon.jsx';
 import { useT } from '../../../i18n/index.jsx';
 
-/** The stacks offered, and the label each one appears under. */
+/**
+ * The fonts offered.
+ *
+ * Every one of these is already on the machine — no webfont is downloaded, so
+ * the list works offline, costs nothing on first paint, and cannot flash
+ * unstyled text while a font file arrives. That rules out the fashionable
+ * choices and leaves the ones that documents are actually set in, which is the
+ * right trade for a suite whose output gets emailed to people running
+ * Microsoft Word.
+ *
+ * They are grouped the way a font menu should be — the ones you would set an
+ * essay in first, then the display faces, then the typewriter ones — because
+ * an alphabetical list of nineteen names is a list nobody reads.
+ */
 export const FONTS = [
-  { id: 'sans', label: 'Inter', stack: "Inter, 'Segoe UI', Roboto, system-ui, sans-serif" },
-  { id: 'serif', label: 'Georgia', stack: "Georgia, 'Times New Roman', serif" },
-  { id: 'mono', label: 'Mono', stack: "'JetBrains Mono', 'SFMono-Regular', Consolas, monospace" },
+  // Sans
+  { id: 'sans', label: 'Inter', group: 'sans', stack: "Inter, 'Segoe UI', Roboto, system-ui, sans-serif" },
+  { id: 'arial', label: 'Arial', group: 'sans', stack: "Arial, Helvetica, sans-serif" },
+  { id: 'helvetica', label: 'Helvetica', group: 'sans', stack: "'Helvetica Neue', Helvetica, Arial, sans-serif" },
+  { id: 'verdana', label: 'Verdana', group: 'sans', stack: "Verdana, Geneva, sans-serif" },
+  { id: 'tahoma', label: 'Tahoma', group: 'sans', stack: "Tahoma, Geneva, Verdana, sans-serif" },
+  { id: 'trebuchet', label: 'Trebuchet MS', group: 'sans', stack: "'Trebuchet MS', 'Lucida Grande', sans-serif" },
+  { id: 'calibri', label: 'Calibri', group: 'sans', stack: "Calibri, Candara, Segoe, Optima, sans-serif" },
+  // Serif
+  { id: 'serif', label: 'Georgia', group: 'serif', stack: "Georgia, 'Times New Roman', serif" },
+  { id: 'times', label: 'Times New Roman', group: 'serif', stack: "'Times New Roman', Times, serif" },
+  { id: 'garamond', label: 'Garamond', group: 'serif', stack: "Garamond, 'EB Garamond', 'Palatino Linotype', serif" },
+  { id: 'palatino', label: 'Palatino', group: 'serif', stack: "'Palatino Linotype', Palatino, 'Book Antiqua', serif" },
+  { id: 'cambria', label: 'Cambria', group: 'serif', stack: "Cambria, Georgia, serif" },
+  { id: 'baskerville', label: 'Baskerville', group: 'serif', stack: "Baskerville, 'Libre Baskerville', Georgia, serif" },
+  // Display
+  { id: 'impact', label: 'Impact', group: 'display', stack: "Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif" },
+  { id: 'copperplate', label: 'Copperplate', group: 'display', stack: "Copperplate, 'Copperplate Gothic Light', fantasy" },
+  { id: 'brush', label: 'Brush Script', group: 'display', stack: "'Brush Script MT', 'Segoe Script', cursive" },
+  // Mono
+  { id: 'mono', label: 'Mono', group: 'mono', stack: "'JetBrains Mono', 'SFMono-Regular', Consolas, monospace" },
+  { id: 'courier', label: 'Courier New', group: 'mono', stack: "'Courier New', Courier, monospace" },
+  { id: 'consolas', label: 'Consolas', group: 'mono', stack: "Consolas, Monaco, 'Andale Mono', monospace" },
+];
+
+const GROUPS = [
+  { id: 'sans', labelKey: 'notes.fontSans' },
+  { id: 'serif', labelKey: 'notes.fontSerif' },
+  { id: 'display', labelKey: 'notes.fontDisplay' },
+  { id: 'mono', labelKey: 'notes.fontMono' },
 ];
 
 const SIZES = [10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 48];
@@ -30,13 +70,23 @@ const SIZES = [10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 48];
 const MIN = 6;
 const MAX = 96;
 
-/** Which of our stacks a computed font-family string belongs to, if any. */
+/**
+ * Which entry in the list a computed font-family string is.
+ *
+ * Matched on the first family name in the stack, because that is what was
+ * asked for — the rest of a stack is the fallback chain, and matching against
+ * it would report "Arial" for anything that merely falls back to Arial.
+ * Anything unrecognised reports the default rather than guessing, so the menu
+ * never claims text is in a font it is not.
+ */
 function familyOf(computed) {
   if (!computed) return 'sans';
   const first = computed.split(',')[0].replace(/["']/g, '').trim().toLowerCase();
-  if (first.includes('georgia') || first.includes('times')) return 'serif';
-  if (first.includes('mono') || first.includes('consolas')) return 'mono';
-  return 'sans';
+  const hit = FONTS.find((font) => {
+    const own = font.stack.split(',')[0].replace(/["']/g, '').trim().toLowerCase();
+    return own === first;
+  });
+  return hit?.id ?? 'sans';
 }
 
 export default function TypeControls({ editorRef, formatState }) {
@@ -80,10 +130,16 @@ export default function TypeControls({ editorRef, formatState }) {
               if (font) editorRef.current?.setFontFamily(font.stack);
             }}
           >
-            {FONTS.map((font) => (
-              <option key={font.id} value={font.id} style={{ fontFamily: font.stack }}>
-                {font.label}
-              </option>
+            {GROUPS.map((group) => (
+              <optgroup key={group.id} label={t(group.labelKey)}>
+                {FONTS.filter((font) => font.group === group.id).map((font) => (
+                  /* Each name is set in its own face, which is the whole
+                     reason a font menu is quicker than a font list. */
+                  <option key={font.id} value={font.id} style={{ fontFamily: font.stack }}>
+                    {font.label}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </label>
