@@ -6,6 +6,9 @@ import SaveIndicator from '../SaveIndicator.jsx';
 import SlideView from './SlideView.jsx';
 import ShareDialog from '../unisave/ShareDialog.jsx';
 import Facepile from '../collab/Facepile.jsx';
+import DownloadMenu from '../ui/DownloadMenu.jsx';
+import { deckToDocx, deckToText } from '../../lib/export/formats.js';
+import { safeName, saveFile } from '../../lib/export/download.js';
 import { LAYOUTS, THEMES, makeSlide } from '../../lib/templates/slides.js';
 import { useData } from '../../context/DataContext.jsx';
 import { useMorphTarget } from '../../lib/morph.js';
@@ -151,6 +154,32 @@ export default function DeckEditor({ deckId, onBack }) {
 
         <div className="editor-header-actions">
           <Facepile document={deck} onShare={() => setSharing(true)} />
+          <DownloadMenu
+            formats={[
+              {
+                id: 'docx',
+                ext: 'DOCX',
+                label: t('export.word'),
+                run: () =>
+                  saveFile(
+                    deckToDocx(deck, deck.title),
+                    safeName(deck.title, 'docx'),
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                  ),
+              },
+              {
+                id: 'txt',
+                ext: 'TXT',
+                label: t('export.speakerNotes'),
+                run: () =>
+                  saveFile(
+                    deckToText(deck),
+                    safeName(deck.title, 'txt'),
+                    'text/plain;charset=utf-8',
+                  ),
+              },
+            ]}
+          />
           <button type="button" className="button ghost" onClick={() => setSharing(true)}>
             <Icon name="share" size={16} />
             {t('common.share')}

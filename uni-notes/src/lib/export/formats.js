@@ -261,6 +261,16 @@ export function toDocx(html, title) {
     }
   }
 
+  return docxPackage(paragraphs);
+}
+
+/**
+ * The five parts every .docx needs, wrapped around a list of paragraphs.
+ *
+ * Split out because Slides exports one too — a deck as a Word outline — and
+ * the container is identical; only the paragraphs differ.
+ */
+function docxPackage(paragraphs) {
   const document_ = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
 <w:body>${paragraphs.join('')}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/></w:sectPr></w:body>
@@ -319,4 +329,182 @@ export function toCsv(rows) {
       )
       .join('\r\n') + '\r\n'
   );
+}
+
+/* --------------------------------- slides --------------------------------- */
+
+/**
+ * A deck as plain text, one slide per block.
+ *
+ * Speaker notes are included under each slide, because the reason to export a
+ * deck as text is almost always to rehearse from it or to hand the words to
+ * somebody who has to read them out.
+ */
+export function deckToText(deck) {
+  const slides = deck?.slides ?? [];
+  return (
+    slides
+      .map((slide, index) => {
+        const lines = [`${index + 1}. ${slide.title || 'Untitled slide'}`];
+        const body = [slide.body, slide.left, slide.right]
+          .filter(Boolean)
+          .join('\n')
+          .split('\n')
+          .map((line) => line.trim())
+          .filter(Boolean);
+        for (const line of body) lines.push(`   • ${line}`);
+        if (slide.quote) lines.push(`   "${slide.quote}"`);
+        if (slide.attribution) lines.push(`   — ${slide.attribution}`);
+        if (slide.notes) lines.push('', `   Notes: ${slide.notes}`);
+        return lines.join('\n');
+      })
+      .join('\n\n') + '\n'
+  );
+}
+
+/** A deck as a Word document: one heading and its points per slide. */
+export function deckToDocx(deck, title) {
+  const paragraphs = [];
+  if (title) {
+    paragraphs.push(para('Title', `<w:r><w:t xml:space="preserve">${xmlEscape(title)}</w:t></w:r>`));
+  }
+
+  for (const slide of deck?.slides ?? []) {
+    if (slide.title) {
+      paragraphs.push(
+        para('Heading1', `<w:r><w:t xml:space="preserve">${xmlEscape(slide.title)}</w:t></w:r>`),
+      );
+    }
+    const body = [slide.body, slide.left, slide.right].filter(Boolean).join('\n');
+    for (const line of body.split('\n').map((item) => item.trim()).filter(Boolean)) {
+      paragraphs.push(
+        para('ListParagraph', `<w:r><w:t xml:space="preserve">${xmlEscape(line)}</w:t></w:r>`),
+      );
+    }
+    if (slide.quote) {
+      paragraphs.push(
+        para('Quote', `<w:r><w:t xml:space="preserve">${xmlEscape(slide.quote)}</w:t></w:r>`),
+      );
+    }
+    if (slide.notes) {
+      paragraphs.push(
+        para('', `<w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve">${xmlEscape(slide.notes)}</w:t></w:r>`),
+      );
+    }
+  }
+
+  return docxPackage(paragraphs);
+}
+
+/* --------------------------------- boards --------------------------------- */
+
+/**
+ * A board as SVG.
+ *
+ * SVG rather than PNG as the first offer, because a board is vector data all
+ * the way down — nothing on it was ever a bitmap — so exporting it as one
+ * would throw away the resolution for no reason. It opens in a browser, in
+ * Illustrator, in Figma, and it prints at any size.
+ */
+export function boardToSvg(board) {
+  const shapes = board?.shapes ?? [];
+  const pad = 40;
+
+  // The bounding box of everything drawn, so the file is the drawing rather
+  // than the drawing adrift in a fixed canvas.
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  const seen = (x, y) => {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+    minX = Math.min(minX, x);
+    minY = Math.min(minY, y);
+    maxX = Math.max(maxX, x);
+    maxY = Math.max(maxY, y);
+  };
+
+  for (const shape of shapes) {
+    // Freehand points are a flat [x, y, x, y, …] list, not objects — that is
+    // how the board stores them, and reading them as {x, y} silently produced
+    // NaN for every one, which is why the first bounding box was the fallback.
+    if (shape.points) {
+      for (let i = 0; i + 1 < shape.points.length; i += 2) {
+        seen(shape.points[i], shape.points[i + 1]);
+      }
+    }
+    if (shape.x != null) seen(shape.x, shape.y);
+    if (shape.x != null && shape.w != null) seen(shape.x + shape.w, shape.y + (shape.h ?? 0));
+    if (shape.x1 != null) {
+      seen(shape.x1, shape.y1);
+      seen(shape.x2, shape.y2);
+    }
+  }
+
+  if (!Number.isFinite(minX)) {
+    minX = 0;
+    minY = 0;
+    maxX = 800;
+    maxY = 600;
+  }
+
+  const width = Math.max(1, maxX - minX) + pad * 2;
+  const height = Math.max(1, maxY - minY) + pad * 2;
+
+  const body = shapes
+    .map((shape) => {
+      const stroke = shape.colour ?? '#111827';
+      const w = shape.width ?? 2;
+      /*
+       * `type`, not `kind`.
+       *
+       * The first version of this switched on `shape.kind`, which does not
+       * exist — every shape fell through to the default and the export was a
+       * white rectangle with nothing on it. It downloaded, it opened, it was
+       * valid SVG, and it was empty. Caught by counting the elements in the
+       * exported file rather than by looking at the download succeeding.
+       */
+      switch (shape.type) {
+        case 'pen': {
+          const pairs = [];
+          const points = shape.points ?? [];
+          for (let i = 0; i + 1 < points.length; i += 2) {
+            pairs.push(`${points[i]},${points[i + 1]}`);
+          }
+          return `<polyline fill="none" stroke="${stroke}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" points="${pairs.join(' ')}"/>`;
+        }
+        case 'line':
+          return `<line x1="${shape.x1}" y1="${shape.y1}" x2="${shape.x2}" y2="${shape.y2}" stroke="${stroke}" stroke-width="${w}" stroke-linecap="round"/>`;
+        case 'arrow': {
+          // The head is drawn rather than declared with a marker: a marker
+          // needs a <defs> entry per colour, and markers are the first thing
+          // some SVG importers drop.
+          const angle = Math.atan2(shape.y2 - shape.y1, shape.x2 - shape.x1);
+          const size = Math.max(10, w * 3);
+          const wing = (offset) =>
+            `${shape.x2 - size * Math.cos(angle - offset)},${shape.y2 - size * Math.sin(angle - offset)}`;
+          return (
+            `<line x1="${shape.x1}" y1="${shape.y1}" x2="${shape.x2}" y2="${shape.y2}" stroke="${stroke}" stroke-width="${w}" stroke-linecap="round"/>` +
+            `<polyline fill="none" stroke="${stroke}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" points="${wing(0.4)} ${shape.x2},${shape.y2} ${wing(-0.4)}"/>`
+          );
+        }
+        case 'rect':
+          return `<rect x="${shape.x}" y="${shape.y}" width="${shape.w}" height="${shape.h}" fill="none" stroke="${stroke}" stroke-width="${w}" rx="6"/>`;
+        case 'ellipse':
+          return `<ellipse cx="${shape.x + (shape.w ?? 0) / 2}" cy="${shape.y + (shape.h ?? 0) / 2}" rx="${Math.abs((shape.w ?? 0) / 2)}" ry="${Math.abs((shape.h ?? 0) / 2)}" fill="none" stroke="${stroke}" stroke-width="${w}"/>`;
+        case 'text':
+          return `<text x="${shape.x}" y="${shape.y}" fill="${stroke}" font-family="Inter, 'Segoe UI', Roboto, sans-serif" font-size="${shape.size ?? 24}">${xmlEscape(shape.text ?? '')}</text>`;
+        default:
+          return '';
+      }
+    })
+    .filter(Boolean)
+    .join('\n  ');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${Math.round(width)}" height="${Math.round(height)}" viewBox="${Math.round(minX - pad)} ${Math.round(minY - pad)} ${Math.round(width)} ${Math.round(height)}">
+  <rect x="${Math.round(minX - pad)}" y="${Math.round(minY - pad)}" width="${Math.round(width)}" height="${Math.round(height)}" fill="#ffffff"/>
+  ${body}
+</svg>
+`;
 }

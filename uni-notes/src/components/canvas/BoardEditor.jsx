@@ -22,6 +22,9 @@ import PromptDialog from '../ui/PromptDialog.jsx';
 import SaveIndicator from '../SaveIndicator.jsx';
 import ShareDialog from '../unisave/ShareDialog.jsx';
 import Facepile from '../collab/Facepile.jsx';
+import DownloadMenu from '../ui/DownloadMenu.jsx';
+import { boardToSvg } from '../../lib/export/formats.js';
+import { safeName, saveFile } from '../../lib/export/download.js';
 import {
   BACKGROUNDS,
   BOARD_HEIGHT,
@@ -259,6 +262,57 @@ export default function BoardEditor({ boardId, onBack }) {
 
         <div className="editor-header-actions">
           <Facepile document={board} onShare={() => setSharing(true)} />
+          <DownloadMenu
+            formats={[
+              {
+                id: 'svg',
+                ext: 'SVG',
+                label: t('export.svg'),
+                run: () =>
+                  saveFile(
+                    boardToSvg(board),
+                    safeName(board.title, 'svg'),
+                    'image/svg+xml;charset=utf-8',
+                  ),
+              },
+              {
+                id: 'png',
+                ext: 'PNG',
+                label: t('export.png'),
+                /*
+                 * Rasterised from the SVG the export already produces, at twice
+                 * the size so it stays sharp when it is dropped into a document
+                 * or a slide. Drawing the board a second time onto a canvas
+                 * would be a second renderer to keep in step with the first.
+                 */
+                run: () =>
+                  new Promise((resolve, reject) => {
+                    const svg = boardToSvg(board);
+                    const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+                    const image = new Image();
+                    image.onload = () => {
+                      const canvas = document.createElement('canvas');
+                      canvas.width = image.width * 2;
+                      canvas.height = image.height * 2;
+                      const context = canvas.getContext('2d');
+                      context.fillStyle = '#ffffff';
+                      context.fillRect(0, 0, canvas.width, canvas.height);
+                      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+                      URL.revokeObjectURL(url);
+                      canvas.toBlob((blob) => {
+                        if (blob) saveFile(blob, safeName(board.title, 'png'), 'image/png');
+                        resolve();
+                      }, 'image/png');
+                    };
+                    image.onerror = () => {
+                      URL.revokeObjectURL(url);
+                      reject(new Error('Could not rasterise the board'));
+                    };
+                    image.src = url;
+                  }),
+              },
+            ]}
+          />
           <button type="button" className="button ghost" onClick={() => setSharing(true)}>
             <Icon name="share" size={16} />
             {t('unisave.share')}

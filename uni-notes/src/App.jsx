@@ -20,6 +20,7 @@ import Sidebar from './components/Sidebar.jsx';
 import SlidesModule from './components/slides/SlidesModule.jsx';
 import TasksModule from './components/tasks/TasksModule.jsx';
 import TipLine from './components/TipLine.jsx';
+import Trouble from './components/ui/Trouble.jsx';
 import UniSaveModule from './components/unisave/UniSaveModule.jsx';
 import { AUTH_STATUS, useAuth } from './context/AuthContext.jsx';
 import { takeJoin } from './lib/pendingJoin.js';
@@ -281,6 +282,8 @@ export default function App() {
 
   return (
     <div className="app-shell" data-app={module}>
+      {/* Offline and failed-save reporting, over everything, on every screen. */}
+      <Trouble />
       <ShortcutsDialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
 
       <CommandPalette

@@ -227,6 +227,55 @@ export default function CalendarModule({ onOpenPlan }) {
           })}
         </div>
 
+        {/*
+          The same month as a list.
+          ------------------------------------------------------------------
+          Seven columns in 390px gives cells 48px wide — measured — which is
+          not enough for a date and a deadline, let alone two. A grid answers
+          "when am I free"; on a phone that question cannot be answered at all,
+          so the phone gets the question it CAN answer: "what is coming, in
+          order".
+
+          Rendered always and switched by CSS rather than by watching the
+          window: a resize listener re-renders the whole month on every frame
+          of a drag, and this markup is a dozen rows.
+        */}
+        <ol className="calendar-agenda" aria-label={monthName}>
+          {cells
+            .filter((cell) => cell.inMonth && (byDay.get(cell.key)?.length ?? 0) > 0)
+            .map((cell) => {
+              const due = byDay.get(cell.key) ?? [];
+              return (
+                <li
+                  key={cell.key}
+                  className={`agenda-day${cell.key === todayKey ? ' is-today' : ''}`}
+                >
+                  <div className="agenda-date">
+                    <strong>{cell.date.getDate()}</strong>
+                    <span>
+                      {cell.date.toLocaleDateString(language, { weekday: 'short' })}
+                    </span>
+                  </div>
+                  <div className="agenda-items">
+                    {due.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={`agenda-item${item.done ? ' is-done' : ''}${
+                          !item.done && item.days < 0 ? ' is-late' : ''
+                        }`}
+                        onClick={() => onOpenPlan(item.planId)}
+                      >
+                        <strong>{item.text}</strong>
+                        <span>{item.plan}</span>
+                      </button>
+                    ))}
+                  </div>
+                </li>
+              );
+            })}
+        </ol>
+
         {openCount === 0 ? <p className="calendar-empty">{t('calendar.empty')}</p> : null}
       </div>
     </div>

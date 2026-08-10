@@ -3441,3 +3441,52 @@
     transform: none;
   }
 }
+
+
+/* ------------------------- the module header on a phone ------------------- *
+ *
+ * These live here rather than in global.css on purpose: the base rules for
+ * .module-title-row are in this file, and this file loads second. The same
+ * media query in global.css lost to them on specificity ties and silently did
+ * nothing — the button stayed beside a three-line subtitle, which is exactly
+ * what it was written to fix.
+ */
+@media (max-width: 700px) {
+  /*
+   * The title row keeps the desktop arrangement until it cannot: below this
+   * the subtitle was wrapping to three lines in a column beside a button,
+   * which is the shape of a layout that was never looked at on a phone.
+   * The action goes full width underneath, where a thumb reaches it.
+   */
+  .module-title-row {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .module-title-actions {
+    flex: 1 0 100%;
+  }
+
+  .module-title-actions .button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .module-title-text p {
+    display: none; /* the app's own name is above it; the subtitle is desktop help */
+  }
+
+  .module-toolbar {
+    gap: 8px;
+  }
+
+  .module-controls {
+    flex: 1;
+  }
+
+  .search-field {
+    flex: 1;
+    min-width: 0;
+  }
+}
+

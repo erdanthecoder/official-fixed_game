@@ -68,6 +68,10 @@ export function DataProvider({ children }) {
   const pendingWrites = useRef(new Map());
   const flushTimer = useRef(null);
   const savedTimer = useRef(null);
+  // How many times in a row the write queue has failed. Drives the backoff and
+  // is reset by any success, so a single blip does not slow the next hour down.
+  const failures = useRef(0);
+  const retryTimer = useRef(null);
 
   // Identity for ownership stamping, read at write time rather than captured.
   const identity = useRef(user);
@@ -133,12 +137,66 @@ export function DataProvider({ children }) {
       settle(batch.flatMap((item) => item.tickets ?? []));
       clearTimeout(savedTimer.current);
       savedTimer.current = setTimeout(() => setSaveStatus(SAVE_STATUS.saved), SAVED_FLASH);
+      failures.current = 0;
     } catch (error) {
       console.warn('[Kadam] Save failed.', error);
-      // Leave the journal entries in place: they are now the only copy.
+
+      /*
+       * Put the work back, and try again.
+       *
+       * The batch was taken out of the queue before the write started, so a
+       * failure used to drop it: the edits survived only in the journal, and
+       * the journal is replayed on load — meaning a five-second network blip
+       * cost you your last paragraph until you happened to reload the page.
+       * Nothing retried, and the only sign was a small "Couldn't save" label
+       * in a corner.
+       *
+       * Anything typed since the attempt started is newer and wins; the failed
+       * copy only fills in keys that have not been touched again.
+       */
+      for (const item of batch) {
+        const key = `${item.name}:${item.id}`;
+        if (!pendingWrites.current.has(key)) pendingWrites.current.set(key, item);
+      }
       setSaveStatus(SAVE_STATUS.error);
+
+      // 2s, 4s, 8s, 16s, then every 30s. Long enough not to hammer a server
+      // that is struggling, short enough that a blip heals before you notice.
+      failures.current += 1;
+      const wait = Math.min(30000, 2000 * 2 ** (failures.current - 1));
+      clearTimeout(retryTimer.current);
+      retryTimer.current = setTimeout(() => flushRef.current?.(), wait);
     }
   }, [repository]);
+
+  /*
+   * A ref to the newest flush, so the retry timer and the online listener can
+   * call it without either of them being rebuilt when `flush` changes identity.
+   */
+  const flushRef = useRef(flush);
+  flushRef.current = flush;
+
+  /*
+   * Coming back online is the single best moment to retry, and it is free —
+   * far better than waiting out whatever backoff happens to be running.
+   */
+  useEffect(() => {
+    const onOnline = () => {
+      failures.current = 0;
+      if (pendingWrites.current.size > 0) flushRef.current?.();
+    };
+    window.addEventListener('online', onOnline);
+    return () => window.removeEventListener('online', onOnline);
+  }, []);
+
+  useEffect(() => () => clearTimeout(retryTimer.current), []);
+
+  /** Try the queued writes again now, for the "Try again" button. */
+  const retryNow = useCallback(() => {
+    failures.current = 0;
+    clearTimeout(retryTimer.current);
+    flushRef.current?.();
+  }, []);
 
   const queueWrite = useCallback(
     (name, id, data, { immediate = false, deleted = false, isNew = false, replay = false } = {}) => {
@@ -442,6 +500,7 @@ export function DataProvider({ children }) {
       leaveDocument,
       setPrefs,
       flush,
+      retryNow,
       exportAll,
       importAll,
     }),
@@ -461,6 +520,7 @@ export function DataProvider({ children }) {
       leaveDocument,
       setPrefs,
       flush,
+      retryNow,
       exportAll,
       importAll,
     ],
