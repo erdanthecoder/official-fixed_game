@@ -163,6 +163,10 @@ export default function NoteEditor({ noteId, onBack }) {
             formats={[
               {
                 id: 'docx',
+                file: () =>
+                  new File([toDocx(note.content, note.title)], safeName(note.title, 'docx'), {
+                    type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                  }),
                 ext: 'DOCX',
                 label: t('export.word'),
                 run: () =>
@@ -180,6 +184,10 @@ export default function NoteEditor({ noteId, onBack }) {
               },
               {
                 id: 'md',
+                file: () =>
+                  new File([toMarkdown(note.content, note.title)], safeName(note.title, 'md'), {
+                    type: 'text/markdown',
+                  }),
                 ext: 'MD',
                 label: t('export.markdown'),
                 run: () =>
@@ -191,6 +199,10 @@ export default function NoteEditor({ noteId, onBack }) {
               },
               {
                 id: 'html',
+                file: () =>
+                  new File([toHtml(note.content, note.title)], safeName(note.title, 'html'), {
+                    type: 'text/html',
+                  }),
                 ext: 'HTML',
                 label: t('export.html'),
                 run: () =>
@@ -202,6 +214,10 @@ export default function NoteEditor({ noteId, onBack }) {
               },
               {
                 id: 'txt',
+                file: () =>
+                  new File([toText(note.content)], safeName(note.title, 'txt'), {
+                    type: 'text/plain',
+                  }),
                 ext: 'TXT',
                 label: t('export.text'),
                 run: () =>

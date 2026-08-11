@@ -158,6 +158,10 @@ export default function DeckEditor({ deckId, onBack }) {
             formats={[
               {
                 id: 'docx',
+                file: () =>
+                  new File([deckToDocx(deck, deck.title)], safeName(deck.title, 'docx'), {
+                    type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                  }),
                 ext: 'DOCX',
                 label: t('export.word'),
                 run: () =>
@@ -169,6 +173,8 @@ export default function DeckEditor({ deckId, onBack }) {
               },
               {
                 id: 'txt',
+                file: () =>
+                  new File([deckToText(deck)], safeName(deck.title, 'txt'), { type: 'text/plain' }),
                 ext: 'TXT',
                 label: t('export.speakerNotes'),
                 run: () =>

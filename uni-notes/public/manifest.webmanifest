@@ -1,15 +1,15 @@
 {
   "id": "/",
-  "name": "Kadam — university planning workspace",
+  "name": "Kadam — documents, sheets, slides and plans",
   "short_name": "Kadam",
-  "description": "Notes, sheets, slides, canvas boards, deadline plans and vocabulary practice for planning university applications.",
+  "description": "Notes, sheets, slides, boards, deadlines and vocabulary practice. Everything you write, in one place, on every device.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "orientation": "any",
-  "background_color": "#071e2f",
-  "theme_color": "#0B4265",
+  "background_color": "#16130f",
+  "theme_color": "#faf7f2",
   "lang": "en",
   "dir": "ltr",
   "categories": ["education", "productivity"],
@@ -31,6 +31,11 @@
     },
     { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ],
+  "share_target": {
+    "action": "./",
+    "method": "GET",
+    "params": { "title": "title", "text": "text", "url": "url" }
+  },
   "shortcuts": [
     {
       "name": "New note",

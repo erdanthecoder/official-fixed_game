@@ -12,7 +12,11 @@
       name="description"
       content="Notes, spreadsheets, slide decks, boards, deadlines and vocabulary practice for planning university applications — in one place, and shareable with the people helping you."
     />
-    <meta name="theme-color" content="#0B4265" />
+    <!-- The status bar and the splash follow the app, not the old palette.
+         Two values so Android tints the bar with the surface actually behind
+         it in each theme; a phone in dark mode used to open on a bright bar. -->
+    <meta name="theme-color" content="#faf7f2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#16130f" media="(prefers-color-scheme: dark)" />
     <meta name="color-scheme" content="light" />
 
     <link rel="icon" type="image/svg+xml" href="./icon.svg" />
@@ -125,7 +129,7 @@
       html,
       body {
         margin: 0;
-        background: #071e2f;
+        background: #16130f;
       }
       #boot {
         position: fixed;
@@ -135,8 +139,8 @@
         align-items: center;
         justify-content: center;
         gap: 18px;
-        background: radial-gradient(120% 90% at 50% 0%, #0f4f74 0%, #071e2f 62%);
-        color: #cfe4f2;
+        background: radial-gradient(120% 90% at 50% 0%, #3a2f22 0%, #16130f 62%);
+        color: #e8dcc6;
         font: 500 0.85rem/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         letter-spacing: 0.01em;
         z-index: 999;

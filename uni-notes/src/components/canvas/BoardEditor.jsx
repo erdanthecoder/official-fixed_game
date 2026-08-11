@@ -266,6 +266,10 @@ export default function BoardEditor({ boardId, onBack }) {
             formats={[
               {
                 id: 'svg',
+                file: () =>
+                  new File([boardToSvg(board)], safeName(board.title, 'svg'), {
+                    type: 'image/svg+xml',
+                  }),
                 ext: 'SVG',
                 label: t('export.svg'),
                 run: () =>

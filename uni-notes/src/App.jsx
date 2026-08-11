@@ -24,6 +24,7 @@ import Trouble from './components/ui/Trouble.jsx';
 import UniSaveModule from './components/unisave/UniSaveModule.jsx';
 import { AUTH_STATUS, useAuth } from './context/AuthContext.jsx';
 import { takeJoin } from './lib/pendingJoin.js';
+import { parkShare, takeParkedShare, takeSharedText } from './lib/shareIn.js';
 import { JOIN, LANDING, SIGN_IN, useHashRoute } from './hooks/useHashRoute.js';
 import { useAppUpdate } from './hooks/useInstall.js';
 import { useStandalone } from './hooks/useStandalone.js';
@@ -111,6 +112,39 @@ export default function App() {
   const onJoin = module === JOIN;
 
   useHideBootSplash(status !== AUTH_STATUS.loading);
+
+  /*
+   * Something was shared into Kadam.
+   *
+   * Read on the very first render and parked immediately: the routing effects
+   * below replace the hash, and a sign-in redirect replaces the whole URL, so
+   * anything still sitting in the query string when those run is gone. Parking
+   * it survives both.
+   */
+  useEffect(() => {
+    const share = takeSharedText();
+    if (share) parkShare(share);
+  }, []);
+
+  /*
+   * Turn a parked share into a document, once the data layer can accept one.
+   *
+   * It becomes a note and opens it — a share that lands you on a dashboard
+   * with a "we saved it somewhere" message is a share you have to go and find.
+   */
+  const { create } = data;
+  useEffect(() => {
+    if (!ready) return;
+    if (status !== AUTH_STATUS.signedIn && status !== AUTH_STATUS.local) return;
+    const share = takeParkedShare();
+    if (!share) return;
+    const note = create(
+      'notes',
+      { title: share.title || t('common.untitled'), content: share.html },
+      { idPrefix: 'note' },
+    );
+    if (note?.id) goToItem('notes', note.id);
+  }, [ready, status, create, goToItem, t]);
 
   /*
    * Ctrl+K, or Cmd+K on a Mac. Bound on the window rather than a component, so

@@ -56,6 +56,34 @@ export default function SheetEditor({ sheetId, onBack }) {
   const selectedRef = cellRef(selected.row, selected.col);
   const selectedCell = cells[selectedRef];
 
+  /**
+   * The sheet as CSV text, built once for both the download and the share.
+   *
+   * Calculated values rather than formulas: the point of a CSV is that it says
+   * the same thing wherever it is opened, and "=B2+C2" depends on a program
+   * the recipient may not be running.
+   */
+  const csvText = useCallback(() => {
+    const grid = Array.from({ length: rows }, (_, row) =>
+      Array.from({ length: cols }, (_, col) => displayValue(cellRef(row, col), cells)),
+    );
+    // Trailing empty rows and columns are the grid's padding, not the person's
+    // data — exporting them gives a file with forty blank lines at the end.
+    while (grid.length && grid[grid.length - 1].every((cell) => !cell)) grid.pop();
+    let width = 0;
+    for (const row of grid) {
+      for (let i = row.length - 1; i >= 0; i -= 1) {
+        if (row[i]) {
+          width = Math.max(width, i + 1);
+          break;
+        }
+      }
+    }
+    // The byte-order mark is not decoration: without it Excel on Windows reads
+    // a UTF-8 CSV as Latin-1 and every Cyrillic name arrives as mojibake.
+    return '\ufeff' + toCsv(grid.map((row) => row.slice(0, width)));
+  }, [rows, cols, cells]);
+
   const patchSheet = useCallback(
     (patch, options) => update('sheets', sheetId, patch, options),
     [sheetId, update],
@@ -294,6 +322,7 @@ export default function SheetEditor({ sheetId, onBack }) {
             formats={[
               {
                 id: 'csv',
+                file: () => new File([csvText()], safeName(sheet.title, 'csv'), { type: 'text/csv' }),
                 ext: 'CSV',
                 label: t('export.csv'),
                 /*
@@ -302,34 +331,8 @@ export default function SheetEditor({ sheetId, onBack }) {
                  * the recipient may not be running; the point of a CSV is that
                  * it opens anywhere and says the same thing.
                  */
-                run: () => {
-                  const grid = Array.from({ length: rows }, (_, row) =>
-                    Array.from({ length: cols }, (_, col) =>
-                      displayValue(cellRef(row, col), cells),
-                    ),
-                  );
-                  // Trailing empty rows and columns are the grid's padding, not
-                  // the person's data.
-                  while (grid.length && grid[grid.length - 1].every((cell) => !cell)) grid.pop();
-                  let width = 0;
-                  for (const row of grid) {
-                    for (let i = row.length - 1; i >= 0; i -= 1) {
-                      if (row[i]) {
-                        width = Math.max(width, i + 1);
-                        break;
-                      }
-                    }
-                  }
-                  const trimmed = grid.map((row) => row.slice(0, width));
-                  saveFile(
-                    // The byte-order mark is not decoration: without it Excel
-                    // on Windows reads a UTF-8 CSV as Latin-1, and every
-                    // Cyrillic or accented name arrives as mojibake.
-                    '\ufeff' + toCsv(trimmed),
-                    safeName(sheet.title, 'csv'),
-                    'text/csv;charset=utf-8',
-                  );
-                },
+                run: () =>
+                  saveFile(csvText(), safeName(sheet.title, 'csv'), 'text/csv;charset=utf-8'),
               },
               {
                 id: 'pdf',
