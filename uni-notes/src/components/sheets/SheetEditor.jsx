@@ -31,7 +31,7 @@ const MAX_COLS = 26;
  * committed, so a half-typed formula never hits the formula engine.
  */
 export default function SheetEditor({ sheetId, onBack }) {
-  const { t } = useT();
+  const { t, language } = useT();
   const { sheets, update, remove } = useData();
 
   const sheet = sheets.find((item) => item.id === sheetId);
@@ -48,6 +48,10 @@ export default function SheetEditor({ sheetId, onBack }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  // Which column was last sorted, and which way — so the header can show it and
+  // clicking the same one again reverses rather than re-sorting identically.
+  const [sortedBy, setSortedBy] = useState(null);
+  const [sortNotice, setSortNotice] = useState(null);
   const gridRef = useRef(null);
 
   const rows = sheet?.rows ?? DEFAULT_ROWS;
@@ -88,6 +92,88 @@ export default function SheetEditor({ sheetId, onBack }) {
     (patch, options) => update('sheets', sheetId, patch, options),
     [sheetId, update],
   );
+
+  /**
+   * Sort the rows by one column.
+   *
+   * The header row stays put — row 1 is a heading in every sheet this app
+   * makes, and sorting it into the middle of the data is the classic
+   * spreadsheet disaster. Everything below it moves as a whole row, so a
+   * university keeps its own tuition and deadline beside it.
+   *
+   * Formulas are deliberately NOT rewritten. A cell holding "=B2+C2" that
+   * moves to row 5 would need to become "=B5+C5", and doing that correctly
+   * means parsing every reference, tracking absolute ones, and handling
+   * ranges that the sort has just torn in half. Sorting a sheet with formulas
+   * in the sorted range is therefore refused rather than done wrongly — a
+   * spreadsheet that quietly returns different numbers after a sort is worse
+   * than one that says it cannot sort.
+   *
+   * Defined after `patchSheet` on purpose. It was written above it first, and
+   * naming patchSheet in this hook's dependency array — which is evaluated
+   * during render, not when the callback runs — crashed the whole editor with
+   * "Cannot access before initialization" the moment a sheet was opened.
+   */
+  const sortByColumn = useCallback(
+    (col, direction) => {
+      const firstDataRow = 1; // row 0 is the header
+      const body = [];
+      for (let row = firstDataRow; row < rows; row += 1) {
+        const values = [];
+        let blank = true;
+        for (let c = 0; c < cols; c += 1) {
+          const cell = cells[cellRef(row, c)];
+          if (cell?.v != null && String(cell.v) !== '') blank = false;
+          values.push(cell);
+        }
+        body.push({ values, blank });
+      }
+
+      const touched = body.some((entry) =>
+        entry.values.some((cell) => typeof cell?.v === 'string' && cell.v.startsWith('=')),
+      );
+      if (touched) {
+        setSortNotice(t('sheets.sortFormulas'));
+        return;
+      }
+
+      const key = (entry) => entry.values[col]?.v ?? '';
+      const filled = body.filter((entry) => !entry.blank);
+      filled.sort((a, b) => {
+        const left = key(a);
+        const right = key(b);
+        const leftNumber = Number(left);
+        const rightNumber = Number(right);
+        // Numbers compare as numbers; anything else compares as text with the
+        // reader's own collation, so "Ä" lands where a Kyrgyz or Russian
+        // speaker expects rather than after "Z".
+        const result =
+          left !== '' && right !== '' && !Number.isNaN(leftNumber) && !Number.isNaN(rightNumber)
+            ? leftNumber - rightNumber
+            : String(left).localeCompare(String(right), language, { numeric: true });
+        return direction === 'desc' ? -result : result;
+      });
+
+      // Empty rows always sink, in both directions: they are the bottom of the
+      // sheet, not the smallest value in it.
+      const ordered = [...filled, ...body.filter((entry) => entry.blank)];
+
+      const next = { ...cells };
+      ordered.forEach((entry, index) => {
+        const row = firstDataRow + index;
+        for (let c = 0; c < cols; c += 1) {
+          const ref = cellRef(row, c);
+          if (entry.values[c]) next[ref] = entry.values[c];
+          else delete next[ref];
+        }
+      });
+
+      patchSheet({ cells: next }, { immediate: true });
+      setSortNotice(null);
+    },
+    [cells, rows, cols, patchSheet, language, t],
+  );
+
 
   const writeCell = useCallback(
     (ref, changes) => {
@@ -476,19 +562,56 @@ export default function SheetEditor({ sheetId, onBack }) {
         aria-label={sheet.title || t('common.untitled')}
         onKeyDown={onGridKeyDown}
       >
+        {sortNotice ? (
+          <p className="sheet-notice" role="status">
+            <Icon name="info" size={15} />
+            {sortNotice}
+            <button
+              type="button"
+              className="icon-button small"
+              aria-label={t('common.close')}
+              onClick={() => setSortNotice(null)}
+            >
+              <Icon name="close" size={14} />
+            </button>
+          </p>
+        ) : null}
+
         <table className="sheet-grid" ref={sheetRef}>
           <thead>
             <tr>
               <th className="sheet-corner" aria-hidden="true" />
-              {columnIndices.map((col) => (
-                <th
-                  key={col}
-                  className={`sheet-col-head ${selected.col === col ? 'is-active' : ''}`}
-                  scope="col"
-                >
-                  {columnLabel(col)}
-                </th>
-              ))}
+              {columnIndices.map((col) => {
+                const sorted = sortedBy?.col === col ? sortedBy.direction : null;
+                return (
+                  <th
+                    key={col}
+                    className={`sheet-col-head ${selected.col === col ? 'is-active' : ''}${
+                      sorted ? ' is-sorted' : ''
+                    }`}
+                    scope="col"
+                    aria-sort={
+                      sorted ? (sorted === 'asc' ? 'ascending' : 'descending') : 'none'
+                    }
+                  >
+                    <button
+                      type="button"
+                      className="sheet-col-button"
+                      title={t('sheets.sortBy', { column: columnLabel(col) })}
+                      onClick={() => {
+                        const direction = sorted === 'asc' ? 'desc' : 'asc';
+                        setSortedBy({ col, direction });
+                        sortByColumn(col, direction);
+                      }}
+                    >
+                      {columnLabel(col)}
+                      {sorted ? (
+                        <Icon name={sorted === 'asc' ? 'up' : 'down'} size={12} />
+                      ) : null}
+                    </button>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>

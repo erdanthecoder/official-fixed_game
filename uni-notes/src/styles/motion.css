@@ -893,3 +893,109 @@ html {
     animation: none;
   }
 }
+
+/* ----------------------- the skeleton, as a list ------------------------- */
+
+.skeleton-rows {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  /* The same height as a real .doc-row, so nothing moves when the rows arrive
+     — that is the entire job of a skeleton. */
+  height: 54px;
+  padding: 0 16px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.skeleton-row:first-child {
+  border-top: 0;
+}
+
+.skeleton-row-icon {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+}
+
+.skeleton-row-name {
+  height: 12px;
+  border-radius: 6px;
+}
+
+.skeleton-row-meta {
+  width: 96px;
+  height: 10px;
+  margin-left: auto;
+  border-radius: 5px;
+}
+
+/* --------------------------- rows deal themselves ------------------------ */
+
+/*
+ * The list arrives a row at a time, the way the app chooser deals its cards.
+ * Only the first nine are staggered: past that the delay is longer than anyone
+ * waits, and rows below the fold do not need an entrance at all.
+ *
+ * Transform only — an opacity entrance with `both` fill leaves the list
+ * permanently invisible if the animation never starts.
+ */
+.doc-rows .doc-row {
+  animation: row-deal 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes row-deal {
+  from {
+    transform: translateY(10px);
+  }
+}
+
+.doc-rows .doc-row:nth-child(1) { animation-delay: 0ms; }
+.doc-rows .doc-row:nth-child(2) { animation-delay: 28ms; }
+.doc-rows .doc-row:nth-child(3) { animation-delay: 56ms; }
+.doc-rows .doc-row:nth-child(4) { animation-delay: 84ms; }
+.doc-rows .doc-row:nth-child(5) { animation-delay: 112ms; }
+.doc-rows .doc-row:nth-child(6) { animation-delay: 140ms; }
+.doc-rows .doc-row:nth-child(7) { animation-delay: 168ms; }
+.doc-rows .doc-row:nth-child(8) { animation-delay: 196ms; }
+.doc-rows .doc-row:nth-child(n + 9) { animation-delay: 224ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .doc-rows .doc-row {
+    animation: none;
+  }
+}
+
+:root[data-motion='reduced'] .doc-rows .doc-row {
+  animation: none;
+}
+
+/* ------------------------- floating surfaces, frosted -------------------- */
+
+/*
+ * Menus, dialogs and the toolbar sit above the page, and on every platform
+ * that means slightly translucent with the page blurred behind. This is the
+ * cheapest change in the app that reads as native rather than as a web page,
+ * and it degrades to a solid panel where backdrop-filter is unsupported,
+ * because --glass is nearly opaque to begin with.
+ */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .menu-popover,
+  .modal-panel,
+  .toolbar,
+  .find-bar {
+    background: var(--glass);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+  }
+}

@@ -346,6 +346,8 @@ const en = {
     backToDocs: 'Back to my documents',
   },
   sheets: {
+    sortBy: 'Sort by column {column}',
+    sortFormulas: 'This sheet has formulas in it, and sorting would move them away from the cells they point at — the numbers would change. Sort a copy without formulas instead.',
     title: 'Sheets',
     subtitle: 'Compare tuition, track budgets, crunch numbers',
     newSheet: 'New sheet',
@@ -1180,6 +1182,8 @@ const ru = {
     backToDocs: 'К моим документам',
   },
   sheets: {
+    sortBy: 'Сортировать по столбцу {column}',
+    sortFormulas: 'В этой таблице есть формулы: сортировка сдвинет их относительно ячеек, на которые они ссылаются, и числа изменятся. Отсортируйте копию без формул.',
     title: 'Таблицы',
     subtitle: 'Сравнивайте стоимость обучения, ведите бюджет, считайте',
     newSheet: 'Новая таблица',
@@ -2014,6 +2018,8 @@ const ky = {
     backToDocs: 'Документтерге кайтуу',
   },
   sheets: {
+    sortBy: '{column} мамычасы боюнча иреттөө',
+    sortFormulas: 'Бул таблицада формулалар бар: иреттөө аларды шилтеме кылган уячалардан жылдырат жана сандар өзгөрөт. Формуласыз көчүрмөнү иреттеңиз.',
     title: 'Таблицалар',
     subtitle: 'Окуу баасын салыштырыңыз, бюджет жүргүзүңүз, эсептеңиз',
     newSheet: 'Жаңы таблица',
