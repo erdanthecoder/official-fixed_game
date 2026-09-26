@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- The4Workspace: four rings, one per app, woven into one account; the white core is you. -->
+  <defs>
+    <linearGradient id="oifBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#241552"/><stop offset=".55" stop-color="#110c2a"/><stop offset="1" stop-color="#070711"/>
+    </linearGradient>
+    <radialGradient id="oifCore" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#fff"/><stop offset=".45" stop-color="#e9e4ff" stop-opacity=".9"/><stop offset="1" stop-color="#a78bfa" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="oifSheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#oifBg)"/>
+  <g fill="none" stroke-width="4.2" stroke-linecap="butt">
+    <circle cx="23.5" cy="23.5" r="10" stroke="#58cc02"/>
+    <circle cx="40.5" cy="23.5" r="10" stroke="#7c5cff"/>
+    <circle cx="23.5" cy="40.5" r="10" stroke="#14b8a6"/>
+    <circle cx="40.5" cy="40.5" r="10" stroke="#1cb0f6"/>
+    <!-- weave: each ring passes over its neighbour once -->
+    <path d="M32 18.23 A10 10 0 0 1 32 28.77" stroke="#58cc02"/>
+    <path d="M45.77 32 A10 10 0 0 1 35.23 32" stroke="#7c5cff"/>
+    <path d="M32 45.77 A10 10 0 0 1 32 35.23" stroke="#1cb0f6"/>
+    <path d="M18.23 32 A10 10 0 0 1 28.77 32" stroke="#14b8a6"/>
+  </g>
+  <circle cx="32" cy="32" r="5.5" fill="url(#oifCore)"/>
+  <circle cx="32" cy="32" r="2.2" fill="#fff"/>
+  <rect width="64" height="32" rx="16" fill="url(#oifSheen)"/>
+</svg>

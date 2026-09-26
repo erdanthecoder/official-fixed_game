@@ -169,6 +169,18 @@ export default function Sidebar({
         )}
 
         <div className="sidebar-footer">
+          {/* The4Workspace: one account for LearnKyrgyz, Quoldek, Kadam and AkylduuKodo. */}
+          <a
+            className="module-item compact workspace-link"
+            href="https://the4workspace.web.app/"
+            title="The4Workspace: all four apps, one account"
+            aria-label="The4Workspace"
+          >
+            <img src={`${import.meta.env.BASE_URL}the4workspace.svg`} alt="" width="26" height="26" />
+            <span className="module-text">
+              <strong>The4Workspace</strong>
+            </span>
+          </a>
           <button
             type="button"
             className={`module-item compact ${activeModule === 'settings' ? 'is-active' : ''}`}

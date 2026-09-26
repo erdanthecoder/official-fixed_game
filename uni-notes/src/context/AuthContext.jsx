@@ -62,7 +62,7 @@ const pendingOneInFour = typeof window !== 'undefined' ? takeOneInFourSession() 
 // straight back either with the session (#oit=…) or with #oit=none, so the
 // visitor arrives signed in as their one account, whatever they opened first.
 // Only on the website itself: the desktop and Android builds keep their own sign-in.
-const ONEINFOUR_HUB = 'https://oneinfour.web.app/';
+const ONEINFOUR_HUB = 'https://the4workspace.web.app/';
 const ssoHere = typeof window !== 'undefined' && window.location.hostname === 'kadam.web.app';
 export function signInWithOneInFour({ silent = false } = {}) {
   const back = window.location.href.split('#')[0] + (window.location.hash || '');

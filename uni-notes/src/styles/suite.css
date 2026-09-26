@@ -3558,3 +3558,8 @@
 }
 .oneinfour-button:hover:not(:disabled) { filter: brightness(1.08); background: linear-gradient(135deg, #7c5cff, #5b3df0); }
 .oneinfour-button svg circle { stroke: #fff; }
+
+/* The4Workspace link in the sidebar: back to the one-account hub. */
+.workspace-link { text-decoration: none; color: inherit; }
+.workspace-link img { border-radius: 7px; flex: none; transition: transform 0.4s cubic-bezier(0.2, 1.4, 0.3, 1); }
+.workspace-link:hover img { transform: rotate(-10deg) scale(1.08); }

@@ -165,7 +165,7 @@ export default function AuthScreen({ onBack }) {
                     disabled={busy}
                   >
                     <OneInFourMark />
-                    Continue with OneInFour
+                    Continue with The4Workspace
                   </button>
 
                   <button
