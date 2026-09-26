@@ -17,6 +17,7 @@ import {
   onAuthStateChanged,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
+  signInWithCustomToken,
   signInWithPopup,
   signInWithRedirect,
   signOut,
@@ -27,6 +28,28 @@ import { migrateIntoAccount } from '../lib/repository.js';
 import { claimInvites } from '../lib/sharing.js';
 
 const AuthContext = createContext(null);
+
+/*
+ * OneInFour (oneinfour.web.app) — one account for LearnKyrgyz, Quoldek, Kadam and AkylduuKodo.
+ *
+ * Opening Kadam from OneInFour adds #oit=… to the address: the OneInFour session, which is
+ * never sent to Kadam's servers. It is removed from the address bar at once, exchanged with
+ * OneInFour for a one-time Kadam sign-in token, and forgotten. People who made their
+ * OneInFour account with Google get the Kadam account with the same Google email.
+ */
+const ONEINFOUR_TOKEN_URL = 'https://lzamxwqxnzcrazyuipjx.supabase.co/functions/v1/oit-firebase-token';
+function takeOneInFourSession() {
+  const match = window.location.hash.match(/(?:^#|&)oit=([A-Za-z0-9_-]+)/);
+  if (!match) return null;
+  const rest = window.location.hash.slice(1).split('&').filter((p) => !p.startsWith('oit=')).join('&');
+  window.history.replaceState(null, '', window.location.pathname + window.location.search + (rest ? `#${rest}` : ''));
+  try {
+    const raw = atob(match[1].replace(/-/g, '+').replace(/_/g, '/'));
+    return JSON.parse(decodeURIComponent(escape(raw))).at || null;
+  } catch {
+    return null;
+  }
+}
 
 export const AUTH_STATUS = {
   loading: 'loading',
@@ -85,6 +108,27 @@ export function AuthProvider({ children }) {
   const [errorKey, setErrorKey] = useState(null);
   const [noticeKey, setNoticeKey] = useState(null);
   const [busy, setBusy] = useState(false);
+
+  // Arriving from OneInFour, already signed in there: sign in here with the same account.
+  useEffect(() => {
+    if (!isFirebaseConfigured) return;
+    const oneInFour = takeOneInFourSession();
+    if (!oneInFour) return;
+    (async () => {
+      try {
+        const res = await fetch(ONEINFOUR_TOKEN_URL, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${oneInFour}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ project: 'unisave-e8483' }),
+        });
+        const body = await res.json().catch(() => ({}));
+        if (!body.token) throw new Error(body.error || `HTTP ${res.status}`);
+        await signInWithCustomToken(auth, body.token);
+      } catch (error) {
+        console.warn('[Kadam] OneInFour sign-in did not complete.', error?.message ?? error);
+      }
+    })();
+  }, []);
 
   // Coming back from a redirect sign-in. The listener below reports the result
   // either way; this is only here so a failure is not swallowed in silence.
