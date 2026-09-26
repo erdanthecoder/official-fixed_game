@@ -5,10 +5,22 @@ import LanguagePicker from './LanguagePicker.jsx';
 import ProductIcon, { PRODUCTS } from './brand/ProductIcon.jsx';
 import Scenery from './Scenery.jsx';
 import TipLine from './TipLine.jsx';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useAuth, signInWithOneInFour } from '../context/AuthContext.jsx';
 import { useT } from '../i18n/index.jsx';
 
 const MODULES = ['notes', 'sheets', 'slides', 'canvas', 'tasks', 'unisave', 'languages'];
+
+// OneInFour: one account for LearnKyrgyz, Quoldek, Kadam and AkylduuKodo.
+function OneInFourMark() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" strokeWidth="2.6">
+      <circle cx="8" cy="8" r="5" stroke="#58cc02" />
+      <circle cx="16" cy="8" r="5" stroke="#7c5cff" />
+      <circle cx="8" cy="16" r="5" stroke="#0f9d58" />
+      <circle cx="16" cy="16" r="5" stroke="#1cb0f6" />
+    </svg>
+  );
+}
 
 function GoogleMark() {
   return (
@@ -146,6 +158,16 @@ export default function AuthScreen({ onBack }) {
             <>
               {mode !== 'reset' ? (
                 <>
+                  <button
+                    type="button"
+                    className="google-button oneinfour-button"
+                    onClick={() => signInWithOneInFour()}
+                    disabled={busy}
+                  >
+                    <OneInFourMark />
+                    Continue with OneInFour
+                  </button>
+
                   <button
                     type="button"
                     className="google-button"

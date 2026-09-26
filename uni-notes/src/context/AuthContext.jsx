@@ -51,6 +51,32 @@ function takeOneInFourSession() {
   }
 }
 
+// Read it the moment this module loads, before the app's own routing gets a
+// chance to rewrite the address: otherwise the hand-off is gone by the time
+// the provider mounts and the visitor arrives signed out.
+const hadOneInFourReply = typeof window !== 'undefined' && /(?:^#|&)oit=/.test(window.location.hash);
+const pendingOneInFour = typeof window !== 'undefined' ? takeOneInFourSession() : null;
+
+// Single sign-on. The first time Kadam opens in a tab, it asks OneInFour who is
+// signed in there. That is a quick redirect to oneinfour.web.app, which comes
+// straight back either with the session (#oit=…) or with #oit=none, so the
+// visitor arrives signed in as their one account, whatever they opened first.
+// Only on the website itself: the desktop and Android builds keep their own sign-in.
+const ONEINFOUR_HUB = 'https://oneinfour.web.app/';
+const ssoHere = typeof window !== 'undefined' && window.location.hostname === 'kadam.web.app';
+export function signInWithOneInFour({ silent = false } = {}) {
+  const back = window.location.href.split('#')[0] + (window.location.hash || '');
+  window.location[silent ? 'replace' : 'assign'](`${ONEINFOUR_HUB}?return=${encodeURIComponent(back)}${silent ? '&silent=1' : ''}`);
+}
+if (ssoHere && isFirebaseConfigured && !hadOneInFourReply && navigator.onLine !== false) {
+  try {
+    if (!sessionStorage.getItem('kadam.oit.checked')) {
+      sessionStorage.setItem('kadam.oit.checked', '1');
+      signInWithOneInFour({ silent: true });
+    }
+  } catch { /* storage blocked: skip the check rather than loop */ }
+}
+
 export const AUTH_STATUS = {
   loading: 'loading',
   signedIn: 'signedIn',
@@ -112,7 +138,7 @@ export function AuthProvider({ children }) {
   // Arriving from OneInFour, already signed in there: sign in here with the same account.
   useEffect(() => {
     if (!isFirebaseConfigured) return;
-    const oneInFour = takeOneInFourSession();
+    const oneInFour = pendingOneInFour;
     if (!oneInFour) return;
     (async () => {
       try {

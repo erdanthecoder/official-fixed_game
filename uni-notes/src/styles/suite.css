@@ -3548,3 +3548,13 @@
   margin-left: auto;
   color: inherit;
 }
+
+/* OneInFour: the one account across the four apps, offered first. */
+.oneinfour-button {
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, #7c5cff, #5b3df0);
+  color: #fff;
+  border-color: transparent;
+}
+.oneinfour-button:hover:not(:disabled) { filter: brightness(1.08); background: linear-gradient(135deg, #7c5cff, #5b3df0); }
+.oneinfour-button svg circle { stroke: #fff; }
